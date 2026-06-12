@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Produit {
+  id        String   @id @default(cuid())
+  nom       String
+  prix      Float
+  categorie String
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Commande {
+  id        String   @id @default(cuid())
+  numero    String
+  date      String
+  total     Float
+  statut    String
+  items     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Charge {
+  id              String   @id @default(cuid())
+  nom             String
+  categorie       String
+  montantMensuel  Float
+  periodicite     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Employe {
+  id          String   @id @default(cuid())
+  nom         String
+  poste       String
+  salaireBrut Float
+  prime       Float
+  avantages   Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Investissement {
+  id                String   @id @default(cuid())
+  nom               String
+  montant           Float
+  type              String
+  amortissementAnnees Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model DailyStat {
+  date      String   @id
+  ca        Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
