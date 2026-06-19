@@ -14,6 +14,7 @@ import { refreshCategoryMaps, getCategories } from '@/utils/productStore'; // Su
 import { getCriticalProducts, predictStockRupture } from '@/utils/stockPrediction';
 import { universalSync } from '@/services/universalSync';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { getSetting } from '@/utils/db';
 
 // Statistiques des 7 derniers jours
 const last7Stats = dailyStats?.slice(-7) || [];
@@ -147,6 +148,16 @@ const calculateVariations = () => {
 
 export function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7' | '15' | '30'>('7');
+  const [barName, setBarName] = useState<string>('');
+
+  useEffect(() => {
+    getSetting('restaurant_info').then(info => {
+      if (info?.value && typeof info.value === 'object') {
+        const name = (info.value as any).name;
+        if (name) setBarName(name);
+      }
+    });
+  }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [topProductsToPromote, setTopProductsToPromote] = useState<any[]>([]);
   const [criticalProducts, setCriticalProducts] = useState<any[]>([]);
@@ -220,12 +231,25 @@ action: (p.popularite || 50) > 70 ? '🔥 Produit star' : '✅ Produit solide',
     loadTopProducts();
   }, [productsList]);
 
-  // Chargement des produits critiques
+  // Chargement des produits critiques depuis IndexedDB (données réelles)
   useEffect(() => {
-    if (productsList && productsList.length > 0) {
-      const critical = getCriticalProducts(productsList);
-      setCriticalProducts(critical);
-    }
+    const loadCritical = async () => {
+      try {
+        // Priorité aux données réelles IndexedDB
+        const realProducts = await universalSync.getProduits();
+        const source = (realProducts && realProducts.length > 0) ? realProducts : (productsList || []);
+        if (source.length > 0) {
+          const critical = getCriticalProducts(source as any);
+          setCriticalProducts(critical);
+        }
+      } catch {
+        if (productsList && productsList.length > 0) {
+          const critical = getCriticalProducts(productsList);
+          setCriticalProducts(critical);
+        }
+      }
+    };
+    loadCritical();
   }, [productsList]);
 
   const recentStats = useMemo(() => {
@@ -327,7 +351,14 @@ action: (p.popularite || 50) > 70 ? '🔥 Produit star' : '✅ Produit solide',
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Tableau de Bord</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-slate-900">Tableau de Bord</h1>
+            {barName && (
+              <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-violet-100 to-fuchsia-100 text-violet-700 border border-violet-200">
+                🍺 {barName}
+              </span>
+            )}
+          </div>
           <p className="text-sm text-slate-500 mt-0.5">
             {today.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>

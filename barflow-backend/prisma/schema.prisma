@@ -8,34 +8,49 @@ datasource db {
 }
 
 model Produit {
-  id        String   @id @default(cuid())
-  nom       String
-  prix      Float
-  categorie String
-  stock     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  nom                String
+  prix               Float
+  categorie          String
+  stock              Int      @default(0)
+  stockUnit          String?
+  seuilAlerte        Int?
+  seuilCritique      Int?
+  image              String?
+  color              String?
+  popularite         Int?
+  activePriceFormats Json?
+  prices             Json?
+  options            Json?
+  synced             Boolean  @default(false)
+  deleted            Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Commande {
-  id        String   @id @default(cuid())
-  numero    String
-  date      String
-  total     Float
-  statut    String
-  items     Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  numero        String
+  date          String
+  total         Float
+  statut        String
+  items         Json
+  tableNumber   Int?
+  server        String?
+  paymentMethod String?
+  comment       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Charge {
-  id              String   @id @default(cuid())
-  nom             String
-  categorie       String
-  montantMensuel  Float
-  periodicite     String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  nom            String
+  categorie      String
+  montantMensuel Float
+  periodicite    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Employe {
@@ -50,18 +65,73 @@ model Employe {
 }
 
 model Investissement {
-  id                String   @id @default(cuid())
-  nom               String
-  montant           Float
-  type              String
+  id                  String   @id @default(cuid())
+  nom                 String
+  montant             Float
+  type                String
   amortissementAnnees Int
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model DailyStat {
   date      String   @id
   ca        Float
+  clients   Int      @default(0)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Fournisseur {
+  id        String   @id @default(cuid())
+  nom       String
+  telephone String?
+  notes     String?
+  produits  Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReapproCommande {
+  id           String   @id @default(cuid())
+  fournisseurId String?
+  fournisseurNom String
+  fournisseurTel String?
+  items        Json
+  totalAmount  Float
+  statut       String   @default("envoyée")
+  receivedAt   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Perte {
+  id           String   @id @default(cuid())
+  productId    String
+  productName  String
+  productPrice Float
+  quantity     Int
+  reason       String
+  stockAvant   Int
+  stockReel    Int?
+  valeurPerdue Float
+  date         String
+  note         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Categorie {
+  id        String   @id @default(cuid())
+  nom       String   @unique
+  emoji     String   @default("📦")
+  color     String   @default("#8B5CF6")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BarSetting {
+  key       String   @id
+  value     Json
   updatedAt DateTime @updatedAt
 }

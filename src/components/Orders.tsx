@@ -1,36 +1,57 @@
-// Orders.tsx - Version avec universalSync
+// Orders.tsx - Version avec persistance réelle (IndexedDB)
 import { useState, useCallback, useEffect } from 'react';
 import {
   ShoppingCart, Plus, Minus, X, Table2, Search,
   Check, Receipt, CreditCard, Settings, Edit3, Trash2, Printer,
+  AlertCircle, BookOpen,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { tables as defaultTables } from '@/data';
 import { useCategories, getCategoryEmoji } from '@/utils/productStore';
 import type { Product, OrderItem, Order, TableStatus } from '@/types';
+import { getClPourFormat } from '@/types';
 import { PaymentModal } from '@/components/PaymentModal';
 import { predictStockRupture } from '@/utils/stockPrediction';
 import { useBarInfo } from '@/hooks/useBarInfo';
 import { universalSync } from '@/services/universalSync';
 import { useLiveQuery } from 'dexie-react-hooks';
+import {
+  orderDb,
+  saveOrder,
+  payOrder,
+  loadActiveOrders,
+  loadOrderHistory,
+  type PersistedOrder,
+} from '@/utils/orderStore';
 
 type CartItem = OrderItem & { supplements?: string[] };
 
+// Convertir PersistedOrder → Order (pour compatibilité avec le reste du code)
+function toOrder(p: PersistedOrder): Order {
+  return {
+    id: p.id,
+    items: p.items as OrderItem[],
+    tableNumber: p.tableNumber,
+    server: p.server,
+    status: p.status as Order['status'],
+    createdAt: new Date(p.createdAt),
+    total: p.total,
+    paymentMethod: p.paymentMethod as Order['paymentMethod'],
+    comment: p.comment,
+  };
+}
+
 export function Orders() {
-  // Données en temps réel depuis universalSync
   const products = useLiveQuery(() => universalSync.getProduits(), []);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>(['all']);
-  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   useEffect(() => {
     const loadCats = async () => {
       const { getCategories } = await import('@/utils/productStore');
       const cats = getCategories();
-      const catNames = cats.map(c => c.name);
-      setAllCategories(catNames);
-      setCategories(['all', ...catNames]);
+      setCategories(['all', ...cats.map(c => c.name)]);
     };
     loadCats();
   }, []);
@@ -41,9 +62,24 @@ export function Orders() {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [showTablePicker, setShowTablePicker] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // ── Commandes persistées depuis IndexedDB ──────────────────
   const [orders, setOrders] = useState<Order[]>([]);
+  const [history, setHistory] = useState<Order[]>([]);
+
+  // Charger les commandes actives au démarrage
+  useEffect(() => {
+    loadActiveOrders().then(active => {
+      setOrders(active.map(toOrder));
+    });
+    loadOrderHistory(30).then(hist => {
+      setHistory(hist.map(toOrder));
+    });
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [showArdoise, setShowArdoise] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [payingOrder, setPayingOrder] = useState<Order | null>(null);
   const [showCartSheet, setShowCartSheet] = useState(false);
@@ -54,7 +90,7 @@ export function Orders() {
   const [tableForm, setTableForm] = useState({ number: '', seats: '4', status: 'libre' as TableStatus['status'] });
   const [showOrderDetail, setShowOrderDetail] = useState<Order | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { barInfo, isLoading: barInfoLoading } = useBarInfo();
+  const { barInfo } = useBarInfo();
 
   useEffect(() => {
     if (products && products.length > 0) setIsLoading(false);
@@ -84,8 +120,7 @@ export function Orders() {
     try {
       const prediction = predictStockRupture(product);
       return prediction.status === 'rupture';
-    } catch (error) {
-      console.warn('Erreur lors de la prédiction:', error);
+    } catch {
       return product.stock <= 0;
     }
   };
@@ -102,16 +137,21 @@ export function Orders() {
   const addToCart = useCallback((product: Product, format: keyof Product['prices'] = 'bouteille', supplements: string[] = []) => {
     if (!isTableSelected()) return;
     if (isProductOutOfStock(product)) return;
-    
     const price = product.prices?.[format] || 0;
     if (price === 0) return;
+
+    // Calcul du volume en cl déduit pour ce format (0 si pas de volumeConfig)
+    const clDeduitsParUnite = product.volumeConfig
+      ? getClPourFormat(format as OrderItem['format'], product.volumeConfig)
+      : 0;
+
     const existingIdx = cartItems.findIndex(i => i.productId === product.id && i.format === format);
     if (existingIdx >= 0) {
       const newItems = [...cartItems];
-      newItems[existingIdx] = { 
-        ...newItems[existingIdx], 
+      newItems[existingIdx] = {
+        ...newItems[existingIdx],
         quantity: newItems[existingIdx].quantity + 1,
-        supplements: supplements.length > 0 ? supplements : newItems[existingIdx].supplements
+        supplements: supplements.length > 0 ? supplements : newItems[existingIdx].supplements,
       };
       setCartItems(newItems);
     } else {
@@ -122,6 +162,7 @@ export function Orders() {
         format: format as OrderItem['format'],
         unitPrice: price,
         supplements: supplements.length > 0 ? supplements : undefined,
+        clDeduitsParUnite: clDeduitsParUnite > 0 ? clDeduitsParUnite : undefined,
       }]);
     }
   }, [cartItems, selectedTable]);
@@ -137,59 +178,66 @@ export function Orders() {
     }
   };
 
-  const createOrder = (flow: 'later' | 'now') => {
+  // ── Créer et persister une commande ───────────────────────
+  const createOrder = async (flow: 'later' | 'now') => {
     if (!selectedTable) return;
-    
     const total = cartItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+
+    // Ardoise existante sur la table ?
     const existingOrder = orders.find(o =>
       o.tableNumber === selectedTable &&
       (o.status === 'en_attente' || o.status === 'en_cours')
     );
 
     if (existingOrder && flow === 'later') {
+      // Fusionner avec l'ardoise existante
       const mergedItems = [...existingOrder.items];
       cartItems.forEach(newItem => {
-        const existingIdx = mergedItems.findIndex(
-          i => i.productId === newItem.productId && i.format === newItem.format
-        );
-        if (existingIdx >= 0) {
-          mergedItems[existingIdx] = {
-            ...mergedItems[existingIdx],
-            quantity: mergedItems[existingIdx].quantity + newItem.quantity,
-            supplements: newItem.supplements || [],
-          };
+        const idx = mergedItems.findIndex(i => i.productId === newItem.productId && i.format === newItem.format);
+        if (idx >= 0) {
+          mergedItems[idx] = { ...mergedItems[idx], quantity: mergedItems[idx].quantity + newItem.quantity };
         } else {
           mergedItems.push(newItem as any);
         }
       });
-
       const newTotal = mergedItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-      setOrders(prev => prev.map(o =>
-        o.id === existingOrder.id
-          ? { ...o, items: mergedItems, total: newTotal, status: 'en_attente' }
-          : o
-      ));
+      const updated: PersistedOrder = {
+        id: existingOrder.id,
+        items: mergedItems,
+        tableNumber: existingOrder.tableNumber,
+        server: existingOrder.server,
+        status: 'en_attente',
+        createdAt: existingOrder.createdAt.toISOString(),
+        total: newTotal,
+        comment: existingOrder.comment,
+      };
+      await saveOrder(updated);
+      setOrders(prev => prev.map(o => o.id === existingOrder.id ? toOrder(updated) : o));
       setCartItems([]);
       setShowCartSheet(false);
       setShowValidationChoice(false);
       return;
     }
 
-    const order: Order = {
-      id: `CMD-${Date.now().toString(36).toUpperCase()}`,
+    const newOrderId = `CMD-${Date.now().toString(36).toUpperCase()}`;
+    const persisted: PersistedOrder = {
+      id: newOrderId,
       items: cartItems.map(i => ({ ...i })),
       tableNumber: selectedTable,
       server: 'Serveur 1',
       status: flow === 'later' ? 'en_attente' : 'en_cours',
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       total,
       comment: flow === 'later' ? 'Ardoise - paiement plus tard' : 'Paiement immédiat',
     };
 
-    setOrders(prev => [order, ...prev]);
+    await saveOrder(persisted);
+    const asOrder = toOrder(persisted);
+
+    setOrders(prev => [asOrder, ...prev]);
     setManagedTables(prev => prev.map(table =>
       table.number === selectedTable
-        ? { ...table, status: flow === 'later' ? 'occupée' : 'en_attente', currentOrder: order.id }
+        ? { ...table, status: flow === 'later' ? 'occupée' : 'en_attente', currentOrder: newOrderId }
         : table
     ));
     setCartItems([]);
@@ -197,8 +245,8 @@ export function Orders() {
     setShowValidationChoice(false);
 
     if (flow === 'now') {
-      setShowOrderDetail(order);
-      setPayingOrder(order);
+      setShowOrderDetail(asOrder);
+      setPayingOrder(asOrder);
       setShowPayment(true);
     }
   };
@@ -209,99 +257,109 @@ export function Orders() {
     setShowValidationChoice(true);
   };
 
-  const handlePayment = (method: string) => {
+  // ── Paiement : persiste + décrémente stock en unités ET en cl ──
+  const handlePayment = async (method: string) => {
     if (!payingOrder) return;
-    
-    const updatedOrders = orders.map(o =>
-      o.id === payingOrder.id ? { ...o, status: 'payé' as const, paymentMethod: method as Order['paymentMethod'] } : o
+
+    await payOrder(
+      payingOrder.id,
+      method,
+      async (productId: string, deltaStock: number, deltaCl: number) => {
+        // deltaStock < 0 = consommation en bouteilles/unités
+        // deltaCl    < 0 = consommation en centilitres (0 si pas de volumeConfig)
+        const prod = safeProducts.find(p => p.id === productId);
+        if (!prod) return;
+
+        const updatePayload: any = {
+          ...prod,
+          stock: Math.max(0, prod.stock + deltaStock),
+        };
+
+        // Si le produit a un stock en cl : déduire en cl (plus précis)
+        if (prod.volumeConfig && prod.stockCl != null && deltaCl !== 0) {
+          updatePayload.stockCl = Math.max(0, prod.stockCl + deltaCl);
+          // Recalculer stock en bouteilles depuis stockCl
+          updatePayload.stock = updatePayload.stockCl / prod.volumeConfig.contenanceCl;
+        }
+
+        await universalSync.updateProduit(productId, updatePayload);
+      }
     );
-    setOrders(updatedOrders);
-    
+
+    // Mettre à jour le state local
+    const paidOrder = { ...payingOrder, status: 'payé' as const, paymentMethod: method as Order['paymentMethod'] };
+    setOrders(prev => prev.map(o => o.id === payingOrder.id ? paidOrder : o));
+    setHistory(prev => [paidOrder, ...prev]);
+
     setManagedTables(prev => prev.map(table =>
       table.number === payingOrder.tableNumber
         ? { ...table, status: 'libre', currentOrder: undefined }
         : table
     ));
-    
+
     setShowPayment(false);
-    
+
     if (showOrderDetail && showOrderDetail.id === payingOrder.id) {
-      const updatedOrder = { ...payingOrder, status: 'payé' as const, paymentMethod: method as Order['paymentMethod'] };
-      setShowOrderDetail(updatedOrder);
+      setShowOrderDetail(paidOrder);
     }
-    
+
     setPayingOrder(null);
   };
-  
+
   const printTicket = (order: Order) => {
     if (order.status !== 'payé') {
       setErrorMessage("❌ Le ticket ne peut être imprimé qu'après paiement !");
       return;
     }
-    
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      setErrorMessage("❌ Impossible d'ouvrir la fenêtre d'impression. Vérifiez votre bloqueur de popups.");
+      setErrorMessage("❌ Impossible d'ouvrir la fenêtre d'impression.");
       return;
     }
-    
     const barName = barInfo.name || 'BARFLOW';
     const barAddress = barInfo.address ? `<p>📍 ${barInfo.address}</p>` : '';
     const barPhone = barInfo.phone ? `<p>📞 ${barInfo.phone}</p>` : '';
     const barTax = barInfo.taxNumber ? `<p>🏷️ NIF: ${barInfo.taxNumber}</p>` : '';
-    
+
     printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Ticket - ${order.id}</title>
-        <style>
-          body { font-family: monospace; font-size: 12px; width: 300px; margin: 0 auto; padding: 20px; }
-          .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-          .header h1 { font-size: 18px; margin: 0; }
-          .header p { margin: 5px 0; }
-          .items { width: 100%; margin: 10px 0; }
-          .items th, .items td { text-align: left; padding: 4px 0; }
-          .items .text-right { text-align: right; }
-          .total { border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; text-align: right; }
-          .footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; font-size: 10px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>🍺 ${barName}</h1>
-          ${barAddress}
-          ${barPhone}
-          ${barTax}
-          <p>Ticket de caisse</p>
-          <p>${new Date(order.createdAt).toLocaleString('fr-FR')}</p>
-          <p>Table ${order.tableNumber}</p>
-          <p>Commande: ${order.id}</p>
-        </div>
-        <table class="items">
-          <thead>
-            <tr><th>Produit</th><th>Qté</th><th class="text-right">Prix</th><th class="text-right">Total</th></tr>
-          </thead>
-          <tbody>
-            ${order.items.map(item => `
-              <tr>
-                <td>${item.productName}${item.supplements ? ' (+' + item.supplements.join(', ') + ')' : ''}</td>
-                <td>${item.quantity}</td>
-                <td class="text-right">${item.unitPrice.toLocaleString()} F</td>
-                <td class="text-right">${(item.quantity * item.unitPrice).toLocaleString()} F</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="total">
-          <strong>TOTAL: ${order.total.toLocaleString()} FCFA</strong>
-        </div>
-        <div class="footer">
-          <p>Merci de votre visite !</p>
-          <p>Règlement par ${order.paymentMethod === 'espèces' ? 'Espèces' : order.paymentMethod === 'wave' ? 'Wave' : 'Orange Money'}</p>
-        </div>
-      </body>
-      </html>
+      <!DOCTYPE html><html><head><title>Ticket - ${order.id}</title>
+      <style>
+        body { font-family: monospace; font-size: 12px; width: 300px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .header h1 { font-size: 18px; margin: 0; }
+        .header p { margin: 5px 0; }
+        .items { width: 100%; margin: 10px 0; }
+        .items th, .items td { text-align: left; padding: 4px 0; }
+        .text-right { text-align: right; }
+        .total { border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; text-align: right; }
+        .footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; font-size: 10px; }
+      </style></head><body>
+      <div class="header">
+        <h1>🍺 ${barName}</h1>
+        ${barAddress}${barPhone}${barTax}
+        <p>Ticket de caisse</p>
+        <p>${new Date(order.createdAt).toLocaleString('fr-FR')}</p>
+        <p>Table ${order.tableNumber}</p>
+        <p>Commande: ${order.id}</p>
+      </div>
+      <table class="items">
+        <thead><tr><th>Produit</th><th>Qté</th><th class="text-right">Prix</th><th class="text-right">Total</th></tr></thead>
+        <tbody>
+          ${order.items.map(item => `
+            <tr>
+              <td>${item.productName}${(item as any).supplements ? ' (+' + (item as any).supplements.join(', ') + ')' : ''}</td>
+              <td>${item.quantity}</td>
+              <td class="text-right">${item.unitPrice.toLocaleString()} F</td>
+              <td class="text-right">${(item.quantity * item.unitPrice).toLocaleString()} F</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div class="total"><strong>TOTAL: ${order.total.toLocaleString()} FCFA</strong></div>
+      <div class="footer">
+        <p>Merci de votre visite !</p>
+        <p>Règlement par ${order.paymentMethod === 'espèces' ? 'Espèces' : order.paymentMethod === 'wave' ? 'Wave' : order.paymentMethod === 'orange_money' ? 'Orange Money' : 'Carte'}</p>
+      </div></body></html>
     `);
     printWindow.document.close();
     printWindow.print();
@@ -353,7 +411,9 @@ export function Orders() {
 
   const cartTotal = cartItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
   const cartCount = cartItems.reduce((s, i) => s + i.quantity, 0);
-  const activeOrders = orders.filter(o => o.status !== 'payé');
+  const activeOrders = orders.filter(o => o.status !== 'payé' && o.status !== 'annulé');
+  const ardoises = orders.filter(o => o.status === 'en_attente');
+  const allHistory = [...history.filter(o => o.status === 'payé'), ...orders.filter(o => o.status === 'payé')];
 
   if (isLoading) {
     return (
@@ -384,17 +444,27 @@ export function Orders() {
                 {selectedTable ? `Table ${selectedTable} sélectionnée` : '⚠️ Aucune table sélectionnée'}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Ardoise badge */}
+              {ardoises.length > 0 && (
+                <button
+                  onClick={() => setShowArdoise(true)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-amber-500 text-white shadow-md flex items-center gap-2 active:scale-95 transition-all"
+                >
+                  <BookOpen size={16} />
+                  Ardoises ({ardoises.length})
+                </button>
+              )}
               <button
-                onClick={() => setShowHistory(!showHistory)}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md hover:shadow-xl flex items-center gap-2"
+                onClick={() => setShowHistory(true)}
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md flex items-center gap-2 active:scale-95"
               >
                 <Receipt size={16} />
                 Historique
               </button>
               <button
                 onClick={() => setShowTablePicker(true)}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 border-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md hover:shadow-xl flex items-center gap-2"
+                className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md flex items-center gap-2 active:scale-95"
               >
                 <Table2 size={16} />
                 {selectedTable ? `Table ${selectedTable}` : 'Choisir une table'}
@@ -442,18 +512,14 @@ export function Orders() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
               {filteredProducts.map(product => {
                 const isOutOfStock = (product.stock || 0) <= 0;
-let prediction = null;
-if (!isOutOfStock) {
-  try {
-    // Vérifier que predictStockRupture existe et fonctionne
-    if (typeof predictStockRupture === 'function') {
-      prediction = predictStockRupture(product);
-    }
-  } catch (error) {
-    console.warn('Erreur de prédiction pour', product.name, error);
-  }
-}
-                
+                let prediction = null;
+                if (!isOutOfStock) {
+                  try {
+                    if (typeof predictStockRupture === 'function') {
+                      prediction = predictStockRupture(product);
+                    }
+                  } catch {}
+                }
                 return (
                   <button
                     key={product.id}
@@ -468,8 +534,8 @@ if (!isOutOfStock) {
                     disabled={isOutOfStock}
                     className={cn(
                       'bg-white rounded-2xl border p-3 hover:shadow-lg transition-all text-left group',
-                      isOutOfStock 
-                        ? 'border-red-200 opacity-60 cursor-not-allowed' 
+                      isOutOfStock
+                        ? 'border-red-200 opacity-60 cursor-not-allowed'
                         : 'border-slate-200 hover:border-violet-200 active:scale-[0.96]'
                     )}
                   >
@@ -477,10 +543,7 @@ if (!isOutOfStock) {
                       className="w-full aspect-square rounded-xl flex items-center justify-center text-4xl mb-2"
                       style={{ backgroundColor: isOutOfStock ? '#f1f5f9' : `${product.color || '#8B5CF6'}15` }}
                     >
-                      <span className={cn(
-                        'transition-transform duration-200',
-                        !isOutOfStock && 'group-hover:scale-110'
-                      )}>
+                      <span className={cn('transition-transform duration-200', !isOutOfStock && 'group-hover:scale-110')}>
                         {product.image || '📦'}
                       </span>
                     </div>
@@ -490,14 +553,16 @@ if (!isOutOfStock) {
                         {((product.prices?.bouteille ?? product.prices?.verre ?? product.prices?.demi ?? product.prices?.quart ?? product.prices?.canette) ?? 0).toLocaleString()} F
                       </span>
                       <span className={cn(
-  'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-  isOutOfStock ? 'bg-red-100 text-red-700' :
-  (product.stock || 0) <= (product.seuilCritique || 0) ? 'bg-red-100 text-red-700' :
-  (product.stock || 0) <= (product.seuilAlerte || 0) ? 'bg-amber-100 text-amber-700' :
-  'bg-emerald-100 text-emerald-700'
-)}>
-  {isOutOfStock ? 'RUPTURE' : product.stock}
-</span>
+                        'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+                        isOutOfStock ? 'bg-red-100 text-red-700' :
+                        (product.stock || 0) <= (product.seuilCritique || 0) ? 'bg-red-100 text-red-700' :
+                        (product.stock || 0) <= (product.seuilAlerte || 0) ? 'bg-amber-100 text-amber-700' :
+                        'bg-emerald-100 text-emerald-700'
+                      )}>
+                        {isOutOfStock ? 'RUPTURE' : product.volumeConfig && product.stockCl != null
+                          ? `${Math.floor(product.stockCl / product.volumeConfig.contenanceCl)}btl/${Math.round(product.stockCl % product.volumeConfig.contenanceCl)}cl`
+                          : product.stock}
+                      </span>
                     </div>
                     {isOutOfStock ? (
                       <p className="text-[10px] text-red-600 mt-1 text-center font-medium">🔴 En rupture</p>
@@ -532,23 +597,34 @@ if (!isOutOfStock) {
             <div className="flex flex-col items-center justify-center h-full text-slate-300">
               <Receipt size={40} className="mb-2 opacity-50" />
               <p className="text-sm">Aucune commande en cours</p>
-              <p className="text-xs">Les commandes apparaîtront ici</p>
             </div>
           ) : (
             activeOrders.map(order => (
-              <div 
-                key={order.id} 
+              <div
+                key={order.id}
                 onClick={() => setShowOrderDetail(order)}
-                className="bg-slate-50 rounded-xl p-3 hover:shadow-md transition-all cursor-pointer border border-slate-200 hover:border-violet-300"
+                className={cn(
+                  'rounded-xl p-3 hover:shadow-md transition-all cursor-pointer border',
+                  order.status === 'en_attente'
+                    ? 'bg-amber-50 border-amber-200 hover:border-amber-400'
+                    : 'bg-slate-50 border-slate-200 hover:border-violet-300'
+                )}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-                      <Table2 size={14} className="text-violet-600" />
+                    <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center',
+                      order.status === 'en_attente' ? 'bg-amber-100' : 'bg-violet-100'
+                    )}>
+                      {order.status === 'en_attente'
+                        ? <BookOpen size={14} className="text-amber-600" />
+                        : <Table2 size={14} className="text-violet-600" />
+                      }
                     </div>
                     <div>
                       <p className="font-bold text-slate-800">Table {order.tableNumber}</p>
-                      <p className="text-[10px] text-slate-400">{order.items.length} article(s)</p>
+                      <p className="text-[10px] text-slate-400">{order.items.length} article(s)
+                        {order.status === 'en_attente' && <span className="ml-1 text-amber-600 font-semibold">· ARDOISE</span>}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -558,17 +634,15 @@ if (!isOutOfStock) {
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 pt-2 border-t border-slate-200">
-                  <div className="flex flex-wrap gap-1">
-                    {order.items.slice(0, 3).map((item, idx) => (
-                      <span key={idx} className="text-[10px] bg-white px-2 py-0.5 rounded-full text-slate-600">
-                        {item.quantity}x {item.productName}
-                      </span>
-                    ))}
-                    {order.items.length > 3 && (
-                      <span className="text-[10px] text-slate-400">+{order.items.length - 3} autres</span>
-                    )}
-                  </div>
+                <div className="mt-2 pt-2 border-t border-slate-200 flex flex-wrap gap-1">
+                  {order.items.slice(0, 3).map((item, idx) => (
+                    <span key={idx} className="text-[10px] bg-white px-2 py-0.5 rounded-full text-slate-600">
+                      {item.quantity}x {item.productName}
+                    </span>
+                  ))}
+                  {order.items.length > 3 && (
+                    <span className="text-[10px] text-slate-400">+{order.items.length - 3} autres</span>
+                  )}
                 </div>
               </div>
             ))
@@ -578,12 +652,12 @@ if (!isOutOfStock) {
         {cartItems.length > 0 && (
           <div className="p-4 border-t border-slate-100 bg-slate-50/50">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-slate-600">Panier actuel (Table {selectedTable})</span>
+              <span className="text-sm text-slate-600">Panier (Table {selectedTable})</span>
               <span className="text-xl font-bold text-slate-900">{cartTotal.toLocaleString()} FCFA</span>
             </div>
             <button
               onClick={submitOrder}
-              className="w-full py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-200 hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <Check size={16} />
               Valider la commande
@@ -592,7 +666,61 @@ if (!isOutOfStock) {
         )}
       </div>
 
-      {/* MODAL: DÉTAIL COMMANDE - identique à l'original, gardé */}
+      {/* MODAL: ARDOISES */}
+      {showArdoise && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowArdoise(false)}>
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-2xl w-full max-h-[80vh] shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BookOpen size={20} className="text-amber-500" />
+                <h3 className="text-lg font-bold text-slate-900">Ardoises en cours</h3>
+                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">
+                  {ardoises.reduce((s, o) => s + o.total, 0).toLocaleString()} FCFA total
+                </span>
+              </div>
+              <button onClick={() => setShowArdoise(false)} className="text-slate-400 p-1"><X size={20} /></button>
+            </div>
+            <p className="text-xs text-slate-500 mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3">
+              ⚠️ Ces clients ont consommé mais n'ont pas encore payé. Ils règleront à la fermeture ou au départ.
+            </p>
+            <div className="space-y-3">
+              {ardoises.length === 0 ? (
+                <p className="text-center text-slate-400 py-8">Aucune ardoise en cours</p>
+              ) : ardoises.map(order => (
+                <div key={order.id} className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-bold text-slate-800">Table {order.tableNumber}</p>
+                      <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleString('fr-FR')}</p>
+                    </div>
+                    <p className="text-lg font-bold text-amber-700">{order.total.toLocaleString()} F</p>
+                  </div>
+                  <div className="space-y-1 mb-3">
+                    {order.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-xs text-slate-600">
+                        <span>{item.quantity}x {item.productName}</span>
+                        <span>{(item.quantity * item.unitPrice).toLocaleString()} F</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setPayingOrder(order);
+                      setShowPayment(true);
+                      setShowArdoise(false);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2"
+                  >
+                    <CreditCard size={16} /> Encaisser maintenant
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: DÉTAIL COMMANDE */}
       {showOrderDetail && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowOrderDetail(null)}>
           <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -601,56 +729,33 @@ if (!isOutOfStock) {
                 <h3 className="text-xl font-bold text-slate-900">Détail de la commande</h3>
                 <p className="text-xs text-slate-500">Table {showOrderDetail.tableNumber} · {showOrderDetail.id}</p>
               </div>
-              <button onClick={() => setShowOrderDetail(null)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X size={20} />
-              </button>
+              <button onClick={() => setShowOrderDetail(null)} className="text-slate-400 p-1"><X size={20} /></button>
             </div>
 
             <div className="bg-slate-50 rounded-xl p-3 mb-4 flex items-center justify-between">
-              <span className="text-sm text-slate-600">📅 Date & heure</span>
-              <span className="text-sm font-medium text-slate-800">
-                {new Date(showOrderDetail.createdAt).toLocaleString('fr-FR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+              <span className="text-sm text-slate-600">📅 {new Date(showOrderDetail.createdAt).toLocaleString('fr-FR')}</span>
+              <span className={cn('text-xs font-semibold px-2 py-1 rounded-full',
+                showOrderDetail.status === 'payé' ? 'bg-emerald-100 text-emerald-700' :
+                showOrderDetail.status === 'en_attente' ? 'bg-amber-100 text-amber-700' :
+                'bg-blue-100 text-blue-700'
+              )}>
+                {showOrderDetail.status === 'payé' ? '✅ Payé' : showOrderDetail.status === 'en_attente' ? '📋 Ardoise' : '🔄 En cours'}
               </span>
             </div>
 
-            <h4 className="font-semibold text-slate-800 mb-2">📦 Produits commandés</h4>
-            <div className="space-y-2 max-h-[400px] overflow-y-auto mb-4">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto mb-4">
               {showOrderDetail.items.map((item, idx) => {
                 const product = safeProducts.find(p => p.id === item.productId);
                 return (
-                  <div key={idx} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{product?.image || '🍺'}</span>
-                          <p className="font-semibold text-slate-800">{item.productName}</p>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          <span className="text-[10px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
-                            {product?.category || 'Produit'}
-                          </span>
-                          <span className="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
-                            Format: {item.format}
-                          </span>
-                          {item.supplements && item.supplements.length > 0 && (
-                            <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                              + {item.supplements.join(', ')}
-                            </span>
-                          )}
-                        </div>
+                  <div key={idx} className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{product?.image || '🍺'}</span>
+                        <p className="font-semibold text-slate-800">{item.productName}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-violet-700">{item.unitPrice.toLocaleString()} F</p>
-                        <p className="text-xs text-slate-500">x{item.quantity}</p>
-                        <p className="text-sm font-bold text-slate-800">{(item.quantity * item.unitPrice).toLocaleString()} F</p>
-                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">{item.format} · {item.quantity} × {item.unitPrice.toLocaleString()} F</p>
                     </div>
+                    <p className="font-bold text-violet-700">{(item.quantity * item.unitPrice).toLocaleString()} F</p>
                   </div>
                 );
               })}
@@ -661,18 +766,6 @@ if (!isOutOfStock) {
                 <span className="font-bold text-slate-800">TOTAL</span>
                 <span className="text-2xl font-bold text-violet-700">{showOrderDetail.total.toLocaleString()} FCFA</span>
               </div>
-              <div className="flex justify-between items-center mt-2 text-sm">
-                <span className="text-slate-500">Statut</span>
-                <span className={cn(
-                  'px-2 py-0.5 rounded-full text-xs font-semibold',
-                  showOrderDetail.status === 'payé' ? 'bg-emerald-100 text-emerald-700' :
-                  showOrderDetail.status === 'en_attente' ? 'bg-amber-100 text-amber-700' :
-                  'bg-blue-100 text-blue-700'
-                )}>
-                  {showOrderDetail.status === 'payé' ? 'Payé' : 
-                   showOrderDetail.status === 'en_attente' ? 'En attente' : 'En cours'}
-                </span>
-              </div>
             </div>
 
             <div className="flex gap-3">
@@ -682,31 +775,25 @@ if (!isOutOfStock) {
                 className={cn(
                   'flex-1 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all',
                   showOrderDetail.status === 'payé'
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-md hover:shadow-xl active:scale-[0.98]'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-md'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 )}
               >
-                <Printer size={16} />
-                Imprimer ticket
+                <Printer size={16} /> Imprimer ticket
               </button>
               {showOrderDetail.status === 'payé' ? (
                 <button
                   onClick={() => closeOrderDetail(showOrderDetail)}
-                  className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md flex items-center justify-center gap-2"
                 >
-                  <Check size={16} />
-                  Fermer
+                  <Check size={16} /> Fermer
                 </button>
               ) : (
                 <button
-                  onClick={() => {
-                    setPayingOrder(showOrderDetail);
-                    setShowPayment(true);
-                  }}
-                  className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  onClick={() => { setPayingOrder(showOrderDetail); setShowPayment(true); }}
+                  className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md flex items-center justify-center gap-2"
                 >
-                  <CreditCard size={16} />
-                  Payer
+                  <CreditCard size={16} /> Payer
                 </button>
               )}
             </div>
@@ -726,94 +813,72 @@ if (!isOutOfStock) {
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">{selectedProduct.name}</h3>
                   <p className="text-xs text-slate-500 capitalize">{selectedProduct.category}</p>
+                  <p className="text-xs text-slate-500">Stock: <strong className={cn(
+                    selectedProduct.stock <= selectedProduct.seuilCritique ? 'text-red-600' :
+                    selectedProduct.stock <= selectedProduct.seuilAlerte ? 'text-amber-600' : 'text-emerald-600'
+                  )}>{selectedProduct.stock} {selectedProduct.stockUnit || 'unités'}</strong></p>
                 </div>
               </div>
-              <button onClick={() => setSelectedProduct(null)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X size={20} />
-              </button>
+              <button onClick={() => setSelectedProduct(null)} className="text-slate-400 p-1"><X size={20} /></button>
             </div>
 
-            <div className="space-y-3 mb-4">
-              <p className="text-sm text-slate-600">
-                Stock: <strong className={cn(
-                  selectedProduct.stock <= selectedProduct.seuilCritique ? 'text-red-600' :
-                  selectedProduct.stock <= selectedProduct.seuilAlerte ? 'text-amber-600' : 'text-emerald-600'
-                )}>
-                  {selectedProduct.stock} {selectedProduct.stockUnit || 'unités'}
-                </strong>
-              </p>
-
-              {selectedProduct.options?.bottleSize && (
-                <p className="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg inline-block">
-                  📏 Volume/Taille : <strong>{selectedProduct.options.bottleSize}</strong>
-                </p>
-              )}
-
-              {selectedProduct.options?.notes && (
-                <p className="text-[10px] text-slate-400 italic bg-amber-50 border border-amber-100 p-2 rounded-lg">
-                  📝 Note interne : {selectedProduct.options.notes}
-                </p>
-              )}
-
-              {selectedProduct.options?.supplements && selectedProduct.options.supplements.length > 0 && (
-  <div className="mt-2">
-    <p className="text-xs font-semibold text-slate-700 mb-2">Options / Suppléments :</p>
-    <div className="flex flex-wrap gap-2">
-      {selectedProduct.options.supplements.map((sup: string) => (
-        <button
-          key={sup}
-          onClick={() => setSelectedSupplements(prev =>
-            prev.includes(sup) ? prev.filter(s => s !== sup) : [...prev, sup]
-          )}
-          className={cn(
-            'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all active:scale-95',
-            selectedSupplements.includes(sup)
-              ? 'bg-violet-100 border-violet-300 text-violet-800 shadow-sm'
-              : 'bg-white border-slate-200 text-slate-600 hover:border-violet-200'
-          )}
-        >
-          {selectedSupplements.includes(sup) ? '✓ ' : ''}{sup}
-        </button>
-      ))}
-    </div>
-  </div>
-)}
-
-              <div className={`grid gap-2 ${(selectedProduct.activePriceFormats || ['bouteille']).length <= 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                {(selectedProduct.activePriceFormats || ['bouteille']).map((format) => {
-                  const price = selectedProduct.prices?.[format];
-                  if (!price) return null;
-                  const formatLabel = format.charAt(0).toUpperCase() + format.slice(1);
-                  return (
+            {selectedProduct.options?.supplements && selectedProduct.options.supplements.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold text-slate-700 mb-2">Options / Suppléments :</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedProduct.options.supplements.map((sup: string) => (
                     <button
-                      key={format}
-                      onClick={() => { addToCart(selectedProduct, format, selectedSupplements); setSelectedProduct(null); }}
-                      className="p-3 rounded-xl border-2 border-slate-200 hover:border-violet-300 hover:bg-violet-50 active:scale-[0.97] transition-all text-center"
+                      key={sup}
+                      onClick={() => setSelectedSupplements(prev =>
+                        prev.includes(sup) ? prev.filter(s => s !== sup) : [...prev, sup]
+                      )}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
+                        selectedSupplements.includes(sup)
+                          ? 'bg-violet-100 border-violet-300 text-violet-800'
+                          : 'bg-white border-slate-200 text-slate-600'
+                      )}
                     >
-                      <p className="text-sm font-bold text-slate-800 capitalize">{formatLabel}</p>
-                      <p className="text-sm text-violet-700 font-bold mt-0.5">{price.toLocaleString()} F</p>
+                      {selectedSupplements.includes(sup) ? '✓ ' : ''}{sup}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
+            )}
 
-              <div className="grid grid-cols-5 gap-2">
-                {[1, 2, 3, 5, 10].map(qty => {
-                  const defaultFormat = selectedProduct.activePriceFormats?.[0] || 'bouteille';
-                  return (
-                    <button
-                      key={qty}
-                      onClick={() => {
-                        for (let i = 0; i < qty; i++) addToCart(selectedProduct, defaultFormat, selectedSupplements);
-                        setSelectedProduct(null);
-                      }}
-                      className="py-3 rounded-xl bg-slate-100 text-sm font-bold text-slate-700 hover:bg-violet-100 active:scale-95 transition-all"
-                    >
-                      +{qty}
-                    </button>
-                  );
-                })}
-              </div>
+            <div className={`grid gap-2 mb-3 ${(selectedProduct.activePriceFormats || ['bouteille']).length <= 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+              {(selectedProduct.activePriceFormats || ['bouteille']).map((format) => {
+                const price = selectedProduct.prices?.[format];
+                if (!price) return null;
+                return (
+                  <button
+                    key={format}
+                    onClick={() => { addToCart(selectedProduct, format, selectedSupplements); setSelectedProduct(null); }}
+                    className="p-3 rounded-xl border-2 border-slate-200 hover:border-violet-300 hover:bg-violet-50 active:scale-[0.97] transition-all text-center"
+                  >
+                    <p className="text-sm font-bold text-slate-800 capitalize">{format}</p>
+                    <p className="text-sm text-violet-700 font-bold mt-0.5">{price.toLocaleString()} F</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-5 gap-2">
+              {[1, 2, 3, 5, 10].map(qty => {
+                const defaultFormat = selectedProduct.activePriceFormats?.[0] || 'bouteille';
+                return (
+                  <button
+                    key={qty}
+                    onClick={() => {
+                      for (let i = 0; i < qty; i++) addToCart(selectedProduct, defaultFormat, selectedSupplements);
+                      setSelectedProduct(null);
+                    }}
+                    className="py-3 rounded-xl bg-slate-100 text-sm font-bold text-slate-700 hover:bg-violet-100 active:scale-95 transition-all"
+                  >
+                    +{qty}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -829,10 +894,10 @@ if (!isOutOfStock) {
                 <p className="text-xs text-slate-500">Choisissez une table pour commencer</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setShowTableManager(true)} className="px-3 py-2 rounded-xl bg-violet-50 text-violet-700 text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform">
+                <button onClick={() => setShowTableManager(true)} className="px-3 py-2 rounded-xl bg-violet-50 text-violet-700 text-xs font-bold flex items-center gap-1.5">
                   <Settings size={14} /> Gérer
                 </button>
-                <button onClick={() => setShowTablePicker(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+                <button onClick={() => setShowTablePicker(false)} className="text-slate-400 p-1"><X size={20} /></button>
               </div>
             </div>
             <div className="grid grid-cols-5 gap-3">
@@ -856,7 +921,7 @@ if (!isOutOfStock) {
                 </button>
               ))}
             </div>
-            <div className="flex gap-3 mt-4 text-xs text-slate-500">
+            <div className="flex gap-4 mt-4 text-xs text-slate-500">
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-200" /> Libre</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-50 border border-red-200" /> Occupé</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-50 border border-amber-200" /> En attente</span>
@@ -870,43 +935,63 @@ if (!isOutOfStock) {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowHistory(false)}>
           <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-3xl w-full max-h-[80vh] shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900">Historique des commandes</h3>
-              <button onClick={() => setShowHistory(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Historique des commandes</h3>
+                <p className="text-xs text-slate-500">30 derniers jours · {allHistory.length} commandes payées</p>
+              </div>
+              <button onClick={() => setShowHistory(false)} className="text-slate-400 p-1"><X size={20} /></button>
             </div>
-            {orders.length === 0 ? (
+
+            {/* Résumé rapide */}
+            {allHistory.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="bg-violet-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-slate-500">Total encaissé</p>
+                  <p className="text-lg font-bold text-violet-700">
+                    {allHistory.reduce((s, o) => s + o.total, 0).toLocaleString()} F
+                  </p>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-slate-500">Commandes</p>
+                  <p className="text-lg font-bold text-emerald-700">{allHistory.length}</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-slate-500">Ticket moyen</p>
+                  <p className="text-lg font-bold text-blue-700">
+                    {allHistory.length > 0 ? Math.round(allHistory.reduce((s, o) => s + o.total, 0) / allHistory.length).toLocaleString() : 0} F
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {allHistory.length === 0 ? (
               <div className="text-center py-12 text-slate-400">
                 <Receipt size={40} className="mx-auto mb-2 opacity-50" />
-                <p>Aucune commande pour le moment</p>
+                <p>Aucune commande payée pour le moment</p>
               </div>
             ) : (
               <div className="space-y-2">
-                {orders.map(order => (
-                  <div key={order.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
+                {allHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(order => (
+                  <div
+                    key={order.id}
+                    onClick={() => { setShowOrderDetail(order); setShowHistory(false); }}
+                    className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer hover:border-violet-200 hover:bg-violet-50/30 transition-all"
+                  >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-bold text-slate-800">{order.id}</span>
-                        <span className={cn(
-                          'text-[10px] font-semibold px-2 py-0.5 rounded-full',
-                          order.status === 'en_cours' ? 'bg-blue-100 text-blue-700' :
-                          order.status === 'en_attente' ? 'bg-amber-100 text-amber-700' :
-                          order.status === 'servi' ? 'bg-emerald-100 text-emerald-700' :
-                          order.status === 'payé' ? 'bg-violet-100 text-violet-700' : 'bg-red-100 text-red-700',
-                        )}>
-                          {order.status === 'en_cours' ? 'En cours' : order.status === 'en_attente' ? 'Ardoise' : order.status === 'servi' ? 'Servi' : order.status === 'payé' ? 'Payé' : 'Annulé'}
-                        </span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">Payé</span>
                         {order.paymentMethod && (
                           <span className="text-[10px] text-slate-500">
-                            {order.paymentMethod === 'wave' ? '📱' : order.paymentMethod === 'orange_money' ? '📱' : order.paymentMethod === 'carte' ? '💳' : '💵'} {order.paymentMethod}
+                            {order.paymentMethod === 'wave' ? '📱 Wave' : order.paymentMethod === 'orange_money' ? '📱 OM' : order.paymentMethod === 'carte' ? '💳' : '💵'} {order.paymentMethod !== 'wave' && order.paymentMethod !== 'orange_money' && order.paymentMethod !== 'carte' ? order.paymentMethod : ''}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Table {order.tableNumber} · {order.items.length} articles · {new Date(order.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        Table {order.tableNumber} · {order.items.length} articles · {new Date(order.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-slate-900">{order.total.toLocaleString()}F</p>
-                    </div>
+                    <p className="text-sm font-bold text-slate-900 ml-3">{order.total.toLocaleString()} F</p>
                   </div>
                 ))}
               </div>
@@ -924,22 +1009,22 @@ if (!isOutOfStock) {
                 <h3 className="text-lg font-bold text-slate-900">Valider la commande</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Table {selectedTable} · {cartTotal.toLocaleString()} FCFA</p>
               </div>
-              <button onClick={() => setShowValidationChoice(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+              <button onClick={() => setShowValidationChoice(false)} className="text-slate-400 p-1"><X size={20} /></button>
             </div>
             {orders.some(o => o.tableNumber === selectedTable && (o.status === 'en_attente' || o.status === 'en_cours')) && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
                 <p className="text-xs font-bold text-amber-800">📋 Note ouverte sur la Table {selectedTable}</p>
-                <p className="text-xs text-amber-600 mt-1">Si vous choisissez "Payer plus tard", les articles seront ajoutés à la note existante.</p>
+                <p className="text-xs text-amber-600 mt-1">Les articles seront ajoutés à l'ardoise existante.</p>
               </div>
             )}
             <div className="space-y-3">
               <button onClick={() => createOrder('later')} className="w-full p-4 rounded-2xl border-2 border-amber-200 bg-amber-50 text-left active:scale-[0.98] transition-transform">
-                <p className="text-sm font-bold text-amber-900">Valider et payer plus tard</p>
-                <p className="text-xs text-amber-700 mt-1">La table reste occupée et la commande passe sur l'ardoise.</p>
+                <p className="text-sm font-bold text-amber-900">📋 Mettre sur ardoise</p>
+                <p className="text-xs text-amber-700 mt-1">La table reste occupée. Le client paiera plus tard.</p>
               </button>
               <button onClick={() => createOrder('now')} className="w-full p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 text-left active:scale-[0.98] transition-transform">
-                <p className="text-sm font-bold text-emerald-900">Payer tout de suite</p>
-                <p className="text-xs text-emerald-700 mt-1">Le mode de paiement sera obligatoire : Espèces, Wave ou Orange Money.</p>
+                <p className="text-sm font-bold text-emerald-900">💳 Payer tout de suite</p>
+                <p className="text-xs text-emerald-700 mt-1">Encaissement immédiat : Espèces, Wave ou Orange Money.</p>
               </button>
             </div>
           </div>
@@ -952,18 +1037,17 @@ if (!isOutOfStock) {
           <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-3xl w-full max-h-[85vh] shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Gestion dynamique des tables</h3>
-                <p className="text-xs text-slate-500">Ajoutez, modifiez ou supprimez les tables et leurs places.</p>
+                <h3 className="text-lg font-bold text-slate-900">Gestion des tables</h3>
+                <p className="text-xs text-slate-500">Ajoutez, modifiez ou supprimez des tables.</p>
               </div>
-              <button onClick={() => setShowTableManager(false)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+              <button onClick={() => setShowTableManager(false)} className="text-slate-400 p-1"><X size={20} /></button>
             </div>
             <div className="grid lg:grid-cols-[1fr_260px] gap-4">
               <div className="space-y-2">
                 {managedTables.map(table => (
-                  <div key={table.number} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div key={table.number} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-sm">
                     <div className="flex items-center gap-3">
-                      <span className={cn(
-                        'w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold border',
+                      <span className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold border',
                         table.status === 'libre' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                         table.status === 'occupée' ? 'bg-red-50 text-red-700 border-red-200' :
                         'bg-amber-50 text-amber-700 border-amber-200',
@@ -974,8 +1058,8 @@ if (!isOutOfStock) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => startEditTable(table)} className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold flex items-center gap-1 active:scale-95 transition-transform"><Edit3 size={14} /> Modifier</button>
-                      <button onClick={() => deleteTable(table.number)} className="px-3 py-2 rounded-xl bg-red-50 text-red-700 text-xs font-bold flex items-center gap-1 active:scale-95 transition-transform"><Trash2 size={14} /> Supprimer</button>
+                      <button onClick={() => startEditTable(table)} className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold flex items-center gap-1"><Edit3 size={14} /> Modifier</button>
+                      <button onClick={() => deleteTable(table.number)} className="px-3 py-2 rounded-xl bg-red-50 text-red-700 text-xs font-bold flex items-center gap-1"><Trash2 size={14} /> Supprimer</button>
                     </div>
                   </div>
                 ))}
@@ -983,11 +1067,11 @@ if (!isOutOfStock) {
               <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 h-fit">
                 <h4 className="text-sm font-bold text-slate-900 mb-3">{editingTable ? `Modifier table ${editingTable.number}` : 'Ajouter une table'}</h4>
                 <div className="space-y-3">
-                  <div><label className="text-xs font-semibold text-slate-600 block mb-1">Numéro</label><input type="number" min={1} value={tableForm.number} onChange={(e) => setTableForm({ ...tableForm, number: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20" placeholder="Ex: 16" /></div>
-                  <div><label className="text-xs font-semibold text-slate-600 block mb-1">Nombre de places</label><input type="number" min={1} value={tableForm.seats} onChange={(e) => setTableForm({ ...tableForm, seats: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20" /></div>
-                  <div><label className="text-xs font-semibold text-slate-600 block mb-1">Statut</label><select value={tableForm.status} onChange={(e) => setTableForm({ ...tableForm, status: e.target.value as TableStatus['status'] })} className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 bg-white"><option value="libre">Libre</option><option value="occupée">Occupé</option><option value="en_attente">En attente</option></select></div>
-                  <button onClick={saveTable} className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm active:scale-[0.98] transition-transform">{editingTable ? 'Enregistrer les modifications' : 'Ajouter la table'}</button>
-                  {editingTable && <button onClick={resetTableForm} className="w-full py-2 rounded-xl bg-white border border-slate-200 text-slate-600 font-medium text-sm">Annuler la modification</button>}
+                  <div><label className="text-xs font-semibold text-slate-600 block mb-1">Numéro</label><input type="number" min={1} value={tableForm.number} onChange={(e) => setTableForm({ ...tableForm, number: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 text-sm" placeholder="Ex: 16" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600 block mb-1">Nombre de places</label><input type="number" min={1} value={tableForm.seats} onChange={(e) => setTableForm({ ...tableForm, seats: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 text-sm" /></div>
+                  <div><label className="text-xs font-semibold text-slate-600 block mb-1">Statut</label><select value={tableForm.status} onChange={(e) => setTableForm({ ...tableForm, status: e.target.value as TableStatus['status'] })} className="w-full p-3 rounded-xl border border-slate-200 text-sm bg-white"><option value="libre">Libre</option><option value="occupée">Occupé</option><option value="en_attente">En attente</option></select></div>
+                  <button onClick={saveTable} className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-sm">{editingTable ? 'Enregistrer' : 'Ajouter la table'}</button>
+                  {editingTable && <button onClick={resetTableForm} className="w-full py-2 rounded-xl bg-white border border-slate-200 text-slate-600 font-medium text-sm">Annuler</button>}
                 </div>
               </div>
             </div>
