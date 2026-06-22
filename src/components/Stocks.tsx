@@ -156,6 +156,144 @@ function StockBadge({ product }: { product: Product }) {
   return <span className="font-bold">{product.stock} {product.stockUnit}</span>;
 }
 
+// ── Composant formulaire prix + volume (hors du composant Stocks pour éviter le re-mount au focus) ──
+function PrixVolumeForm({ form, setForm }: { form: any; setForm: (f: any) => void }) {
+  const contenance = parseFloat(form.contenanceCl) || 75;
+  return (
+    <div className="space-y-4">
+      {/* Formats & Prix */}
+      <div className="space-y-3 pt-2 border-t border-slate-100">
+        <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Formats & Prix (FCFA)</p>
+        <div className="grid grid-cols-2 gap-3">
+          {(['bouteille', 'demi', 'quart', 'verre', 'canette'] as const).map(format => {
+            const isActive = form.activePriceFormats.includes(format);
+            return (
+              <div key={format} className={`p-3 rounded-xl border transition-colors ${isActive ? 'border-violet-300 bg-violet-50/50' : 'border-slate-200 bg-white'}`}>
+                <label className="text-xs font-semibold text-slate-700 capitalize flex items-center gap-2 mb-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={e => {
+                      const updated = e.target.checked
+                        ? [...form.activePriceFormats, format]
+                        : form.activePriceFormats.filter((f: string) => f !== format);
+                      setForm({ ...form, activePriceFormats: updated });
+                    }}
+                    className="rounded border-slate-300 text-violet-600"
+                  />
+                  {format}
+                </label>
+                <input
+                  type="number"
+                  placeholder="Prix FCFA"
+                  disabled={!isActive}
+                  value={form.prices[format] || ''}
+                  onChange={e => setForm({ ...form, prices: { ...form.prices, [format]: e.target.value } })}
+                  className="w-full p-2 rounded-lg border border-slate-200 text-sm disabled:bg-slate-100 disabled:text-slate-400"
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Section gestion en centilitres */}
+      <div className="border-t border-slate-100 pt-3">
+        <label className="flex items-center gap-2 cursor-pointer mb-3">
+          <input
+            type="checkbox"
+            checked={form.useVolumeCl}
+            onChange={e => setForm({ ...form, useVolumeCl: e.target.checked })}
+            className="rounded border-slate-300 text-violet-600"
+          />
+          <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
+            <FlaskConical size={13} className="text-violet-500" />
+            Gestion en centilitres (vins, spiritueux, bières)
+          </span>
+        </label>
+
+        {form.useVolumeCl && (
+          <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 space-y-3">
+            <div>
+              <label className="text-xs font-semibold text-slate-600 block mb-1">
+                Contenance de la bouteille (cl) *
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={form.contenanceCl}
+                onChange={e => {
+                  const val = parseFloat(e.target.value) || 75;
+                  setForm({
+                    ...form,
+                    contenanceCl: e.target.value,
+                    clParBouteille: String(val),
+                    clParDemi: form.clParDemi || String(Math.round(val / 2 * 10) / 10),
+                    clParQuart: form.clParQuart || String(Math.round(val / 4 * 10) / 10),
+                  });
+                }}
+                className="w-full p-2 rounded-lg border border-violet-300 text-sm bg-white"
+                placeholder="75"
+              />
+              <p className="text-[10px] text-violet-600 mt-1">
+                Exemples : 75cl vin, 70cl whisky/gin, 65cl bière Flag/Gazelle, 33cl canette
+              </p>
+            </div>
+
+            <p className="text-xs font-semibold text-slate-600">Volume servi par format (cl) :</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'clParBouteille', label: 'Bouteille', placeholder: String(contenance), hint: 'Bouteille entière' },
+                { key: 'clParDemi',      label: 'Demi',      placeholder: String(Math.round(contenance / 2 * 10) / 10), hint: 'Demi-bouteille' },
+                { key: 'clParQuart',     label: 'Quart',     placeholder: String(Math.round(contenance / 4 * 10) / 10), hint: 'Quart de bouteille' },
+                { key: 'clParVerre',     label: 'Verre',     placeholder: clVerreDefaut(form.category).toString(), hint: 'Service au verre' },
+                { key: 'clParCanette',   label: 'Canette',   placeholder: '33', hint: 'Canette entière' },
+              ].map(({ key, label, placeholder, hint }) => (
+                <div key={key}>
+                  <label className="text-[10px] font-semibold text-slate-500 block mb-1">{label}</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder={placeholder}
+                    value={form[key] || ''}
+                    onChange={e => setForm({ ...form, [key]: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-violet-200 text-xs bg-white"
+                  />
+                  <p className="text-[9px] text-slate-400">{hint}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Récapitulatif live */}
+            {form.activePriceFormats.length > 0 && (
+              <div className="bg-white rounded-lg border border-violet-200 p-2 text-[10px] space-y-1">
+                <p className="font-bold text-violet-700 mb-1">📊 Récapitulatif :</p>
+                {form.activePriceFormats.map((fmt: string) => {
+                  const clKey = `clPar${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`;
+                  const cl = parseFloat(form[clKey]) || parseFloat((() => {
+                    if (fmt === 'bouteille') return String(contenance);
+                    if (fmt === 'demi') return String(Math.round(contenance / 2 * 10) / 10);
+                    if (fmt === 'quart') return String(Math.round(contenance / 4 * 10) / 10);
+                    if (fmt === 'verre') return String(clVerreDefaut(form.category));
+                    return '33';
+                  })());
+                  const services = cl > 0 ? (contenance / cl).toFixed(1) : '—';
+                  return (
+                    <div key={fmt} className="flex justify-between text-slate-600">
+                      <span className="capitalize">{fmt}</span>
+                      <span>{cl}cl → <strong>{services} service(s)/btl</strong></span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function Stocks() {
   const products = useLiveQuery(() => universalSync.getProduits(), []);
   const { addLoss } = useLosses();
@@ -664,144 +802,6 @@ export function Stocks() {
 
     setShowInventory(false); setInventoryProduct(null);
     setInventoryQty(''); setLossReason('casse'); setLossNote('');
-  };
-
-  // ── Composant formulaire prix + volume ────────────────────
-  const PrixVolumeForm = ({ form, setForm }: { form: any; setForm: (f: any) => void }) => {
-    const contenance = parseFloat(form.contenanceCl) || 75;
-    return (
-      <div className="space-y-4">
-        {/* Formats & Prix */}
-        <div className="space-y-3 pt-2 border-t border-slate-100">
-          <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Formats & Prix (FCFA)</p>
-          <div className="grid grid-cols-2 gap-3">
-            {(['bouteille', 'demi', 'quart', 'verre', 'canette'] as const).map(format => {
-              const isActive = form.activePriceFormats.includes(format);
-              return (
-                <div key={format} className={`p-3 rounded-xl border transition-colors ${isActive ? 'border-violet-300 bg-violet-50/50' : 'border-slate-200 bg-white'}`}>
-                  <label className="text-xs font-semibold text-slate-700 capitalize flex items-center gap-2 mb-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isActive}
-                      onChange={e => {
-                        const updated = e.target.checked
-                          ? [...form.activePriceFormats, format]
-                          : form.activePriceFormats.filter((f: string) => f !== format);
-                        setForm({ ...form, activePriceFormats: updated });
-                      }}
-                      className="rounded border-slate-300 text-violet-600"
-                    />
-                    {format}
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Prix FCFA"
-                    disabled={!isActive}
-                    value={form.prices[format] || ''}
-                    onChange={e => setForm({ ...form, prices: { ...form.prices, [format]: e.target.value } })}
-                    className="w-full p-2 rounded-lg border border-slate-200 text-sm disabled:bg-slate-100 disabled:text-slate-400"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Section gestion en centilitres */}
-        <div className="border-t border-slate-100 pt-3">
-          <label className="flex items-center gap-2 cursor-pointer mb-3">
-            <input
-              type="checkbox"
-              checked={form.useVolumeCl}
-              onChange={e => setForm({ ...form, useVolumeCl: e.target.checked })}
-              className="rounded border-slate-300 text-violet-600"
-            />
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
-              <FlaskConical size={13} className="text-violet-500" />
-              Gestion en centilitres (vins, spiritueux, bières)
-            </span>
-          </label>
-
-          {form.useVolumeCl && (
-            <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">
-                  Contenance de la bouteille (cl) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={form.contenanceCl}
-                  onChange={e => {
-                    const val = parseFloat(e.target.value) || 75;
-                    setForm({
-                      ...form,
-                      contenanceCl: e.target.value,
-                      clParBouteille: String(val),
-                      clParDemi: form.clParDemi || String(Math.round(val / 2 * 10) / 10),
-                      clParQuart: form.clParQuart || String(Math.round(val / 4 * 10) / 10),
-                    });
-                  }}
-                  className="w-full p-2 rounded-lg border border-violet-300 text-sm bg-white"
-                  placeholder="75"
-                />
-                <p className="text-[10px] text-violet-600 mt-1">
-                  Exemples : 75cl vin, 70cl whisky/gin, 65cl bière Flag/Gazelle, 33cl canette
-                </p>
-              </div>
-
-              <p className="text-xs font-semibold text-slate-600">Volume servi par format (cl) :</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { key: 'clParBouteille', label: 'Bouteille', placeholder: String(contenance), hint: 'Bouteille entière' },
-                  { key: 'clParDemi',      label: 'Demi',      placeholder: String(Math.round(contenance / 2 * 10) / 10), hint: 'Demi-bouteille' },
-                  { key: 'clParQuart',     label: 'Quart',     placeholder: String(Math.round(contenance / 4 * 10) / 10), hint: 'Quart de bouteille' },
-                  { key: 'clParVerre',     label: 'Verre',     placeholder: clVerreDefaut(form.category).toString(), hint: 'Service au verre' },
-                  { key: 'clParCanette',   label: 'Canette',   placeholder: '33', hint: 'Canette entière' },
-                ].map(({ key, label, placeholder, hint }) => (
-                  <div key={key}>
-                    <label className="text-[10px] font-semibold text-slate-500 block mb-1">{label}</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      placeholder={placeholder}
-                      value={form[key] || ''}
-                      onChange={e => setForm({ ...form, [key]: e.target.value })}
-                      className="w-full p-2 rounded-lg border border-violet-200 text-xs bg-white"
-                    />
-                    <p className="text-[9px] text-slate-400">{hint}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Récapitulatif live */}
-              {form.activePriceFormats.length > 0 && (
-                <div className="bg-white rounded-lg border border-violet-200 p-2 text-[10px] space-y-1">
-                  <p className="font-bold text-violet-700 mb-1">📊 Récapitulatif :</p>
-                  {form.activePriceFormats.map((fmt: string) => {
-                    const clKey = `clPar${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`;
-                    const cl = parseFloat(form[clKey]) || parseFloat((() => {
-                      if (fmt === 'bouteille') return String(contenance);
-                      if (fmt === 'demi') return String(Math.round(contenance / 2 * 10) / 10);
-                      if (fmt === 'quart') return String(Math.round(contenance / 4 * 10) / 10);
-                      if (fmt === 'verre') return String(clVerreDefaut(form.category));
-                      return '33';
-                    })());
-                    const services = cl > 0 ? (contenance / cl).toFixed(1) : '—';
-                    return (
-                      <div key={fmt} className="flex justify-between text-slate-600">
-                        <span className="capitalize">{fmt}</span>
-                        <span>{cl}cl → <strong>{services} service(s)/btl</strong></span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
   };
 
   if (isLoading) {

@@ -485,51 +485,47 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
                 const displayUnit = sp.unitType === 'carton' ? t('units.carton') : t('units.unit');
                 const qtyPerCarton = sp.qtyPerCarton || 0;
                 return (
-                  <div key={index} className={cn('bg-white rounded-2xl border-2 p-4 flex flex-col gap-3 transition-all', qty > 0 ? 'border-emerald-400 bg-emerald-50/40 shadow-md' : 'border-slate-200 hover:border-slate-300')}>
-                    <div className="flex items-start gap-2">
+                  <div key={index} className={cn('bg-white rounded-2xl border-2 p-3 flex flex-col gap-2 transition-all', qty > 0 ? 'border-emerald-400 bg-emerald-50/40 shadow-md' : 'border-slate-200 hover:border-slate-300')}>
+                    {/* En-tête : vignette + nom */}
+                    <div className="flex items-center gap-2">
                       <ProductThumb product={catProd} />
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-900">{sp.productName}</p>
-                        {catProd && <p className="text-[10px] text-slate-400">{t('product.stock')}: {catProd.stock}</p>}
-                        <p className="text-[9px] text-slate-500">
-                          {t('order.order_in')} <strong>{displayUnit}</strong>
-                          {sp.unitType === 'carton' && qtyPerCarton > 0 && ` (${t('order.per_carton')})`}
-                        </p>
+                        <p className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight">{sp.productName}</p>
+                        {catProd && <p className="text-[10px] text-slate-400 mt-0.5">{t('product.stock')}: {catProd.stock}</p>}
                       </div>
                     </div>
-                    <div className="text-center">
+                    {/* Prix */}
+                    <div className="text-center py-0.5">
                       <p className="text-sm font-black text-emerald-700">{fmt(displayPrice)} F</p>
-                      <p className="text-[10px] text-slate-400">/ {displayUnit}</p>
+                      <p className="text-[10px] text-slate-400">/ {displayUnit}{sp.unitType === 'carton' && qtyPerCarton > 0 && ` × ${qtyPerCarton}`}</p>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <button 
-                        onClick={() => setQuantities(prev => ({ ...prev, [index]: Math.max(0, (prev[index] || 0) - 1) }))} 
-                        className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold"
-                      >
-                        −
-                      </button>
-                      <input 
-                        type="number" 
-                        min={0} 
-                        value={qty === 0 ? '' : qty} 
-                        placeholder="0" 
-                        onChange={(e) => handleQtyChange(index, e.target.value)} 
-                        className="flex-1 h-8 rounded-lg border border-slate-200 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-emerald-400/40" 
+                    {/* Contrôle quantité compact */}
+                    <div className="flex items-center gap-1 w-full">
+                      <button
+                        onClick={() => setQuantities(prev => ({ ...prev, [index]: Math.max(0, (prev[index] || 0) - 1) }))}
+                        className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-base shrink-0"
+                      >−</button>
+                      <input
+                        type="number"
+                        min={0}
+                        value={qty === 0 ? '' : qty}
+                        placeholder="0"
+                        onChange={(e) => handleQtyChange(index, e.target.value)}
+                        className="flex-1 min-w-0 h-7 rounded-lg border border-slate-200 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
                       />
-                      <button 
-                        onClick={() => setQuantities(prev => ({ ...prev, [index]: (prev[index] || 0) + 1 }))} 
-                        className="w-8 h-8 rounded-lg bg-emerald-100 hover:bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold"
-                      >
-                        +
-                      </button>
+                      <button
+                        onClick={() => setQuantities(prev => ({ ...prev, [index]: (prev[index] || 0) + 1 }))}
+                        className="w-7 h-7 rounded-lg bg-emerald-100 hover:bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-base shrink-0"
+                      >+</button>
                     </div>
+                    {/* Sous-total */}
                     {qty > 0 && (
                       <div className="text-center">
                         <p className="text-[11px] font-bold text-emerald-700 bg-emerald-100 rounded-lg py-1">
                           = {fmt(qty * displayPrice)} F
                         </p>
                         {sp.unitType === 'carton' && qtyPerCarton > 0 && (
-                          <p className="text-[9px] text-slate-400">{t('order.so_bottles', { count: qty * qtyPerCarton })}</p>
+                          <p className="text-[9px] text-slate-400 mt-0.5">{t('order.so_bottles', { count: qty * qtyPerCarton })}</p>
                         )}
                       </div>
                     )}
