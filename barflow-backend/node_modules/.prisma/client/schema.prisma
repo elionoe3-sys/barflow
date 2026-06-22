@@ -17,11 +17,14 @@ model Produit {
   seuilAlerte        Int?
   seuilCritique      Int?
   image              String?
+  photo              String?  @db.Text
   color              String?
   popularite         Int?
   activePriceFormats Json?
   prices             Json?
   options            Json?
+  stockCl            Float?
+  volumeConfig       Json?
   synced             Boolean  @default(false)
   deleted            Boolean  @default(false)
   createdAt          DateTime @default(now())
@@ -126,6 +129,7 @@ model Categorie {
   nom       String   @unique
   emoji     String   @default("📦")
   color     String   @default("#8B5CF6")
+  icon      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

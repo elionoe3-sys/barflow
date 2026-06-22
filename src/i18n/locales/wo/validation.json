@@ -1,0 +1,46 @@
+{
+  "errors": {
+    "required": "Dafa soxla lii",
+    "email": "Bindal ab email bu am solo",
+    "phone": "Bindal ab numéro bu am solo",
+    "number": "Bindal ab lim bu am solo",
+    "min": "Li gëna tuuti mooy {min}",
+    "max": "Li gëna bari mooy {max}",
+    "minLength": "Minimum {length} caractères",
+    "maxLength": "Maximum {length} caractères",
+    "password": "Mot de passe bi wara am lu ëpp 4 caractères",
+    "password_match": "Mot de passe yi ànduñu",
+    "stock_insufficient": "Stock bi matul",
+    "out_of_stock": "Produit bi jeex na",
+    "table_required": "Tànnal ab table"
+  },
+  "success": {
+    "saved": "Denc nañu ko ak mujj",
+    "deleted": "Dindi nañu ko ak mujj",
+    "updated": "Yeesalaat nañu ko ak mujj",
+    "created": "Defal nañu ko ak mujj",
+    "exported": "Exporté nañu ko ak mujj",
+    "imported": "Importé nañu ko ak mujj",
+    "paid": "Fay bi jeex na ak mujj",
+    "synced": "Synchronisé nañu ko ak mujj"
+  },
+  "confirm": {
+    "delete": "Dëggël nga ne bëgg nga dindi lii?",
+    "delete_all": "Dëggël nga ne bëgg nga dindi lépp?",
+    "reset": "Dëggël nga ne bëgg nga yeesalaat paramètres yi?",
+    "close_cash": "Dëggël nga ne bëgg nga tëj caisse bi?",
+    "cancel_order": "Dëggël nga ne bëgg nga dindi commande bi?"
+  },
+  "warnings": {
+    "low_stock": "Stock bi tuuti na",
+    "critical_stock": "Stock bi mën na jeex",
+    "expiring": "Produit bi dina jeex dëj",
+    "unpaid_orders": "Commande yi ñu fayul"
+  },
+  "info": {
+    "loading": "Yóbb na...",
+    "processing": "Doxal na...",
+    "please_wait": "Xaaral tuti...",
+    "no_data": "Amul benn données"
+  }
+}

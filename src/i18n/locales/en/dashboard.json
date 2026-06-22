@@ -1,0 +1,75 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Overview of your activity",
+  "loading": "Loading data...",
+  "period_days": "{{count}} days",
+  "period": {
+    "weekend": "Weekend",
+    "weekday": "Weekday"
+  },
+  "stats": {
+    "ca": "Yesterday's Revenue",
+    "clients": "Yesterday's Clients",
+    "ticket": "Average Ticket",
+    "marge": "Yesterday's Margin"
+  },
+  "estimation": {
+    "title": "Today's Estimate",
+    "based_on": "Based on the last {{days}} days",
+    "click_details": "🔍 Click for more details",
+    "clients": "Estimated clients",
+    "ca": "Estimated revenue",
+    "beers": "Beer consumption",
+    "cocktails": "Cocktail consumption",
+    "weekend": "Weekend → +40%",
+    "weekday": "Weekday",
+    "bottles": "estimated bottles",
+    "glasses": "estimated glasses"
+  },
+  "modal": {
+    "title": "Estimate details",
+    "subtitle": "Based on the last {{days}} days of consumption",
+    "clients": "Clients",
+    "ca": "Est. revenue",
+    "beers": "Beers",
+    "cocktails": "Cocktails",
+    "weekend_boost": "Weekend (+40%)",
+    "method_title": "Calculation method",
+    "method_clients": "Clients: Average of last {{days}} days {{weekend}}",
+    "method_weekend_suffix": "× 1.4 (weekend)",
+    "method_ca": "Revenue: Est. clients × Avg ticket ({{ticket}} F)",
+    "method_beers": "Beers: {{count}} bottles based on avg consumption",
+    "method_cocktails": "Cocktails: {{count}} glasses based on avg consumption",
+    "trends_title": "Trends",
+    "ca_variation": "Revenue change",
+    "clients_variation": "Clients change",
+    "close": "Close"
+  },
+  "charts": {
+    "ca_evolution": "Revenue evolution (7 days)",
+    "sales_by_hour": "Sales by hour",
+    "top_products": "Top 10 Products",
+    "category_consumption": "Consumption by category (30 days)",
+    "units": "{{count}} units",
+    "sales_count": "{{count}} sales"
+  },
+  "alerts": {
+    "stock_alert": "Stock out alerts",
+    "no_stock": "No critical products",
+    "critical_count": "{{count}} critical product(s)",
+    "remaining": "{{count}} left",
+    "daily_consumption": "Consumption: {{value}}/day",
+    "restock_tip": "💡 Restock these products quickly to avoid shortages"
+  },
+  "products": {
+    "top_to_promote": "Top products to promote tonight",
+    "score": "Profitability score",
+    "score_tip": "These products have the best profitability score (margin × rotation × waste)",
+    "star": "🔥 Star product",
+    "solid": "✅ Solid product",
+    "high_margin": "🔥 Exceptional margin",
+    "happy_hour": "✅ Great product - Ideal for happy hour",
+    "fast_rotation": "✅ Fast rotation",
+    "bundle": "📊 Good margin - Bundle it"
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "title": "Payments",
+  "subtitle": "Mobile payment management",
+  "header": {
+    "payment": "Payment",
+    "amount_to_pay": "Amount to pay",
+    "order_id": "Order {id}",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "methods": {
+    "wave": "Wave",
+    "orange_money": "Orange Money",
+    "cash": "Cash",
+    "card": "Card",
+    "card_desc": "Credit Card / Visa",
+    "wave_desc": "Payment via Wave",
+    "om_desc": "Payment via Orange Money",
+    "cash_desc": "Cash payment",
+    "choose": "Payment method",
+    "change": "Change method"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "amount": "Amount",
+    "status": "Status",
+    "date": "Date",
+    "reference": "Reference",
+    "client": "Client",
+    "type": "Type",
+    "details": "Transaction details",
+    "pending_count": "Pending reconciliation",
+    "reconciled": "Reconciled",
+    "reconcile": "Reconcile",
+    "manual_ref": "{method} reference",
+    "ref_locale": "Local ref: {ref}",
+    "to_reconcile": "To reconcile"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "success": "Success",
+    "failed": "Failed",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded",
+    "idle": "Idle",
+    "succeeded": "Succeeded",
+    "expired": "Expired",
+    "processing": "Processing..."
+  },
+  "qr_code": {
+    "title": "Payment QR Code",
+    "generate": "Generate QR code",
+    "scan": "Scan QR code",
+    "amount": "Amount to pay",
+    "description": "Payment description",
+    "scan_with": "Scan with {method}",
+    "show_sticker": "Show your {method} sticker",
+    "client_scans": "The customer scans the QR code on your merchant sticker",
+    "merchant_number": "{method}: {number}"
+  },
+  "wave": {
+    "title": "Wave Payment",
+    "pay": "Pay with Wave",
+    "pay_loading": "Creating session...",
+    "open_app": "Opens Wave app automatically · Secure Business API",
+    "reopen_app": "Reopen Wave app",
+    "pending": "Waiting for payment...",
+    "pending_desc": "Customer pays in their Wave app",
+    "success": "Wave payment confirmed!",
+    "no_api": "Wave API not configured — basic QR mode",
+    "no_number": "No Wave number configured",
+    "error": "Unable to create Wave session. Check your connection and API key.",
+    "api_key": "Wave API key not configured. Go to Settings → Wave & Payments.",
+    "failed": "Payment failed or cancelled."
+  },
+  "orange_money": {
+    "title": "Orange Money Payment",
+    "pay": "Pay with Orange Money",
+    "pay_loading": "Generating QR...",
+    "open_app": "Opens Orange Money app automatically",
+    "qr_generated": "Generates secure dynamic QR code",
+    "pending": "Waiting for payment...",
+    "pending_desc": "Customer pays in their Orange Money app",
+    "success": "Orange Money payment confirmed!",
+    "no_api": "Orange Money API not configured — basic QR mode",
+    "no_number": "No Orange Money number configured",
+    "error": "Unable to initiate Orange Money payment. Check your connection.",
+    "api_key": "Orange Money not configured. Go to Settings → Wave & Payments.",
+    "failed": "Orange Money payment failed or expired."
+  },
+  "cash": {
+    "title": "Cash Payment",
+    "received": "Cash received (FCFA)",
+    "placeholder": "Ex: 2000, 5000, 10000...",
+    "change": "Change to give",
+    "insufficient": "Insufficient amount",
+    "confirm": "Confirm payment",
+    "amount_due": "Amount due"
+  },
+  "card": {
+    "title": "Card Payment",
+    "confirm": "Confirm payment"
+  },
+  "manual_entry": {
+    "title": "Manual {method} entry",
+    "auth_required": "Authentication required",
+    "auth_desc": "Manual entry — {method}",
+    "password": "Administrator password",
+    "password_placeholder": "Administrator password",
+    "verify": "Verify",
+    "incorrect": "Incorrect password",
+    "ref_label": "{method} reference *",
+    "ref_placeholder_wave": "Ex: WV2025-XXXX",
+    "ref_placeholder_om": "Ex: OM-2025-XXXX",
+    "client_name": "Client name (optional)",
+    "client_name_placeholder": "For verification",
+    "save": "Save (to reconcile)",
+    "warning": "The customer paid via the {method} sticker. Note the transaction reference.",
+    "ref_local": "Local ref: {ref} · To reconcile"
+  },
+  "password": {
+    "title": "Authentication required",
+    "desc": "Manual entry — {method}",
+    "input": "Administrator password",
+    "placeholder": "Administrator password",
+    "verify": "Verify",
+    "error": "Incorrect password"
+  },
+  "offline": {
+    "title": "Offline mode",
+    "desc": "Show your {label} sticker. The transaction will be recorded upon reconnection.",
+    "show_sticker": "Show your {label} sticker",
+    "client_scans": "The customer scans the QR code on your merchant sticker",
+    "amount_due": "Amount to pay",
+    "ref": "Ref: {ref}",
+    "manual_ref": "Manual ref.",
+    "client_paid": "Client has paid",
+    "reconcile_note": "Transaction automatically reconciled upon reconnection"
+  },
+  "payment_confirmation": {
+    "success": "Payment confirmed!",
+    "order": "Order {id}",
+    "amount": "{amount} FCFA",
+    "offline_note": "Offline — to reconcile online"
+  },
+  "buttons": {
+    "confirm": "Confirm payment",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "back": "Back",
+    "save": "Save",
+    "verify": "Verify",
+    "close": "Close",
+    "reconcile": "Reconcile",
+    "manual_entry": "Manual entry",
+    "change_method": "← Change method",
+    "client_paid": "Client has paid",
+    "open_app": "Open app"
+  },
+  "errors": {
+    "merchant_not_found": "Merchant not found",
+    "insufficient_funds": "Insufficient funds",
+    "invalid_amount": "Invalid amount",
+    "timeout": "Transaction expired",
+    "network_error": "Network error",
+    "wave_api": "Wave API key not configured. Go to Settings → Wave & Payments.",
+    "wave_session": "Unable to create Wave session. Check your connection and API key.",
+    "wave_failed": "Payment failed or cancelled.",
+    "om_api": "Orange Money not configured. Go to Settings → Wave & Payments.",
+    "om_session": "Unable to initiate Orange Money payment. Check your connection.",
+    "om_failed": "Orange Money payment failed or expired.",
+    "password_incorrect": "Incorrect password",
+    "ref_required": "Reference required"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "url": "Notification URL",
+    "secret": "Secret",
+    "events": "Events",
+    "test": "Test webhook"
+  },
+  "reconciliation": {
+    "title": "Reconciliation",
+    "pending": "Pending reconciliation",
+    "reconciled": "Reconciled",
+    "reconcile_now": "Reconcile now",
+    "manual_ref": "Manual reference",
+    "auto_reconcile": "Transaction automatically reconciled upon reconnection"
+  }
+}

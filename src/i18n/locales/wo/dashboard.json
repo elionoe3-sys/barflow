@@ -1,0 +1,75 @@
+{
+  "title": "Panneau njiite",
+  "subtitle": "Xool bu mat ci sa liggéey",
+  "loading": "Yebum données yi...",
+  "period_days": "{{count}} fan",
+  "period": {
+    "weekend": "Àjjuma ak Dibéer",
+    "weekday": "Ayu-bés yi"
+  },
+  "stats": {
+    "ca": "CA Démb",
+    "clients": "Klian yi démb",
+    "ticket": "Njëg mu njëkk",
+    "marge": "Bénéfice démb"
+  },
+  "estimation": {
+    "title": "Jeexitalu tey",
+    "based_on": "Mi ngi sukkandiku ci {{days}} fan yi weesu",
+    "click_details": "🔍 Bësal ngir gis yeneen leeral",
+    "clients": "Klian yu ñu xayma",
+    "ca": "CA bu ñu xayma",
+    "beers": "Naanu biir",
+    "cocktails": "Naan yu ñu jaxase",
+    "weekend": "Àjjuma ak Dibéer → +40%",
+    "weekday": "Bésub liggéey",
+    "bottles": "butey yu ñu xayma",
+    "glasses": "kàas yu ñu xayma"
+  },
+  "modal": {
+    "title": "Leeral ci jeexital bi",
+    "subtitle": "Mi ngi sukkandiku ci njëg mi ak naan mi ci {{days}} fan yi weesu",
+    "clients": "Klian yi",
+    "ca": "CA bu ñu xayma",
+    "beers": "Biir yi",
+    "cocktails": "Cocktail yi",
+    "weekend_boost": "Àjjuma ak Dibéer (+40%)",
+    "method_title": "Yoonu xayma",
+    "method_clients": "Klian yi : Digganteg {{days}} fan yi weesu {{weekend}}",
+    "method_weekend_suffix": "× 1.4 (week-end)",
+    "method_ca": "CA : Klian yu ñu xayma × Ticket moyen ({{ticket}} F)",
+    "method_beers": "Biir yi : {{count}} butey sukkandiku ci digganteg naan",
+    "method_cocktails": "Cocktail yi : {{count}} kàas sukkandiku ci digganteg naan",
+    "trends_title": "Yoon yi",
+    "ca_variation": "Soppiku CA",
+    "clients_variation": "Soppiku klian yi",
+    "close": "Tëj"
+  },
+  "charts": {
+    "ca_evolution": "Yokkute CA (7 fan)",
+    "sales_by_hour": "Jaay ci waxtu",
+    "top_products": "10 Produit yi gën a jaay",
+    "category_consumption": "Naan ci wàll yi (30 fan)",
+    "units": "{{count}} unité",
+    "sales_count": "{{count}} jaay"
+  },
+  "alerts": {
+    "stock_alert": "Artu rupture de stock",
+    "no_stock": "Amul produit bu metti",
+    "critical_count": "{{count}} produit yu metti",
+    "remaining": "{{count}} des",
+    "daily_consumption": "Naan : {{value}}/bés",
+    "restock_tip": "💡 Yokkati stock yi gaaw ngir moytu jeex"
+  },
+  "products": {
+    "top_to_promote": "Produit yi gën a baax ngir jëfandikoo leen guddig tey",
+    "score": "Nattug rentabilité",
+    "score_tip": "Produit yii ñoo gën ci rentabilité (bénéfice × rotasion × perte)",
+    "star": "🔥 Produit bu mag",
+    "solid": "✅ Produit bu dëgër",
+    "high_margin": "🔥 Bénéfice bu réy",
+    "happy_hour": "✅ Produit bu baax - Yémbal ci happy hour",
+    "fast_rotation": "✅ Gaaw a jaay",
+    "bundle": "📊 Bénéfice bu baax - Mën nañu ko boole ci pack"
+  }
+}

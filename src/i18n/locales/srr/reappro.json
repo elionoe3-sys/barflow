@@ -1,0 +1,54 @@
+{
+  "title": "Réapprovisionnement",
+  "subtitle": "Gestion des commandes fournisseurs",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "order": "Commande",
+    "in_progress": "En cours",
+    "history": "Historique",
+    "suppliers": "Fournisseurs"
+  },
+  "overview": {
+    "total_purchases": "Total achats",
+    "orders_received": "Commandes reçues",
+    "items_ordered": "Articles commandés",
+    "avg_delivery": "Délai livraison moyen",
+    "monthly": "Achats mensuels",
+    "yearly": "Achats annuels",
+    "supplier_detail": "Détail par fournisseur"
+  },
+  "order": {
+    "title": "Nouvelle commande",
+    "supplier": "Fournisseur",
+    "select_supplier": "Sélectionner un fournisseur",
+    "no_products": "Aucun produit lié au catalogue",
+    "recap": "Récapitulatif",
+    "total_estimated": "Total estimé",
+    "save": "Enregistrer la commande",
+    "saved": "Commande enregistrée et sauvegardée !"
+  },
+  "in_progress": {
+    "title": "Commandes en cours",
+    "empty": "Aucune commande en attente",
+    "receive": "Confirmer la réception",
+    "adjust": "Ajustez les quantités réellement reçues",
+    "new_products": "Les produits inconnus seront créés automatiquement"
+  },
+  "history": {
+    "title": "Historique des commandes",
+    "empty": "Aucune commande",
+    "export": "Exporter PDF",
+    "detail": "Détail de la commande"
+  },
+  "suppliers": {
+    "title": "Fournisseurs",
+    "empty": "Aucun fournisseur",
+    "add": "Nouveau fournisseur",
+    "edit": "Modifier le fournisseur",
+    "delete": "Supprimer le fournisseur",
+    "name": "Nom du fournisseur",
+    "phone": "Téléphone",
+    "notes": "Notes",
+    "products": "Produits catalogués"
+  }
+}

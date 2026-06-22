@@ -10,12 +10,13 @@ import { cn } from '@/utils/cn';
 import { getSetting, setSetting } from '@/utils/db';
 import { useProducts } from '@/utils/productStore';
 import { useLosses } from '@/utils/lossStore';
-import { useTranslation, languages as i18nLanguages } from '@/i18n';
+import { useTranslation } from 'react-i18next';  // ← AJOUTER CETTE LIGNE
+
 
 const themes = [
   { id: 'light', label: 'Clair', icon: Sun, preview: 'bg-white border-slate-200' },
-  { id: 'dark', label: 'Sombre', icon: Moon, preview: 'bg-slate-800 border-slate-700' },
-  { id: 'system', label: 'Système', icon: Monitor, preview: 'bg-gradient-to-r from-white to-slate-800 border-slate-200' },
+   { id: 'daltonien', label: '♿ Daltonien', icon: Eye, preview: 'bg-[#f5f0e8] border-[#d4c9b8]' },
+  { id: 'senegal', label: 'Sénégal 🇸🇳', icon: Monitor, preview: 'bg-gradient-to-r from-green-600 via-yellow-400 to-red-600 border-green-700' },
 ];
 
 const colorSchemes = [
@@ -43,6 +44,8 @@ const SECRET_QUESTIONS = [
 ];
 
 export function Settings() {
+  const { t, i18n } = useTranslation('settings');  // ← AJOUTER CETTE LIGNE (déplacer vers le haut)
+
   const [activeTab, setActiveTab] = useState<'general' | 'network' | 'backup' | 'security' | 'payments'>('general');
   const [theme, setTheme] = useState('light');
   const [colorScheme, setColorScheme] = useState('violet');
@@ -52,6 +55,7 @@ export function Settings() {
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [adminPassword, setAdminPassword] = useState('admin123');
+  
 
   // Verrouillage de l'onglet Paiements (Wave / Orange Money)
   const [paymentsUnlocked, setPaymentsUnlocked] = useState(false);
@@ -82,7 +86,15 @@ export function Settings() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [sendingEmail, setSendingEmail] = useState(false);
 
-  const { t, setLanguage: setI18nLanguage, currentLanguage } = useTranslation();
+  // SUPPRIMER CETTE LIGNE (déjà déclaré plus haut)
+  // const { t, i18n } = useTranslation('settings');
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('barflow_lang', lang);
+    setLanguage(lang);
+  };
+
   const [restaurantInfo, setRestaurantInfo] = useState({ name: '', address: '', phone: '', email: '', taxNumber: '' });
   const [printerSettings, setPrinterSettings] = useState({ type: 'network', ipAddress: '', port: '9100', paperSize: '80mm' });
   const [networkSettings, setNetworkSettings] = useState({ wifi: '', printer: '', caisseSecondaire: '' });
@@ -107,19 +119,56 @@ export function Settings() {
 
   const applyFullTheme = (themeMode: string, colorSchemeMode: string) => {
     const html = document.documentElement;
-    if (themeMode === 'dark') {
-      html.setAttribute('data-theme', 'dark');
+    
+    // Appliquer le thème
+    if (themeMode === 'daltonien') {
+      html.setAttribute('data-theme', 'daltonien');
+      html.style.setProperty('--color-barflow-primary', '#0077BB');
+      html.style.setProperty('--color-barflow-secondary', '#EE7733');
+      html.style.setProperty('--color-barflow-accent', '#009988');
+      html.style.setProperty('--color-barflow-primary-dark', '#005588');
+      html.style.setProperty('--app-primary-light', '#e6f0fa');
+      html.style.setProperty('--app-primary-dark', '#005588');
+    } else if (themeMode === 'senegal') {
+      html.setAttribute('data-theme', 'senegal');
+      html.style.setProperty('--color-barflow-primary', '#00a859');
+      html.style.setProperty('--color-barflow-secondary', '#e31b23');
+      html.style.setProperty('--color-barflow-accent', '#fdce12');
+      html.style.setProperty('--color-barflow-primary-dark', '#008544');
+      html.style.setProperty('--app-primary-light', '#e8f5e9');
+      html.style.setProperty('--app-primary-dark', '#008544');
     } else if (themeMode === 'light') {
       html.setAttribute('data-theme', 'light');
+      // Réinitialiser toutes les variables
+      html.style.removeProperty('--color-barflow-primary');
+      html.style.removeProperty('--color-barflow-secondary');
+      html.style.removeProperty('--color-barflow-accent');
+      html.style.removeProperty('--color-barflow-primary-dark');
+      html.style.removeProperty('--app-primary-light');
+      html.style.removeProperty('--app-primary-dark');
     } else {
+      // 'system' - par défaut on utilise light
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      html.setAttribute('data-theme', isDark ? 'daltonien' : 'light');
+      html.style.removeProperty('--color-barflow-primary');
+      html.style.removeProperty('--color-barflow-secondary');
+      html.style.removeProperty('--color-barflow-accent');
+      html.style.removeProperty('--color-barflow-primary-dark');
+      html.style.removeProperty('--app-primary-light');
+      html.style.removeProperty('--app-primary-dark');
     }
-    html.setAttribute('data-color', colorSchemeMode);
-    const colorMap: Record<string, string> = {
-      violet: '#8B5CF6', emerald: '#10B981', blue: '#3B82F6', rose: '#F43F5E', amber: '#F59E0B',
-    };
-    html.style.setProperty('--color-barflow-primary', colorMap[colorSchemeMode] || '#8B5CF6');
+    
+    // Appliquer la couleur (sauf pour les thèmes qui ont leurs propres couleurs)
+    if (themeMode !== 'senegal' && themeMode !== 'daltonien') {
+      html.setAttribute('data-color', colorSchemeMode);
+      const colorMap: Record<string, string> = {
+        violet: '#8B5CF6', emerald: '#10B981', blue: '#3B82F6', rose: '#F43F5E', amber: '#F59E0B',
+      };
+      html.style.setProperty('--color-barflow-primary', colorMap[colorSchemeMode] || '#8B5CF6');
+    } else {
+      // Pour les thèmes Sénégal et Daltonien, on fixe data-color
+      html.setAttribute('data-color', themeMode === 'senegal' ? 'senegal' : 'daltonien');
+    }
   };
 
   useEffect(() => {
@@ -149,7 +198,11 @@ export function Settings() {
       const nc = savedColor?.value as string || 'violet';
       if (savedTheme) setTheme(nt);
       if (savedColor) setColorScheme(nc);
-      if (savedLanguage) setLanguage(savedLanguage.value as string);
+      if (savedLanguage) {
+        const lang = savedLanguage.value as string;
+        setLanguage(lang);
+        i18n.changeLanguage(lang);
+      }
       if (savedPwd) setAdminPassword(savedPwd.value as string);
       if (savedInfo) setRestaurantInfo(savedInfo.value as any);
       if (savedPrinter) setPrinterSettings(savedPrinter.value as any);
@@ -181,7 +234,6 @@ export function Settings() {
     await setSetting('theme', theme, new Date().toISOString());
     await setSetting('color_scheme', colorScheme, new Date().toISOString());
     await setSetting('language', language, new Date().toISOString());
-    setI18nLanguage(language as any);
     await setSetting('restaurant_info', restaurantInfo, new Date().toISOString());
     applyFullTheme(theme, colorScheme);
     showMessage('Paramètres généraux sauvegardés !');
@@ -400,8 +452,8 @@ export function Settings() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
         <div className="relative">
-          <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">Paramètres</h1>
-          <p className="text-violet-200 mt-1">Configuration de votre application</p>
+          <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">{t('title')}</h1>  {/* ← MODIFIER */}
+          <p className="text-violet-200 mt-1">{t('subtitle')}</p>  {/* ← MODIFIER */}
         </div>
       </div>
 
@@ -420,11 +472,11 @@ export function Settings() {
       {/* Navigation */}
       <div className="flex flex-wrap gap-1 p-1 rounded-xl shadow-sm border settings-nav" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
         {[
-          { id: 'general', label: 'Thème & Langues', icon: Sun },
-          { id: 'network', label: 'Configuration réseau', icon: Wifi },
-          { id: 'backup', label: 'Sauvegarde & Données', icon: Database },
-          { id: 'payments', label: 'Paiements', icon: CreditCard },
-          { id: 'security', label: 'Sécurité', icon: Shield },
+          { id: 'general', label: t('tabs.general'), icon: Sun },  // ← MODIFIER
+          { id: 'network', label: t('tabs.network'), icon: Wifi },  // ← MODIFIER
+          { id: 'backup', label: t('tabs.backup'), icon: Database },  // ← MODIFIER
+          { id: 'payments', label: t('tabs.payments'), icon: CreditCard },  // ← MODIFIER
+          { id: 'security', label: t('tabs.security'), icon: Shield },  // ← MODIFIER
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -446,7 +498,7 @@ export function Settings() {
           {/* Thème */}
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}>
-              <Sun size={20} className="text-amber-500" /> Thème & Apparence
+              <Sun size={20} className="text-amber-500" /> {t('themes.title')}  {/* ← MODIFIER */}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {themes.map(t => {
@@ -478,34 +530,93 @@ export function Settings() {
           {/* Langues */}
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}>
-              <Languages size={20} className="text-blue-500" /> Langues
+              <Languages size={20} className="text-blue-500" /> {t('languages.title')}  {/* ← MODIFIER */}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-              {i18nLanguages.map(lang => (
-                <button key={lang.code} onClick={() => { setLanguage(lang.code); setI18nLanguage(lang.code); }}
-                  className={cn('p-4 rounded-xl border-2 transition-all text-center', currentLanguage === lang.code ? 'border-violet-500 bg-violet-50' : 'border-slate-200 hover:border-slate-300')}>
-                  <span className="text-3xl mb-2 block">{lang.flag}</span>
-                  <p className={cn('text-sm font-semibold', currentLanguage === lang.code ? 'text-violet-700' : 'text-slate-700')}>{lang.name}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{lang.native}</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              {[
+                { code: 'fr', label: t('languages.french'), flag: '🇫🇷', native: 'FR' },  // ← MODIFIER
+                { code: 'en', label: t('languages.english'), flag: '🇬🇧', native: 'EN' },  // ← MODIFIER
+                { code: 'wo', label: t('languages.wolof'), flag: '🇸🇳', native: 'WO' },  // ← MODIFIER
+                { code: 'srr', label: 'Sérère', flag: '🇸🇳', native: 'SRR' },
+                { code: 'dyo', label: 'Diola', flag: '🇸🇳', native: 'DYO' },
+                { code: 'man', label: 'Mancagne', flag: '🇸🇳', native: 'MAN' },
+                { code: 'ar', label: 'العربية', flag: '🇸🇦', native: 'AR' },
+              ].map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => changeLanguage(lang.code)}
+                  className={cn(
+                    'group relative p-3 rounded-xl border-2 transition-all duration-300 text-center',
+                    'hover:scale-105 hover:shadow-lg active:scale-95',
+                    language === lang.code
+                      ? 'border-violet-500 bg-gradient-to-br from-violet-50 to-purple-50 shadow-md shadow-violet-200/50'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  )}
+                  style={{
+                    backgroundColor: language === lang.code ? 'var(--app-surface)' : undefined,
+                  }}
+                >
+                  <div className="text-4xl mb-2 transition-transform group-hover:scale-110">
+                    {lang.flag}
+                  </div>
+                  <p className={cn(
+                    'text-sm font-semibold transition-colors',
+                    language === lang.code ? 'text-violet-700' : 'text-slate-700 group-hover:text-slate-900'
+                  )}>
+                    {lang.label}
+                  </p>
+                  <p className="text-[10px] font-mono uppercase text-slate-400 mt-0.5">
+                    {lang.native}
+                  </p>
+                  {language === lang.code && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center shadow-md">
+                      <Check size={12} className="text-white" />
+                    </div>
+                  )}
                 </button>
               ))}
+            </div>
+
+            <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-xl flex items-center justify-between">
+              <span className="text-sm text-violet-700 flex items-center gap-2">
+                <Languages size={16} className="text-violet-500" />
+                {t('languages.select')} : <strong>  {/* ← MODIFIER */}
+                  {language === 'fr' && 'Français'}
+                  {language === 'en' && 'English'}
+                  {language === 'wo' && 'Wolof'}
+                  {language === 'srr' && 'Sérère'}
+                  {language === 'dyo' && 'Diola'}
+                  {language === 'man' && 'Mancagne'}
+                  {language === 'ar' && 'العربية'}
+                </strong>
+              </span>
+              <span className="text-2xl">
+                {language === 'fr' && '🇫🇷'}
+                {language === 'en' && '🇬🇧'}
+                {language === 'wo' && '🇸🇳'}
+                {language === 'srr' && '🇸🇳'}
+                {language === 'dyo' && '🇸🇳'}
+                {language === 'man' && '🇸🇳'}
+                {language === 'ar' && '🇸🇦'}
+              </span>
             </div>
           </div>
 
           {/* Infos établissement */}
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}>
-              <Building2 size={20} className="text-emerald-500" /> Informations établissement
+              <Building2 size={20} className="text-emerald-500" /> {t('restaurant.title')}  {/* ← MODIFIER */}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className={labelCls}>Nom du bar</label><input type="text" value={restaurantInfo.name} onChange={e => setRestaurantInfo({...restaurantInfo, name: e.target.value})} className={inputCls} placeholder="Mon Bar" /></div>
-              <div><label className={labelCls}>Téléphone</label><input type="tel" value={restaurantInfo.phone} onChange={e => setRestaurantInfo({...restaurantInfo, phone: e.target.value})} className={inputCls} placeholder="+221 77 000 00 00" /></div>
-              <div><label className={labelCls}>Email</label><input type="email" value={restaurantInfo.email} onChange={e => setRestaurantInfo({...restaurantInfo, email: e.target.value})} className={inputCls} placeholder="contact@monbar.com" /></div>
-              <div><label className={labelCls}>Adresse</label><input type="text" value={restaurantInfo.address} onChange={e => setRestaurantInfo({...restaurantInfo, address: e.target.value})} className={inputCls} placeholder="Dakar, Sénégal" /></div>
-              <div><label className={labelCls}>NIF / Contribution</label><input type="text" value={restaurantInfo.taxNumber} onChange={e => setRestaurantInfo({...restaurantInfo, taxNumber: e.target.value})} className={inputCls} placeholder="Numéro fiscal" /></div>
+              <div><label className={labelCls}>{t('restaurant.name')}</label><input type="text" value={restaurantInfo.name} onChange={e => setRestaurantInfo({...restaurantInfo, name: e.target.value})} className={inputCls} placeholder={t('restaurant.name_placeholder')} /></div>  {/* ← MODIFIER */}
+              <div><label className={labelCls}>{t('restaurant.phone')}</label><input type="tel" value={restaurantInfo.phone} onChange={e => setRestaurantInfo({...restaurantInfo, phone: e.target.value})} className={inputCls} placeholder={t('restaurant.phone_placeholder')} /></div>
+              <div><label className={labelCls}>{t('restaurant.email')}</label><input type="email" value={restaurantInfo.email} onChange={e => setRestaurantInfo({...restaurantInfo, email: e.target.value})} className={inputCls} placeholder={t('restaurant.email_placeholder')} /></div>
+              <div><label className={labelCls}>{t('restaurant.address')}</label><input type="text" value={restaurantInfo.address} onChange={e => setRestaurantInfo({...restaurantInfo, address: e.target.value})} className={inputCls} placeholder={t('restaurant.address_placeholder')} /></div>
+              <div><label className={labelCls}>{t('restaurant.taxNumber')}</label><input type="text" value={restaurantInfo.taxNumber} onChange={e => setRestaurantInfo({...restaurantInfo, taxNumber: e.target.value})} className={inputCls} placeholder={t('restaurant.taxNumber_placeholder')} /></div>
             </div>
             <button onClick={saveGeneralSettings} className="mt-4 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold text-sm shadow-md hover:shadow-xl transition-all flex items-center gap-2">
-              <Save size={16} /> Sauvegarder
+              <Save size={16} /> {t('restaurant.save')}  {/* ← MODIFIER */}
             </button>
           </div>
         </div>
@@ -515,7 +626,7 @@ export function Settings() {
       {activeTab === 'network' && (
         <div className="space-y-6">
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
-            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><Wifi size={20} className="text-blue-500" /> Configuration réseau</h2>
+            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><Wifi size={20} className="text-blue-500" /> {t('network.title')}</h2>  {/* ← MODIFIER */}
             <div className="space-y-4">
               {networkConfigs.map(config => {
                 const Icon = config.icon;
@@ -524,7 +635,7 @@ export function Settings() {
                   <div key={config.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                     <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center"><Icon size={18} className="text-blue-600" /></div>
                     <div className="flex-1">
-                      <label className={labelCls}>{config.label}</label>
+                      <label className={labelCls}>{t(`network.${config.id}`)}</label>  {/* ← MODIFIER */}
                       <input type="text" value={value} onChange={e => setNetworkSettings({...networkSettings, [config.id]: e.target.value})} className={inputCls} placeholder={config.placeholder} />
                     </div>
                   </div>
@@ -533,14 +644,14 @@ export function Settings() {
             </div>
           </div>
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
-            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><Printer size={20} className="text-emerald-500" /> Imprimante de tickets</h2>
+            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><Printer size={20} className="text-emerald-500" /> {t('network.printer')}</h2>  {/* ← MODIFIER */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className={labelCls}>Type</label><select value={printerSettings.type} onChange={e => setPrinterSettings({...printerSettings, type: e.target.value})} className={inputCls}><option value="network">Réseau (Ethernet/Wi-Fi)</option><option value="usb">USB</option><option value="bluetooth">Bluetooth</option></select></div>
               <div><label className={labelCls}>Adresse IP</label><input type="text" value={printerSettings.ipAddress} onChange={e => setPrinterSettings({...printerSettings, ipAddress: e.target.value})} className={inputCls} placeholder="192.168.1.100" /></div>
               <div><label className={labelCls}>Port</label><input type="text" value={printerSettings.port} onChange={e => setPrinterSettings({...printerSettings, port: e.target.value})} className={inputCls} placeholder="9100" /></div>
               <div><label className={labelCls}>Format papier</label><select value={printerSettings.paperSize} onChange={e => setPrinterSettings({...printerSettings, paperSize: e.target.value})} className={inputCls}><option value="58mm">58mm</option><option value="80mm">80mm</option></select></div>
             </div>
-            <button onClick={saveNetworkSettings} className="mt-4 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold text-sm shadow-md flex items-center gap-2"><Save size={16} /> Sauvegarder</button>
+            <button onClick={saveNetworkSettings} className="mt-4 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold text-sm shadow-md flex items-center gap-2"><Save size={16} /> {t('buttons.save')}</button>  {/* ← MODIFIER */}
           </div>
         </div>
       )}
@@ -549,20 +660,20 @@ export function Settings() {
       {activeTab === 'backup' && (
         <div className="space-y-6">
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
-            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><Database size={20} className="text-amber-500" /> Sauvegarde des données</h2>
+            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><Database size={20} className="text-amber-500" /> {t('backup.title')}</h2>  {/* ← MODIFIER */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button onClick={exportData} className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-left hover:shadow-md transition-all"><Download size={24} className="text-emerald-600 mb-2" /><p className="font-semibold text-emerald-800">Exporter les données</p><p className="text-xs text-emerald-600 mt-1">Sauvegarde complète en fichier JSON</p></button>
+              <button onClick={exportData} className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-left hover:shadow-md transition-all"><Download size={24} className="text-emerald-600 mb-2" /><p className="font-semibold text-emerald-800">{t('backup.export')}</p><p className="text-xs text-emerald-600 mt-1">{t('backup.export_desc')}</p></button>  {/* ← MODIFIER */}
               <div className="relative">
-                <button onClick={() => document.getElementById('importFile')?.click()} className="w-full p-4 rounded-xl bg-blue-50 border border-blue-200 text-left hover:shadow-md transition-all"><Upload size={24} className="text-blue-600 mb-2" /><p className="font-semibold text-blue-800">Importer les données</p><p className="text-xs text-blue-600 mt-1">Restaurer depuis un fichier JSON</p></button>
+                <button onClick={() => document.getElementById('importFile')?.click()} className="w-full p-4 rounded-xl bg-blue-50 border border-blue-200 text-left hover:shadow-md transition-all"><Upload size={24} className="text-blue-600 mb-2" /><p className="font-semibold text-blue-800">{t('backup.import')}</p><p className="text-xs text-blue-600 mt-1">{t('backup.import_desc')}</p></button>  {/* ← MODIFIER */}
                 <input id="importFile" type="file" accept=".json" className="hidden" onChange={e => { if (e.target.files?.[0]) { setPendingAction({ type: 'import', data: e.target.files[0] }); setShowPasswordModal(true); }}} />
               </div>
             </div>
           </div>
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
-            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><RefreshCw size={20} className="text-red-500" /> Réinitialisation</h2>
+            <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}><RefreshCw size={20} className="text-red-500" /> {t('backup.reset')}</h2>  {/* ← MODIFIER */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button onClick={() => { setPendingAction({ type: 'resetSettings' }); setShowPasswordModal(true); }} className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-left hover:shadow-md transition-all"><RefreshCw size={24} className="text-amber-600 mb-2" /><p className="font-semibold text-amber-800">Réinitialiser les paramètres</p><p className="text-xs text-amber-600 mt-1">Remet à zéro tous les réglages</p></button>
-              <button onClick={() => { setPendingAction({ type: 'resetAll' }); setShowPasswordModal(true); }} className="p-4 rounded-xl bg-red-50 border border-red-200 text-left hover:shadow-md transition-all"><Trash2 size={24} className="text-red-600 mb-2" /><p className="font-semibold text-red-800">Tout réinitialiser</p><p className="text-xs text-red-600 mt-1">Supprime toutes les données</p></button>
+              <button onClick={() => { setPendingAction({ type: 'resetSettings' }); setShowPasswordModal(true); }} className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-left hover:shadow-md transition-all"><RefreshCw size={24} className="text-amber-600 mb-2" /><p className="font-semibold text-amber-800">{t('backup.resetSettings')}</p><p className="text-xs text-amber-600 mt-1">{t('backup.resetSettings_desc')}</p></button>  {/* ← MODIFIER */}
+              <button onClick={() => { setPendingAction({ type: 'resetAll' }); setShowPasswordModal(true); }} className="p-4 rounded-xl bg-red-50 border border-red-200 text-left hover:shadow-md transition-all"><Trash2 size={24} className="text-red-600 mb-2" /><p className="font-semibold text-red-800">{t('backup.resetAll')}</p><p className="text-xs text-red-600 mt-1">{t('backup.resetAll_desc')}</p></button>  {/* ← MODIFIER */}
             </div>
           </div>
         </div>
@@ -576,8 +687,8 @@ export function Settings() {
               <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
                 <Lock size={28} className="text-white" />
               </div>
-              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--app-text)' }}>Onglet protégé</h2>
-              <p className="text-sm text-slate-500 mb-5">Les clés API Wave et Orange Money sont sensibles. Entrez le mot de passe administrateur pour y accéder.</p>
+              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--app-text)' }}>{t('payments.locked')}</h2>  {/* ← MODIFIER */}
+              <p className="text-sm text-slate-500 mb-5">{t('payments.lockedMessage')}</p>  {/* ← MODIFIER */}
               <input
                 type="password"
                 value={paymentsPasswordInput}
@@ -599,7 +710,7 @@ export function Settings() {
                 }}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold shadow-md"
               >
-                Déverrouiller
+                {t('payments.unlock')}  {/* ← MODIFIER */}
               </button>
             </div>
           </div>
@@ -607,7 +718,7 @@ export function Settings() {
           <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
-                <Check size={15} /> Onglet déverrouillé pour cette session
+                <Check size={15} /> {t('payments.unlocked')}  {/* ← MODIFIER */}
               </div>
               <button
                 onClick={() => setPaymentsUnlocked(false)}
@@ -619,52 +730,52 @@ export function Settings() {
 
             <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
               <h2 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{ color: 'var(--app-text)' }}>
-                <CreditCard size={20} className="text-blue-500" /> Paiements mobiles (API)
+                <CreditCard size={20} className="text-blue-500" /> {t('payments.title')}  {/* ← MODIFIER */}
               </h2>
-              <p className="text-sm text-slate-500 mb-4">Configurez les API Wave et Orange Money pour générer des QR codes de paiement dynamiques.</p>
+              <p className="text-sm text-slate-500 mb-4">{t('payments.subtitle')}</p>  {/* ← MODIFIER */}
 
               <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2"><Smartphone size={18} className="text-blue-600" /><h3 className="font-bold text-blue-800">Wave Business API</h3></div>
+                  <div className="flex items-center gap-2"><Smartphone size={18} className="text-blue-600" /><h3 className="font-bold text-blue-800">{t('payments.wave.title')}</h3></div>  {/* ← MODIFIER */}
                   <span className={cn('text-xs px-2 py-0.5 rounded-full', waveApi.merchantId && waveApi.apiKey ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800')}>
                     {waveApi.merchantId && waveApi.apiKey ? '✅ Configuré' : '⚠️ Non configuré'}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Merchant ID *</label><input type="text" value={waveApi.merchantId} onChange={e => setWaveApi({...waveApi, merchantId: e.target.value})} className={inputCls} placeholder="wave_merchant_xxxxx" /></div>
-                  <div><label className={labelCls}>API Key *</label>
+                  <div><label className={labelCls}>{t('payments.wave.merchantId')}</label><input type="text" value={waveApi.merchantId} onChange={e => setWaveApi({...waveApi, merchantId: e.target.value})} className={inputCls} placeholder="wave_merchant_xxxxx" /></div>
+                  <div><label className={labelCls}>{t('payments.wave.apiKey')}</label>
                     <div className="relative">
                       <input type={showApiKeys ? 'text' : 'password'} value={waveApi.apiKey} onChange={e => setWaveApi({...waveApi, apiKey: e.target.value})} className={cn(inputCls, 'pr-10')} placeholder="wave_api_xxxxxxxx" />
                       <button onClick={() => setShowApiKeys(!showApiKeys)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">{showApiKeys ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                     </div>
                   </div>
-                  <div><label className={labelCls}>API Secret</label><input type="password" value={waveApi.apiSecret} onChange={e => setWaveApi({...waveApi, apiSecret: e.target.value})} className={inputCls} placeholder="wave_secret_xxxxxxxx" /></div>
-                  <div><label className={labelCls}>Webhook Secret</label><input type="password" value={waveApi.webhookSecret} onChange={e => setWaveApi({...waveApi, webhookSecret: e.target.value})} className={inputCls} placeholder="webhook_secret" /></div>
+                  <div><label className={labelCls}>{t('payments.wave.apiSecret')}</label><input type="password" value={waveApi.apiSecret} onChange={e => setWaveApi({...waveApi, apiSecret: e.target.value})} className={inputCls} placeholder="wave_secret_xxxxxxxx" /></div>
+                  <div><label className={labelCls}>{t('payments.wave.webhookSecret')}</label><input type="password" value={waveApi.webhookSecret} onChange={e => setWaveApi({...waveApi, webhookSecret: e.target.value})} className={inputCls} placeholder="webhook_secret" /></div>
                 </div>
-                <button onClick={testWaveConnection} className="mt-3 text-xs text-blue-600 underline flex items-center gap-1"><QrCode size={12} /> Tester la connexion</button>
+                <button onClick={testWaveConnection} className="mt-3 text-xs text-blue-600 underline flex items-center gap-1"><QrCode size={12} /> {t('payments.wave.test')}</button>  {/* ← MODIFIER */}
               </div>
 
               <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-100">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2"><Smartphone size={18} className="text-orange-600" /><h3 className="font-bold text-orange-800">Orange Money API</h3></div>
+                  <div className="flex items-center gap-2"><Smartphone size={18} className="text-orange-600" /><h3 className="font-bold text-orange-800">{t('payments.orange.title')}</h3></div>  {/* ← MODIFIER */}
                   <span className={cn('text-xs px-2 py-0.5 rounded-full', orangeApi.merchantId && orangeApi.apiLogin ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800')}>
                     {orangeApi.merchantId && orangeApi.apiLogin ? '✅ Configuré' : '⚠️ Non configuré'}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Merchant ID *</label><input type="text" value={orangeApi.merchantId} onChange={e => setOrangeApi({...orangeApi, merchantId: e.target.value})} className={inputCls} placeholder="om_merchant_xxxxx" /></div>
-                  <div><label className={labelCls}>API Login *</label><input type="text" value={orangeApi.apiLogin} onChange={e => setOrangeApi({...orangeApi, apiLogin: e.target.value})} className={inputCls} placeholder="login_om" /></div>
-                  <div><label className={labelCls}>API Password</label><input type="password" value={orangeApi.apiPassword} onChange={e => setOrangeApi({...orangeApi, apiPassword: e.target.value})} className={inputCls} placeholder="••••••••" /></div>
-                  <div><label className={labelCls}>API Key</label><input type="password" value={orangeApi.apiKey} onChange={e => setOrangeApi({...orangeApi, apiKey: e.target.value})} className={inputCls} placeholder="om_key_xxxxxxxx" /></div>
+                  <div><label className={labelCls}>{t('payments.orange.merchantId')}</label><input type="text" value={orangeApi.merchantId} onChange={e => setOrangeApi({...orangeApi, merchantId: e.target.value})} className={inputCls} placeholder="om_merchant_xxxxx" /></div>
+                  <div><label className={labelCls}>{t('payments.orange.apiLogin')}</label><input type="text" value={orangeApi.apiLogin} onChange={e => setOrangeApi({...orangeApi, apiLogin: e.target.value})} className={inputCls} placeholder="login_om" /></div>
+                  <div><label className={labelCls}>{t('payments.orange.apiPassword')}</label><input type="password" value={orangeApi.apiPassword} onChange={e => setOrangeApi({...orangeApi, apiPassword: e.target.value})} className={inputCls} placeholder="••••••••" /></div>
+                  <div><label className={labelCls}>{t('payments.orange.apiKey')}</label><input type="password" value={orangeApi.apiKey} onChange={e => setOrangeApi({...orangeApi, apiKey: e.target.value})} className={inputCls} placeholder="om_key_xxxxxxxx" /></div>
                 </div>
-                <button onClick={testOrangeConnection} className="mt-3 text-xs text-orange-600 underline flex items-center gap-1"><QrCode size={12} /> Tester la connexion</button>
+                <button onClick={testOrangeConnection} className="mt-3 text-xs text-orange-600 underline flex items-center gap-1"><QrCode size={12} /> {t('payments.orange.test')}</button>  {/* ← MODIFIER */}
               </div>
 
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <h3 className="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2"><Phone size={14} /> Numéros marchands (Fallback)</h3>
+                <h3 className="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2"><Phone size={14} /> Autocollant marchand</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Numéro Wave</label><input type="tel" value={merchantNumbers.wave} onChange={e => setMerchantNumbers({...merchantNumbers, wave: e.target.value})} className={inputCls} placeholder="77 000 00 00" /></div>
-                  <div><label className={labelCls}>Numéro Orange Money</label><input type="tel" value={merchantNumbers.orange} onChange={e => setMerchantNumbers({...merchantNumbers, orange: e.target.value})} className={inputCls} placeholder="78 000 00 00" /></div>
+                  <div><label className={labelCls}>{t('payments.wave.merchant_number')}</label><input type="tel" value={merchantNumbers.wave} onChange={e => setMerchantNumbers({...merchantNumbers, wave: e.target.value})} className={inputCls} placeholder="77 000 00 00" /></div>
+                  <div><label className={labelCls}>{t('payments.orange.merchant_number')}</label><input type="tel" value={merchantNumbers.orange} onChange={e => setMerchantNumbers({...merchantNumbers, orange: e.target.value})} className={inputCls} placeholder="78 000 00 00" /></div>
                 </div>
               </div>
 
@@ -675,7 +786,7 @@ export function Settings() {
                 </p>
               </div>
               <button onClick={saveApiSettings} className="mt-4 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold text-sm shadow-md flex items-center gap-2">
-                <Save size={16} /> Sauvegarder les APIs
+                <Save size={16} /> {t('payments.save')}  {/* ← MODIFIER */}
               </button>
             </div>
           </div>
@@ -689,16 +800,16 @@ export function Settings() {
           {/* Changement mot de passe */}
           <div className="settings-card rounded-2xl border p-6 shadow-sm" style={{ backgroundColor: 'var(--app-surface)', borderColor: 'var(--app-border)' }}>
             <h2 className="font-semibold text-lg mb-5 flex items-center gap-2" style={{ color: 'var(--app-text)' }}>
-              <KeyRound size={20} className="text-violet-500" /> Mot de passe administrateur
+              <KeyRound size={20} className="text-violet-500" /> {t('security.password.title')}  {/* ← MODIFIER */}
             </h2>
 
             {!changePasswordMode ? (
               <div className="flex gap-3 flex-wrap">
                 <button onClick={() => setChangePasswordMode(true)} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold text-sm shadow-md flex items-center gap-2">
-                  <KeyRound size={16} /> Changer le mot de passe
+                  <KeyRound size={16} /> {t('security.password.change')}  {/* ← MODIFIER */}
                 </button>
                 <button onClick={startRecovery} className="px-6 py-2.5 rounded-xl bg-amber-100 text-amber-800 font-semibold text-sm border border-amber-300 flex items-center gap-2 hover:bg-amber-200 transition-colors">
-                  <HelpCircle size={16} /> Mot de passe oublié ?
+                  <HelpCircle size={16} /> {t('security.password.forgot')}  {/* ← MODIFIER */}
                 </button>
               </div>
             ) : (
@@ -709,52 +820,48 @@ export function Settings() {
                   </div>
                 )}
 
-                {/* Mot de passe actuel */}
                 <div>
-                  <label className={labelCls}>Mot de passe actuel *</label>
+                  <label className={labelCls}>{t('security.password.current')}</label>  {/* ← MODIFIER */}
                   <div className="relative">
-                    <input type={showCurrentPwd ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={inputCls} placeholder="Votre mot de passe actuel" />
+                    <input type={showCurrentPwd ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={inputCls} placeholder={t('security.password.current_placeholder')} />  {/* ← MODIFIER */}
                     <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                       {showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
 
-                {/* Nouveau mot de passe */}
                 <div>
-                  <label className={labelCls}>Nouveau mot de passe *</label>
+                  <label className={labelCls}>{t('security.password.new')}</label>  {/* ← MODIFIER */}
                   <div className="relative">
-                    <input type={showNewPwd ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} className={inputCls} placeholder="Minimum 4 caractères" />
+                    <input type={showNewPwd ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} className={inputCls} placeholder={t('security.password.new_placeholder')} />  {/* ← MODIFIER */}
                     <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                       {showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
 
-                {/* Confirmer */}
                 <div>
-                  <label className={labelCls}>Confirmer le nouveau mot de passe *</label>
+                  <label className={labelCls}>{t('security.password.confirm')}</label>  {/* ← MODIFIER */}
                   <div className="relative">
-                    <input type={showConfirmPwd ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={inputCls} placeholder="Répétez le mot de passe" />
+                    <input type={showConfirmPwd ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={inputCls} placeholder={t('security.password.confirm_placeholder')} />  {/* ← MODIFIER */}
                     <button type="button" onClick={() => setShowConfirmPwd(!showConfirmPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                       {showConfirmPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
 
-                {/* Question secrète */}
                 <div className="pt-3 border-t border-slate-200">
-                  <p className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-1.5"><HelpCircle size={14} className="text-violet-500" /> Question secrète (pour récupération)</p>
+                  <p className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-1.5"><HelpCircle size={14} className="text-violet-500" /> {t('security.secret.title')}</p>  {/* ← MODIFIER */}
                   <div className="space-y-3">
                     <div>
-                      <label className={labelCls}>Question *</label>
+                      <label className={labelCls}>{t('security.secret.question')}</label>  {/* ← MODIFIER */}
                       <select value={secretQuestion} onChange={e => setSecretQuestion(e.target.value)} className={inputCls}>
                         {SECRET_QUESTIONS.map(q => <option key={q} value={q}>{q}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className={labelCls}>Réponse *</label>
-                      <input type="text" value={secretAnswer} onChange={e => setSecretAnswer(e.target.value)} className={inputCls} placeholder="Votre réponse (insensible à la casse)" />
+                      <label className={labelCls}>{t('security.secret.answer')}</label>  {/* ← MODIFIER */}
+                      <input type="text" value={secretAnswer} onChange={e => setSecretAnswer(e.target.value)} className={inputCls} placeholder={t('security.secret.answer_placeholder')} />  {/* ← MODIFIER */}
                     </div>
                   </div>
                 </div>
@@ -764,28 +871,26 @@ export function Settings() {
                     <Check size={16} /> Valider
                   </button>
                   <button onClick={() => { setChangePasswordMode(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setSecretAnswer(''); setPasswordError(''); }} className="px-6 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-medium hover:bg-slate-50">
-                    Annuler
+                    {t('buttons.cancel')}  {/* ← MODIFIER */}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Info question secrète enregistrée */}
             {savedSecretQuestion && !changePasswordMode && (
               <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-xl flex items-start gap-2">
                 <HelpCircle size={15} className="text-violet-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold text-violet-800">Question secrète enregistrée</p>
+                  <p className="text-xs font-semibold text-violet-800">{t('security.secret.title')}</p>  {/* ← MODIFIER */}
                   <p className="text-xs text-violet-600 mt-0.5">{savedSecretQuestion}</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Info sécurité */}
           <div className="bg-amber-50 rounded-2xl border border-amber-200 p-4">
             <p className="text-sm text-amber-800 flex items-center gap-2">
-              <Shield size={18} /> Les actions sensibles (import, réinitialisation) sont protégées par mot de passe.
+              <Shield size={18} /> {t('security.info')}  {/* ← MODIFIER */}
             </p>
           </div>
         </div>
@@ -800,8 +905,8 @@ export function Settings() {
             <input type="password" placeholder="Mot de passe" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && verifyPassword(() => { if (pendingAction?.type === 'import' && pendingAction.data) importData(pendingAction.data); if (pendingAction?.type === 'resetSettings') resetSettings(); if (pendingAction?.type === 'resetAll') resetAllData(); })} className="w-full p-3 rounded-xl border border-slate-200 mb-4 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-slate-900" autoFocus />
             {passwordError && <p className="text-red-500 text-sm mb-4">{passwordError}</p>}
             <div className="flex gap-3">
-              <button onClick={() => verifyPassword(() => { if (pendingAction?.type === 'import' && pendingAction.data) importData(pendingAction.data); if (pendingAction?.type === 'resetSettings') resetSettings(); if (pendingAction?.type === 'resetAll') resetAllData(); })} className="flex-1 py-3 rounded-xl bg-violet-600 text-white font-semibold">Confirmer</button>
-              <button onClick={() => { setShowPasswordModal(false); setPasswordInput(''); setPasswordError(''); setPendingAction(null); }} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600">Annuler</button>
+              <button onClick={() => verifyPassword(() => { if (pendingAction?.type === 'import' && pendingAction.data) importData(pendingAction.data); if (pendingAction?.type === 'resetSettings') resetSettings(); if (pendingAction?.type === 'resetAll') resetAllData(); })} className="flex-1 py-3 rounded-xl bg-violet-600 text-white font-semibold">{t('buttons.confirm')}</button>  {/* ← MODIFIER */}
+              <button onClick={() => { setShowPasswordModal(false); setPasswordInput(''); setPasswordError(''); setPendingAction(null); }} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600">{t('buttons.cancel')}</button>  {/* ← MODIFIER */}
             </div>
           </div>
         </div>
@@ -812,12 +917,11 @@ export function Settings() {
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowRecovery(false)}>
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
 
-            {/* Header modal */}
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <HelpCircle size={22} />
-                  <h3 className="text-lg font-bold">Récupération du mot de passe</h3>
+                  <h3 className="text-lg font-bold">{t('security.password.forgot')}</h3>  {/* ← MODIFIER */}
                 </div>
                 <button onClick={() => setShowRecovery(false)} className="text-white/70 hover:text-white">✕</button>
               </div>
@@ -835,7 +939,6 @@ export function Settings() {
                 </div>
               )}
 
-              {/* Étape 1 : Choisir la méthode */}
               {recoveryStep === 'choose' && (
                 <div className="space-y-3">
                   <p className="text-sm text-slate-600 text-center">Comment voulez-vous récupérer votre accès ?</p>
@@ -867,7 +970,6 @@ export function Settings() {
                 </div>
               )}
 
-              {/* Étape Email */}
               {recoveryStep === 'email' && (
                 <div className="space-y-4 text-center">
                   <div className="w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center mx-auto"><Mail size={28} className="text-violet-600" /></div>
@@ -879,7 +981,6 @@ export function Settings() {
                 </div>
               )}
 
-              {/* Étape saisie code */}
               {recoveryStep === 'code' && (
                 <div className="space-y-4">
                   <p className="text-sm text-slate-600 text-center">Entrez le code à 6 chiffres reçu par email</p>
@@ -891,7 +992,6 @@ export function Settings() {
                 </div>
               )}
 
-              {/* Étape question secrète (hors ligne) */}
               {recoveryStep === 'offline' && (
                 <div className="space-y-4">
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
@@ -909,7 +1009,6 @@ export function Settings() {
                 </div>
               )}
 
-              {/* Étape reset */}
               {recoveryStep === 'reset' && (
                 <div className="space-y-4">
                   <div className="text-center">

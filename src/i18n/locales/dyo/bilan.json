@@ -1,0 +1,40 @@
+{
+  "title": "Bilan Financier",
+  "subtitle": "État de la santé financière de votre bar",
+  "summary": {
+    "title": "Résumé du bilan",
+    "assets": "Actifs",
+    "liabilities": "Passifs",
+    "equity": "Capitaux propres",
+    "total": "Total"
+  },
+  "assets": {
+    "title": "Actifs",
+    "cash": "Liquidités",
+    "inventory": "Stocks",
+    "equipment": "Équipement",
+    "accounts_receivable": "Créances",
+    "total": "Total actifs"
+  },
+  "liabilities": {
+    "title": "Passifs",
+    "accounts_payable": "Dettes fournisseurs",
+    "loans": "Emprunts",
+    "taxes": "Taxes dues",
+    "total": "Total passifs"
+  },
+  "equity": {
+    "title": "Capitaux propres",
+    "capital": "Capital social",
+    "retained_earnings": "Résultats non distribués",
+    "current_result": "Résultat de l'exercice",
+    "total": "Total capitaux propres"
+  },
+  "ratios": {
+    "title": "Ratios financiers",
+    "liquidity": "Liquidité",
+    "solvency": "Solvabilité",
+    "profitability": "Rentabilité",
+    "debt": "Endettement"
+  }
+}

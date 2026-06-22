@@ -1,0 +1,46 @@
+{
+  "app": {
+    "name": "BarFlow",
+    "title": "Gestion de Bar"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "orders": "Commandes",
+    "stocks": "Stocks",
+    "reappro": "Réapprovisionnement",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "actions": {
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "export": "Exporter",
+    "import": "Importer",
+    "print": "Imprimer"
+  },
+  "status": {
+    "success": "Succès",
+    "error": "Erreur",
+    "loading": "Chargement...",
+    "empty": "Aucune donnée"
+  },
+  "tables": {
+    "title": "Tables",
+    "free": "Libre",
+    "occupied": "Occupée",
+    "waiting": "En attente"
+  },
+  "common": {
+    "yes": "Oui",
+    "no": "Non",
+    "all": "Tous",
+    "none": "Aucun",
+    "total": "Total"
+  }
+}

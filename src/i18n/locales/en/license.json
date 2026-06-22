@@ -1,0 +1,85 @@
+{
+  "title": "Finance & Analysis",
+  "subtitle": "Financial analysis of your activity",
+  "tabs": {
+    "overview": "Overview",
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "profit": "Profits",
+    "trends": "Trends"
+  },
+  "metrics": {
+    "total_revenue": "Total revenue",
+    "total_expenses": "Total expenses",
+    "net_profit": "Net profit",
+    "margin": "Margin",
+    "growth": "Growth",
+    "average_ticket": "Average ticket",
+    "daily_average": "Daily average"
+  },
+  "charts": {
+    "revenue_vs_expenses": "Revenue vs Expenses",
+    "profit_evolution": "Profit evolution",
+    "cost_breakdown": "Cost breakdown",
+    "revenue_by_category": "Revenue by category"
+  },
+  "periods": {
+    "today": "Today",
+    "week": "This week",
+    "month": "This month",
+    "quarter": "This quarter",
+    "year": "This year",
+    "custom": "Custom"
+  },
+  "access": {
+    "restricted": "Restricted access",
+    "enter_password": "Enter password to access financial data"
+  },
+  "data": {
+    "real_banner": "✅ Real data — {count} day(s) of sales",
+    "ca_total": "Total revenue",
+    "demo_banner": "⚠️ Demo data — start taking payments to see your real statistics"
+  },
+  "kpi": {
+    "total_ca": "Total Revenue",
+    "clients": "Customers",
+    "avg_ticket": "Average ticket",
+    "gross_margin": "Gross margin"
+  },
+  "pdf": {
+    "title": "Financial Report",
+    "period": "Period",
+    "generated": "Generated on",
+    "real": "Real Data ✓",
+    "demo": "Demo Data",
+    "pages": {
+      "summary": "1. General Summary",
+      "evolution": "2. Evolution",
+      "products": "3. Product Performance",
+      "payments": "4. Payment Methods",
+      "losses": "5. Losses & Adjustments"
+    },
+    "fields": {
+      "date": "Date",
+      "ca": "Revenue (FCFA)",
+      "clients": "Customers",
+      "ticket_moyen": "Avg. ticket (FCFA)",
+      "marge": "Margin (FCFA)",
+      "product": "Product",
+      "category": "Category",
+      "quantity": "Quantity",
+      "ca_product": "Revenue (FCFA)",
+      "marge_product": "Margin (FCFA)",
+      "pct_ca": "% Revenue",
+      "payment_method": "Method",
+      "amount": "Amount (FCFA)",
+      "transactions": "Transactions",
+      "pct_ca_payment": "% of Revenue",
+      "reason": "Reason"
+    },
+    "footer": {
+      "confidential": "BarFlow — {type} Confidential Report",
+      "page": "Page {page}"
+    }
+  }
+}

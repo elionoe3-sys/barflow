@@ -1,0 +1,25 @@
+{
+  "title": "Synchronisation",
+  "status": {
+    "idle": "Ci xaar",
+    "syncing": "Synchronisation bi nekk ci biir...",
+    "success": "Synchronisation bi gën na baax",
+    "error": "Error ci synchronisation bi"
+  },
+  "actions": {
+    "sync_now": "Synchroniser leegi",
+    "auto_sync": "Synchronisation bu boppam",
+    "last_sync": "Synchronisation bi mujj"
+  },
+  "sources": {
+    "cloud": "Cloud",
+    "local": "Local",
+    "conflicts": "Li ñu jàppee (Conflits)"
+  },
+  "messages": {
+    "confirm": "Bëgg nga synchroniser données yi?",
+    "conflict_detected": "Conflit bi nekk na",
+    "resolved": "Conflit bi jéex na",
+    "select_version": "Tànnal version bi nga bëgg denc"
+  }
+}

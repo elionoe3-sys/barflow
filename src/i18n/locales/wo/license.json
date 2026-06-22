@@ -1,0 +1,37 @@
+{
+  "title": "Licence ak Sécurité",
+  "subtitle": "Gestionu licence logiciel bi",
+  "status": {
+    "valid": "Licence bu baax",
+    "invalid": "Licence bu wul",
+    "expired": "Licence bi jeex na",
+    "trial": "Jamono test",
+    "pending": "Ngaaral ngir wone ni mu baax"
+  },
+  "fields": {
+    "license_key": "Clé licence",
+    "customer": "Client",
+    "expiry_date": "Fan yu mujj",
+    "max_users": "Liggéeykat yu bari gën",
+    "features": "Fonctionnalités yi ñu ubbi"
+  },
+  "actions": {
+    "activate": "Ubbi licence bi",
+    "validate": "Wone ni mu baax",
+    "renew": "Yeesalat",
+    "deactivate": "Doxalaat"
+  },
+  "messages": {
+    "enter_key": "Bindal sa clé licence",
+    "validation_success": "Licence bi baax na",
+    "validation_failed": "Licence bi baaxul",
+    "expiry_warning": "Sa licence di jeex ci {days} fan",
+    "expired": "Sa licence jeex na. Yeesalat ko."
+  },
+  "protection": {
+    "title": "Protection anti-piratage",
+    "fingerprint": "Empreinte matérielle",
+    "last_check": "Benn vérification bi gën a mujj",
+    "status": "Statut bu protection bi"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "title": "Gestion des Stocks",
+  "subtitle": "Suivi en temps réel des stocks",
+  "actions": {
+    "new": "Nouveau produit",
+    "reappro": "Réapprovisionner",
+    "inventory": "Inventaire",
+    "movements": "Mouvements",
+    "predictions": "Prévisions",
+    "categories": "Catégories"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."
+  },
+  "status": {
+    "critical": "Critique",
+    "low": "Bas",
+    "medium": "Moyen",
+    "good": "Bon"
+  },
+  "volume": {
+    "title": "Gestion en centilitres",
+    "bottle": "Contenance de la bouteille",
+    "service": "Volume servi par format"
+  },
+  "reappro": {
+    "title": "Réapprovisionnement",
+    "format": "Format de livraison",
+    "quantity": "Quantité reçue",
+    "supplier": "Fournisseur",
+    "price": "Prix achat",
+    "confirm": "Confirmer la réception"
+  },
+  "inventory": {
+    "title": "Pertes & Ajustements",
+    "reason": "Motif",
+    "quantity": "Quantité",
+    "note": "Note (optionnel)",
+    "reasons": {
+      "breakage": "Casse",
+      "offered": "Offert",
+      "gap": "Écart",
+      "expiry": "Péremption",
+      "inventory": "Inventaire",
+      "other": "Autre"
+    }
+  },
+  "movements": {
+    "title": "Flux Récents",
+    "entry": "Entrée",
+    "exit": "Sortie"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "title": "Finance & Analytics",
+  "subtitle": "Financial analysis of your activity",
+  "tabs": {
+    "overview": "Overview",
+    "products": "Products",
+    "margin": "Margin & Losses",
+    "payments": "Payments",
+    "attendance": "Attendance",
+    "ticket": "Avg. Ticket",
+    "radar": "Performance",
+    "bilan": "Balance Sheet"
+  },
+  "metrics": {
+    "total_revenue": "Total Revenue",
+    "total_expenses": "Total Expenses",
+    "net_profit": "Net Profit",
+    "margin": "Gross Margin",
+    "growth": "Growth",
+    "average_ticket": "Avg. Ticket",
+    "daily_average": "Daily Average",
+    "total_clients": "Clients",
+    "ca_per_day": "Avg. CA / day",
+    "clients_per_day": "Clients / day"
+  },
+  "periods": {
+    "jour": "Day",
+    "semaine": "Week",
+    "mois": "Month",
+    "année": "Year"
+  },
+  "kpi": {
+    "total_ca": "Total Revenue",
+    "clients": "Clients",
+    "avg_ticket": "Avg. Ticket",
+    "gross_margin": "Gross Margin"
+  },
+  "charts": {
+    "ca_evolution": "Revenue Evolution",
+    "current_period": "Current period",
+    "previous_period": "Previous period",
+    "ca_trend": "Revenue & Margin Trend",
+    "key_indicators": "Key Indicators",
+    "margin_by_category": "Gross margin by category",
+    "losses": "Losses & Adjustments",
+    "payments_split": "Payment breakdown",
+    "payment_detail": "Detail by method",
+    "attendance": "Attendance",
+    "avg_ticket_evolution": "Avg. ticket evolution",
+    "performance_radar": "Performance by category",
+    "recommendations": "Recommendations"
+  },
+  "data": {
+    "real": "Real data",
+    "demo": "Demo data",
+    "real_banner": "Real data — based on {{count}} day(s) of recorded sales.",
+    "demo_banner": "Demo data — start processing orders to see your real stats.",
+    "real_days": "{{count}} day(s) of sales recorded",
+    "ca_total": "Total revenue"
+  },
+  "charges": {
+    "fixed": "Fixed Monthly Expenses",
+    "payroll": "Payroll",
+    "total": "Total expenses",
+    "profitability": "Profitability",
+    "ca_period": "Period revenue",
+    "net_benefit": "Net profit"
+  },
+  "products_tab": {
+    "title": "Product performance",
+    "empty": "No sales recorded for this period",
+    "columns": {
+      "product": "Product",
+      "category": "Category",
+      "qty": "Qty sold",
+      "revenue": "Revenue (FCFA)",
+      "margin": "Margin (FCFA)",
+      "pct": "% Revenue"
+    },
+    "badge_real": "✅ Real data",
+    "badge_estimated": "⚠️ Estimated"
+  },
+  "margin_tab": {
+    "title": "Gross margin by category",
+    "losses_title": "Losses & Adjustments",
+    "no_entries": "No loss recorded",
+    "no_data": "No margin data available",
+    "total_losses": "Total losses",
+    "ca_impact": "Impact on revenue",
+    "advice_title": "💡 Tip",
+    "advice": "Renegotiate supplier prices or adjust your selling prices for these categories."
+  },
+  "payments_tab": {
+    "title": "Payment breakdown",
+    "detail": "Detail by method",
+    "empty": "No payment data",
+    "transactions": "transaction(s)",
+    "pct_ca": "% of revenue",
+    "badge_real": "✅ Real",
+    "badge_estimated": "⚠️ Estimated"
+  },
+  "attendance_tab": {
+    "title": "Attendance",
+    "clients_total": "clients",
+    "per_day": "/ day"
+  },
+  "ticket_tab": {
+    "title": "Avg. ticket evolution",
+    "average": "average"
+  },
+  "radar_tab": {
+    "star_product": "⭐ Star product of the period",
+    "strengths": "✅ Strengths — Excellent margin",
+    "weaknesses": "⚠️ Watch out — Low margin",
+    "no_data": "Process orders to see recommendations"
+  },
+  "report": {
+    "title": "Evening report",
+    "real": "Based on your real sales",
+    "demo": "Based on demo data",
+    "ca": "Revenue",
+    "estimated_profit": "Estimated profit",
+    "clients": "Clients",
+    "star_product": "⭐ Star product",
+    "vs_last_week": "vs same day last week",
+    "export_pdf": "Export PDF"
+  },
+  "export": {
+    "pdf": "PDF",
+    "excel": "Excel"
+  },
+  "access": {
+    "restricted": "Restricted Access",
+    "enter_password": "Enter the administrator password",
+    "unlock": "Unlock"
+  }
+}

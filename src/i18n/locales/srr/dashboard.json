@@ -1,0 +1,75 @@
+{
+  "title": "Jëf-jëf",
+  "subtitle": "Xoolum jëf-jëf",
+  "loading": "Njëkk na dox...",
+  "period_days": "{{count}} fan",
+  "period": {
+    "weekend": "Weekend",
+    "weekday": "Fan yu mag"
+  },
+  "stats": {
+    "ca": "Goxu xaliss démb",
+    "clients": "Nit ñi ñëw démb",
+    "ticket": "Ticketu néw",
+    "marge": "Marge démb"
+  },
+  "estimation": {
+    "title": "Li ñu yaakaar tay",
+    "based_on": "Li ñu jëlee ci {{days}} fan yi wees",
+    "click_details": "🔍 Defal ci ngir gis lu ëpp",
+    "clients": "Nit ñi ñu yaakaar",
+    "ca": "Goxu xaliss ñu yaakaar",
+    "beers": "Bii bi ñu nar a naan",
+    "cocktails": "Cocktail yi ñu nar a naan",
+    "weekend": "Weekend → +40%",
+    "weekday": "Fan yu mag",
+    "bottles": "bëy ñu yaakaar",
+    "glasses": "kopp ñu yaakaar"
+  },
+  "modal": {
+    "title": "Li ci biir estimation bi",
+    "subtitle": "Li ñu jëlee ci {{days}} fan yi wees",
+    "clients": "Nit ñi",
+    "ca": "Goxu xaliss ñu yaakaar",
+    "beers": "Bii",
+    "cocktails": "Cocktail",
+    "weekend_boost": "Weekend (+40%)",
+    "method_title": "Fanu jàpp",
+    "method_clients": "Nit ñi : Moyenneu {{days}} fan yi wees {{weekend}}",
+    "method_weekend_suffix": "× 1.4 (weekend)",
+    "method_ca": "Goxu xaliss : Nit ñi ñu yaakaar × Ticketu néw ({{ticket}} F)",
+    "method_beers": "Bii : {{count}} bëy ci li ñu gën a naan",
+    "method_cocktails": "Cocktail : {{count}} kopp ci li ñu gën a naan",
+    "trends_title": "Li soppiku",
+    "ca_variation": "Variationu goxu xaliss",
+    "clients_variation": "Variationu nit ñi",
+    "close": "Tëj"
+  },
+  "charts": {
+    "ca_evolution": "Li goxu xaliss di dëkku (7 fan)",
+    "sales_by_hour": "Jaay ci waxtu",
+    "top_products": "10 Produit yi gën a baax",
+    "category_consumption": "Li ñu naan ci xeet (30 fan)",
+    "units": "{{count}} yu am",
+    "sales_count": "{{count}} yu ñu jaay"
+  },
+  "alerts": {
+    "stock_alert": "Alertu jeexu stock",
+    "no_stock": "Amul benn produit bu am njàqare",
+    "critical_count": "{{count}} produit bu am njàqare",
+    "remaining": "{{count}} yu des",
+    "daily_consumption": "Li ñu naan : {{value}}/fan",
+    "restock_tip": "💡 Yabal ngir dëgël jeexu stock"
+  },
+  "products": {
+    "top_to_promote": "Produit yi ñu wara yëkkël tay",
+    "score": "Scoreu jariñ",
+    "score_tip": "Produit yii ñoo gën a jariñ (marge × rotation × perte)",
+    "star": "🔥 Produit bu mag",
+    "solid": "✅ Produit bu dëgër",
+    "high_margin": "🔥 Marge bu am solo",
+    "happy_hour": "✅ Produit bu baax - Ngir happy hour",
+    "fast_rotation": "✅ Rotation bu gaaw",
+    "bundle": "📊 Marge bu mat - Defal ci pack"
+  }
+}

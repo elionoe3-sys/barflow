@@ -1,0 +1,156 @@
+{
+  "title": "Orders",
+  "subtitle": "Order Management",
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "paid": "Paid",
+    "cancelled": "Cancelled"
+  },
+  "caisse": {
+    "open": "Open Cash Register",
+    "close": "Close Cash Register",
+    "opened": "Cash Register Open",
+    "closed": "Cash Register Closed",
+    "fund": "Cash Fund",
+    "server": "Server Name",
+    "openedAt": "Opened: {time}",
+    "totalExpected": "Total Expected in Register",
+    "fundPlusCash": "Fund + Cash Received",
+    "confirmClose": "Confirm Closure"
+  },
+  "cart": {
+    "title": "Cart",
+    "total": "Total",
+    "submit": "Validate Order",
+    "empty": "Empty Cart",
+    "items": "items",
+    "table": "Cart (Table {table})"
+  },
+  "payment": {
+    "title": "Payment",
+    "methods": {
+      "cash": "Cash",
+      "wave": "Wave",
+      "orange_money": "Orange Money"
+    },
+    "amount": "Amount to Pay",
+    "confirm": "Confirm Payment"
+  },
+  "ardoise": {
+    "title": "Tabs",
+    "empty": "No active tabs",
+    "total": "Total Tabs",
+    "pay": "Collect Payment Now",
+    "warning": "These customers have consumed but haven't paid yet. They will pay at closing or when leaving.",
+    "existingNote": "Open tab on Table {table}",
+    "itemsAdded": "Items will be added to the existing tab."
+  },
+  "history": {
+    "title": "History",
+    "empty": "No orders in history",
+    "details": "Order Details",
+    "total": "Total Collected",
+    "orders": "Orders",
+    "avgTicket": "Average Ticket",
+    "lastDays": "Last 30 days · {count} paid orders",
+    "paid": "Paid"
+  },
+  "search": {
+    "placeholder": "Search for a product..."
+  },
+  "product": {
+    "outOfStock": "Out of Stock",
+    "stock": "Stock",
+    "price": "Price",
+    "category": "Category",
+    "inStock": "In Stock",
+    "critical": "Critical Stock"
+  },
+  "table": {
+    "title": "Floor Plan",
+    "select": "Choose a table to start",
+    "manage": "Manage",
+    "free": "Free",
+    "occupied": "Occupied",
+    "waiting": "Waiting",
+    "seats": "{seats} pers.",
+    "number": "Number",
+    "places": "Number of Seats",
+    "status": "Status",
+    "add": "Add a Table",
+    "edit": "Edit Table",
+    "delete": "Delete",
+    "editTitle": "Edit Table {number}",
+    "addTitle": "Add a Table",
+    "save": "Save",
+    "cancel": "Cancel",
+    "deleteConfirm": "Delete Table {number}?"
+  },
+  "order": {
+    "detail": "Order Details",
+    "table": "Table {table}",
+    "id": "Order: {id}",
+    "items": "{count} item(s)",
+    "total": "TOTAL",
+    "paid": "Paid",
+    "pending": "Tab",
+    "inProgress": "In Progress",
+    "print": "Print Ticket",
+    "close": "Close",
+    "pay": "Pay",
+    "ardoise": "TAB",
+    "ticketPrinted": "Ticket can only be printed after payment!",
+    "payFirst": "Please pay the order first before closing!"
+  },
+  "validation": {
+    "title": "Validate Order",
+    "table": "Table {table} · {total} FCFA",
+    "ardoise": "Put on Tab",
+    "ardoiseDesc": "The table remains occupied. The customer will pay later.",
+    "payNow": "Pay Now",
+    "payNowDesc": "Immediate payment: Cash, Wave or Orange Money."
+  },
+  "errors": {
+    "caisseClosed": "Open the cash register first to start the service!",
+    "selectTable": "Please select a table first!",
+    "paymentRequired": "Please pay the order first before closing!",
+    "printNotPaid": "The ticket can only be printed after payment!",
+    "printError": "Unable to open print window.",
+    "cartEmpty": "Your cart is empty"
+  },
+  "modals": {
+    "caisse": {
+      "open": "Open Cash Register",
+      "openDesc": "Cash amount in the register at the start of service",
+      "serverLabel": "Server Name (optional)",
+      "serverPlaceholder": "Ex: Fatou, Jean-Pierre...",
+      "openButton": "Open Cash Register",
+      "cancel": "Cancel",
+      "date": "{weekday} {day} {month}"
+    },
+    "fermeture": {
+      "title": "Close Cash Register",
+      "openedAt": "Opened: {time}",
+      "server": "{server}",
+      "fund": "Cash Fund",
+      "cashReceipts": "Cash Receipts",
+      "payments": "{count} payment(s)",
+      "totalExpected": "Total Expected in Register",
+      "fundPlusCash": "Fund + Cash Received",
+      "ardoisesOpen": "{count} tab(s) still open",
+      "ardoisesTotal": "Total amount: {total} FCFA — Remember to collect them before closing.",
+      "confirmClose": "Confirm Closure"
+    }
+  },
+  "loading": "Loading products...",
+  "noProducts": "No products found",
+  "noProductsDesc": "Modify your filters or add products in Stocks",
+  "currentOrders": "Current Orders",
+  "currentOrdersDesc": "Click on an order to see details",
+  "orderCount": "{count} order(s)",
+  "noActiveOrders": "No active orders",
+  "totalFCFA": "{amount} FCFA",
+  "paidWith": "Payment by {method}",
+  "thankYou": "Thank you for your visit!"
+}

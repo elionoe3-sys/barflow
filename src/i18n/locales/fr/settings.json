@@ -1,0 +1,250 @@
+{
+  "title": "Paramètres",
+  "subtitle": "Configuration de votre application",
+  "tabs": {
+    "general": "Thème & Langues",
+    "network": "Configuration réseau",
+    "backup": "Sauvegarde & Données",
+    "payments": "Paiements",
+    "security": "Sécurité"
+  },
+  "themes": {
+    "title": "Thème",
+    "light": "Clair",
+    "daltonien": "Daltonien",
+    "senegal": "Sénégal",
+    "dark": "Sombre",
+    "senegal_desc": "Couleurs du drapeau du Sénégal"
+  },
+  "colors": {
+    "title": "Couleur principale",
+    "violet": "Violet",
+    "emerald": "Émeraude",
+    "blue": "Bleu",
+    "rose": "Rose",
+    "amber": "Ambre"
+  },
+  "languages": {
+    "title": "Langues",
+    "french": "Français",
+    "english": "Anglais",
+    "wolof": "Wolof",
+    "select": "Sélectionnez votre langue"
+  },
+  "restaurant": {
+    "title": "Informations établissement",
+    "subtitle": "Ces informations apparaîtront sur les tickets et les factures",
+    "name": "Nom du bar",
+    "name_placeholder": "Ex: Le Teranga Bar",
+    "phone": "Téléphone",
+    "phone_placeholder": "+221 77 000 00 00",
+    "email": "Email",
+    "email_placeholder": "contact@votrebar.sn",
+    "address": "Adresse",
+    "address_placeholder": "N° rue, quartier, ville",
+    "taxNumber": "NIF / Contribution",
+    "taxNumber_placeholder": "Ex: 0000000 0A 0000",
+    "save": "Enregistrer les informations",
+    "saved": "Informations sauvegardées !"
+  },
+  "network": {
+    "title": "Configuration réseau",
+    "wifi": "Wi-Fi",
+    "printer": "Imprimante",
+    "caisse": "Caisse secondaire",
+    "offline_mode": "Mode hors-ligne",
+    "offline_mode_desc": "Les données sont sauvegardées localement et synchronisées automatiquement",
+    "sync_now": "Synchroniser maintenant",
+    "last_sync": "Dernière synchronisation",
+    "never": "Jamais",
+    "sync_status": "Statut de synchronisation",
+    "pending_changes": "Modifications en attente",
+    "synced": "Tout est synchronisé"
+  },
+  "backup": {
+    "title": "Sauvegarde des données",
+    "subtitle": "Exportez, importez ou réinitialisez vos données",
+    "export": "Exporter les données",
+    "export_desc": "Téléchargez toutes vos données au format JSON",
+    "import": "Importer les données",
+    "import_desc": "Restaurer les données à partir d'un fichier JSON",
+    "reset": "Réinitialisation",
+    "resetSettings": "Réinitialiser les paramètres",
+    "resetSettings_desc": "Remet tous les paramètres à leurs valeurs par défaut",
+    "resetAll": "Tout réinitialiser",
+    "resetAll_desc": "Supprime toutes les données de l'application (commandes, produits, etc.)",
+    "last_backup": "Dernière sauvegarde",
+    "never": "Jamais",
+    "export_success": "Données exportées avec succès !",
+    "import_success": "Données importées avec succès !",
+    "reset_confirm": "Êtes-vous sûr de vouloir tout réinitialiser ? Cette action est irréversible.",
+    "reset_settings_confirm": "Êtes-vous sûr de vouloir réinitialiser les paramètres ?",
+    "password_required": "Mot de passe requis pour cette action"
+  },
+  "payments": {
+    "title": "Paiements mobiles",
+    "subtitle": "Configurez les API Wave et Orange Money",
+    "locked": "Onglet protégé",
+    "lockedMessage": "Les clés API sont sensibles. Entrez le mot de passe administrateur pour y accéder.",
+    "unlock": "Déverrouiller",
+    "unlocked": "Onglet déverrouillé",
+    "wave": {
+      "title": "Wave Business API",
+      "subtitle": "Configuration de l'API Wave pour les paiements mobiles",
+      "merchantId": "Merchant ID",
+      "merchantId_placeholder": "Votre identifiant marchand Wave",
+      "apiKey": "API Key",
+      "apiKey_placeholder": "Clé API Wave",
+      "apiSecret": "API Secret",
+      "apiSecret_placeholder": "Secret API Wave",
+      "webhookSecret": "Webhook Secret",
+      "webhookSecret_placeholder": "Secret pour les webhooks Wave",
+      "test": "Tester la connexion",
+      "test_success": "✅ Connexion Wave réussie !",
+      "test_failed": "❌ Échec de la connexion Wave",
+      "merchant_number": "Numéro marchand Wave",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "orange": {
+      "title": "Orange Money API",
+      "subtitle": "Configuration de l'API Orange Money",
+      "merchantId": "Merchant ID",
+      "merchantId_placeholder": "Votre identifiant marchand Orange",
+      "apiLogin": "API Login",
+      "apiLogin_placeholder": "Login API Orange Money",
+      "apiPassword": "API Password",
+      "apiPassword_placeholder": "Mot de passe API Orange Money",
+      "apiKey": "API Key",
+      "apiKey_placeholder": "Clé API Orange Money",
+      "test": "Tester la connexion",
+      "test_success": "✅ Connexion Orange Money réussie !",
+      "test_failed": "❌ Échec de la connexion Orange Money",
+      "merchant_number": "Numéro marchand Orange Money",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "merchant_sticker": {
+      "title": "Autocollant marchand",
+      "desc": "Les clients peuvent payer en scannant votre QR code même hors-ligne",
+      "show_qr": "Afficher le QR code",
+      "download_qr": "Télécharger le QR code"
+    },
+    "save": "Enregistrer",
+    "saved": "Configuration sauvegardée !",
+    "testing": "Test en cours..."
+  },
+  "security": {
+    "title": "Sécurité",
+    "subtitle": "Gérez les accès et la sécurité de votre application",
+    "password": {
+      "title": "Mot de passe administrateur",
+      "current": "Mot de passe actuel",
+      "current_placeholder": "Entrez votre mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "new_placeholder": "Entrez un nouveau mot de passe",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "confirm_placeholder": "Confirmez le nouveau mot de passe",
+      "change": "Changer le mot de passe",
+      "forgot": "Mot de passe oublié ?",
+      "change_success": "✅ Mot de passe modifié avec succès !",
+      "change_failed": "❌ Échec du changement de mot de passe",
+      "incorrect": "Mot de passe actuel incorrect",
+      "mismatch": "Les mots de passe ne correspondent pas",
+      "min_length": "Le mot de passe doit contenir au moins 6 caractères"
+    },
+    "secret": {
+      "title": "Question secrète",
+      "desc": "Utilisée pour réinitialiser votre mot de passe en cas d'oubli",
+      "question": "Question",
+      "question_placeholder": "Ex: Quel est le nom de votre premier animal de compagnie ?",
+      "answer": "Réponse",
+      "answer_placeholder": "Votre réponse",
+      "save": "Enregistrer la question secrète"
+    },
+    "info": "Les actions sensibles (import, réinitialisation) sont protégées par mot de passe.",
+    "two_factor": {
+      "title": "Authentification à deux facteurs (2FA)",
+      "enable": "Activer la 2FA",
+      "disable": "Désactiver la 2FA",
+      "code": "Code de vérification",
+      "setup": "Configurer la 2FA",
+      "enabled": "✅ 2FA activée",
+      "disabled": "❌ 2FA désactivée"
+    },
+    "session": {
+      "title": "Session",
+      "expire_after": "Expiration de la session",
+      "expire_after_desc": "Déconnexion automatique après inactivité",
+      "never": "Jamais",
+      "minutes": "{minutes} minutes",
+      "hours": "{hours} heures"
+    }
+  },
+  "theme": {
+    "title": "Thème",
+    "appearance": "Apparence",
+    "select_color": "Choisissez votre couleur principale",
+    "preview": "Aperçu"
+  },
+  "language": {
+    "title": "Langue",
+    "select": "Choisissez votre langue"
+  },
+  "info": {
+    "title": "À propos",
+    "version": "Version {version}",
+    "build": "Build {build}",
+    "license": "Licence",
+    "copyright": "© {year} BarFlow. Tous droits réservés.",
+    "support": "Support",
+    "contact": "Contactez-nous",
+    "documentation": "Documentation"
+  },
+  "status": {
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "saving": "Enregistrement...",
+    "loading": "Chargement...",
+    "success": "Succès !",
+    "error": "Erreur",
+    "pending": "En attente..."
+  },
+  "buttons": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "refresh": "Rafraîchir",
+    "export": "Exporter",
+    "import": "Importer",
+    "reset": "Réinitialiser",
+    "test": "Tester",
+    "unlock": "Déverrouiller",
+    "change": "Changer",
+    "enable": "Activer",
+    "disable": "Désactiver",
+    "download": "Télécharger",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "sync": "Synchroniser"
+  },
+  "errors": {
+    "save_failed": "Erreur lors de l'enregistrement",
+    "load_failed": "Erreur lors du chargement",
+    "connection_failed": "Échec de la connexion",
+    "invalid_data": "Données invalides",
+    "password_required": "Mot de passe requis",
+    "permission_denied": "Permission refusée"
+  },
+  "notifications": {
+    "saved": "✅ Enregistré avec succès !",
+    "deleted": "✅ Supprimé avec succès !",
+    "reset": "🔄 Réinitialisé avec succès !",
+    "error": "❌ Une erreur est survenue",
+    "warning": "⚠️ Attention",
+    "info": "ℹ️ Information",
+    "test_success": "✅ Test réussi",
+    "test_failed": "❌ Test échoué"
+  }
+}

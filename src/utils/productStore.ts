@@ -26,6 +26,49 @@ export interface Category {
   name: string;
   emoji: string;
   color: string;
+  // Nom d'icône générique sélectionné dans CATEGORY_ICONS (optionnel,
+  // permet d'afficher une icône vectorielle au lieu/en plus de l'emoji)
+  icon?: string;
+}
+
+// ── Banque d'icônes génériques pour les catégories ────────────
+// Chaque entrée associe un nom d'icône (clé stable, utilisée en BDD)
+// à un emoji représentatif affiché dans le sélecteur et sur les badges.
+// Cette liste est volontairement large pour couvrir tous les types de bar.
+export interface CategoryIconOption {
+  id: string;
+  emoji: string;
+  label: string;
+}
+
+export const CATEGORY_ICONS: CategoryIconOption[] = [
+  { id: 'biere',        emoji: '🍺', label: 'Bière' },
+  { id: 'biere_pression', emoji: '🍻', label: 'Bière pression' },
+  { id: 'vin',          emoji: '🍷', label: 'Vin' },
+  { id: 'champagne',    emoji: '🥂', label: 'Champagne' },
+  { id: 'cocktail',     emoji: '🍹', label: 'Cocktail' },
+  { id: 'cocktail_verre', emoji: '🍸', label: 'Cocktail (verre)' },
+  { id: 'spiritueux',   emoji: '🥃', label: 'Spiritueux' },
+  { id: 'soft',         emoji: '🥤', label: 'Soft / Soda' },
+  { id: 'jus',          emoji: '🧃', label: 'Jus' },
+  { id: 'eau',          emoji: '💧', label: 'Eau' },
+  { id: 'cafe',         emoji: '☕', label: 'Café' },
+  { id: 'the',          emoji: '🍵', label: 'Thé' },
+  { id: 'glace',        emoji: '🍦', label: 'Glace' },
+  { id: 'snack',        emoji: '🍿', label: 'Snack' },
+  { id: 'sandwich',     emoji: '🥪', label: 'Sandwich' },
+  { id: 'pizza',        emoji: '🍕', label: 'Pizza' },
+  { id: 'grillade',     emoji: '🍖', label: 'Grillade' },
+  { id: 'poisson',      emoji: '🐟', label: 'Poisson' },
+  { id: 'fruit',        emoji: '🍍', label: 'Fruit' },
+  { id: 'dessert',      emoji: '🍰', label: 'Dessert' },
+  { id: 'cigarette',    emoji: '🚬', label: 'Tabac' },
+  { id: 'autre',        emoji: '📦', label: 'Autre / Divers' },
+];
+
+export function getCategoryIconEmoji(iconId?: string): string | null {
+  if (!iconId) return null;
+  return CATEGORY_ICONS.find(i => i.id === iconId)?.emoji || null;
 }
 
 // ── Store global en mémoire ───────────────────────────────────
@@ -100,16 +143,16 @@ export function getCategories(): Category[] {
   return [...globalCategories];
 }
 
-export async function addCategory(name: string, emoji: string = '📦', color: string = '#64748B'): Promise<boolean> {
+export async function addCategory(name: string, emoji: string = '📦', color: string = '#64748B', icon?: string): Promise<boolean> {
   if (globalCategories.some(c => c.name === name)) return false;
   const id = name.toLowerCase().replace(/\s/g, '_');
-  globalCategories.push({ id, name, emoji, color });
+  globalCategories.push({ id, name, emoji, color, icon });
   localStorage.setItem('barflow_categories', JSON.stringify(globalCategories));
   notifyCategoryListeners();
   return true;
 }
 
-export async function updateCategory(oldName: string, newName: string, emoji?: string, color?: string): Promise<boolean> {
+export async function updateCategory(oldName: string, newName: string, emoji?: string, color?: string, icon?: string): Promise<boolean> {
   const index = globalCategories.findIndex(c => c.name === oldName);
   if (index === -1) return false;
   
@@ -123,6 +166,7 @@ export async function updateCategory(oldName: string, newName: string, emoji?: s
     name: newName,
     emoji: emoji || globalCategories[index].emoji,
     color: color || globalCategories[index].color,
+    icon: icon !== undefined ? icon : globalCategories[index].icon,
   };
   
   localStorage.setItem('barflow_categories', JSON.stringify(globalCategories));
@@ -191,12 +235,12 @@ export function useCategories() {
     return () => { categoryListeners = categoryListeners.filter(l => l !== listener); };
   }, []);
 
-  const addNewCategory = useCallback(async (name: string, emoji?: string, color?: string) => {
-    return await addCategory(name, emoji, color);
+  const addNewCategory = useCallback(async (name: string, emoji?: string, color?: string, icon?: string) => {
+    return await addCategory(name, emoji, color, icon);
   }, []);
 
-  const editCategory = useCallback(async (oldName: string, newName: string, emoji?: string, color?: string) => {
-    return await updateCategory(oldName, newName, emoji, color);
+  const editCategory = useCallback(async (oldName: string, newName: string, emoji?: string, color?: string, icon?: string) => {
+    return await updateCategory(oldName, newName, emoji, color, icon);
   }, []);
 
   const removeCategory = useCallback(async (categoryName: string) => {

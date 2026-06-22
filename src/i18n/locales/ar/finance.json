@@ -1,0 +1,85 @@
+{
+  "title": "المالية والتحليلات",
+  "subtitle": "التحليل المالي لنشاطك",
+  "tabs": {
+    "overview": "نظرة عامة",
+    "revenue": "الإيرادات",
+    "expenses": "المصروفات",
+    "profit": "الأرباح",
+    "trends": "الاتجاهات"
+  },
+  "metrics": {
+    "total_revenue": "إجمالي الإيرادات",
+    "total_expenses": "إجمالي المصروفات",
+    "net_profit": "صافي الربح",
+    "margin": "الهامش",
+    "growth": "النمو",
+    "average_ticket": "متوسط الفاتورة",
+    "daily_average": "المتوسط اليومي"
+  },
+  "charts": {
+    "revenue_vs_expenses": "الإيرادات مقابل المصروفات",
+    "profit_evolution": "تطور الأرباح",
+    "cost_breakdown": "توزيع التكاليف",
+    "revenue_by_category": "الإيرادات حسب الفئة"
+  },
+  "periods": {
+    "today": "اليوم",
+    "week": "هذا الأسبوع",
+    "month": "هذا الشهر",
+    "quarter": "هذا الربع",
+    "year": "هذه السنة",
+    "custom": "مخصص"
+  },
+  "access": {
+    "restricted": "وصول مقيد",
+    "enter_password": "أدخل كلمة المرور للوصول إلى البيانات المالية"
+  },
+  "data": {
+    "real_banner": "✅ بيانات فعلية — {count} يوم(أيام) من المبيعات",
+    "ca_total": "إجمالي المبيعات",
+    "demo_banner": "⚠️ بيانات تجريبية — ابدأ في تحصيل المدفوعات لمشاهدة إحصائياتك الحقيقية"
+  },
+  "kpi": {
+    "total_ca": "إجمالي المبيعات",
+    "clients": "العملاء",
+    "avg_ticket": "متوسط الفاتورة",
+    "gross_margin": "الهامش الإجمالي"
+  },
+  "pdf": {
+    "title": "التقرير المالي",
+    "period": "الفترة",
+    "generated": "تم الإنشاء في",
+    "real": "بيانات فعلية ✓",
+    "demo": "بيانات تجريبية",
+    "pages": {
+      "summary": "1. الملخص العام",
+      "evolution": "2. التطور",
+      "products": "3. أداء المنتجات",
+      "payments": "4. طرق الدفع",
+      "losses": "5. الخسائر والتسويات"
+    },
+    "fields": {
+      "date": "التاريخ",
+      "ca": "المبيعات (FCFA)",
+      "clients": "العملاء",
+      "ticket_moyen": "متوسط الفاتورة (FCFA)",
+      "marge": "الهامش (FCFA)",
+      "product": "المنتج",
+      "category": "الفئة",
+      "quantity": "الكمية",
+      "ca_product": "المبيعات (FCFA)",
+      "marge_product": "الهامش (FCFA)",
+      "pct_ca": "% المبيعات",
+      "payment_method": "الطريقة",
+      "amount": "المبلغ (FCFA)",
+      "transactions": "المعاملات",
+      "pct_ca_payment": "% من المبيعات",
+      "reason": "السبب"
+    },
+    "footer": {
+      "confidential": "BarFlow — تقرير {type} سري",
+      "page": "صفحة {page}"
+    }
+  }
+}

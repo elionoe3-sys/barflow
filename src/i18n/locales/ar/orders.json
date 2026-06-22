@@ -1,0 +1,156 @@
+{
+  "title": "الطلبات",
+  "subtitle": "إدارة الطلبات",
+  "status": {
+    "pending": "في الانتظار",
+    "in_progress": "قيد التنفيذ",
+    "paid": "مدفوع",
+    "cancelled": "ملغي"
+  },
+  "caisse": {
+    "open": "فتح الصندوق",
+    "close": "إغلاق الصندوق",
+    "opened": "الصندوق مفتوح",
+    "closed": "الصندوق مغلق",
+    "fund": "رصيد الصندوق",
+    "server": "اسم النادل",
+    "openedAt": "الفتح: {time}",
+    "totalExpected": "الإجمالي المتوقع في الصندوق",
+    "fundPlusCash": "الرصيد + النقد المحصل",
+    "confirmClose": "تأكيد الإغلاق"
+  },
+  "cart": {
+    "title": "السلة",
+    "total": "الإجمالي",
+    "submit": "تأكيد الطلب",
+    "empty": "السلة فارغة",
+    "items": "عناصر",
+    "table": "السلة (طاولة {table})"
+  },
+  "payment": {
+    "title": "الدفع",
+    "methods": {
+      "cash": "نقدي",
+      "wave": "ويف",
+      "orange_money": "أورانج موني"
+    },
+    "amount": "المبلغ المطلوب",
+    "confirm": "تأكيد الدفع"
+  },
+  "ardoise": {
+    "title": "الحسابات المفتوحة",
+    "empty": "لا توجد حسابات مفتوحة حالياً",
+    "total": "إجمالي الحسابات المفتوحة",
+    "pay": "تحصيل الدفع الآن",
+    "warning": "قام هؤلاء العملاء باستهلاك ولكن لم يدفعوا بعد. سيدفعون عند الإغلاق أو المغادرة.",
+    "existingNote": "حساب مفتوح على الطاولة {table}",
+    "itemsAdded": "سيتم إضافة العناصر إلى الحساب المفتوح الحالي."
+  },
+  "history": {
+    "title": "السجل",
+    "empty": "لا توجد طلبات في السجل",
+    "details": "تفاصيل الطلب",
+    "total": "إجمالي المحصل",
+    "orders": "الطلبات",
+    "avgTicket": "متوسط الفاتورة",
+    "lastDays": "آخر 30 يوماً · {count} طلب مدفوع",
+    "paid": "مدفوع"
+  },
+  "search": {
+    "placeholder": "البحث عن منتج..."
+  },
+  "product": {
+    "outOfStock": "نفد المخزون",
+    "stock": "المخزون",
+    "price": "السعر",
+    "category": "الفئة",
+    "inStock": "متوفر",
+    "critical": "مخزون حرج"
+  },
+  "table": {
+    "title": "مخطط القاعة",
+    "select": "اختر طاولة للبدء",
+    "manage": "إدارة",
+    "free": "شاغرة",
+    "occupied": "مشغولة",
+    "waiting": "في الانتظار",
+    "seats": "{seats} شخص",
+    "number": "الرقم",
+    "places": "عدد المقاعد",
+    "status": "الحالة",
+    "add": "إضافة طاولة",
+    "edit": "تعديل الطاولة",
+    "delete": "حذف",
+    "editTitle": "تعديل الطاولة {number}",
+    "addTitle": "إضافة طاولة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "deleteConfirm": "حذف الطاولة {number}؟"
+  },
+  "order": {
+    "detail": "تفاصيل الطلب",
+    "table": "طاولة {table}",
+    "id": "الطلب: {id}",
+    "items": "{count} عنصر(عناصر)",
+    "total": "الإجمالي",
+    "paid": "مدفوع",
+    "pending": "حساب مفتوح",
+    "inProgress": "قيد التنفيذ",
+    "print": "طباعة الإيصال",
+    "close": "إغلاق",
+    "pay": "دفع",
+    "ardoise": "حساب مفتوح",
+    "ticketPrinted": "لا يمكن طباعة الإيصال إلا بعد الدفع!",
+    "payFirst": "يرجى دفع الطلب أولاً قبل الإغلاق!"
+  },
+  "validation": {
+    "title": "تأكيد الطلب",
+    "table": "طاولة {table} · {total} FCFA",
+    "ardoise": "وضع على الحساب المفتوح",
+    "ardoiseDesc": "تبقى الطاولة مشغولة. سيدفع العميل لاحقاً.",
+    "payNow": "الدفع الآن",
+    "payNowDesc": "تحصيل فوري: نقدي، ويف أو أورانج موني."
+  },
+  "errors": {
+    "caisseClosed": "افتح الصندوق أولاً لبدء الخدمة!",
+    "selectTable": "يرجى اختيار طاولة أولاً!",
+    "paymentRequired": "يرجى دفع الطلب أولاً قبل الإغلاق!",
+    "printNotPaid": "لا يمكن طباعة الإيصال إلا بعد الدفع!",
+    "printError": "تعذر فتح نافذة الطباعة.",
+    "cartEmpty": "سلتك فارغة"
+  },
+  "modals": {
+    "caisse": {
+      "open": "فتح الصندوق",
+      "openDesc": "المبلغ النقدي في الصندوق في بداية الخدمة",
+      "serverLabel": "اسم النادل (اختياري)",
+      "serverPlaceholder": "مثال: فاتو، جان بيير...",
+      "openButton": "فتح الصندوق",
+      "cancel": "إلغاء",
+      "date": "{weekday} {day} {month}"
+    },
+    "fermeture": {
+      "title": "إغلاق الصندوق",
+      "openedAt": "الفتح: {time}",
+      "server": "{server}",
+      "fund": "رصيد الصندوق",
+      "cashReceipts": "الإيرادات النقدية",
+      "payments": "{count} دفعة(مدفوعات)",
+      "totalExpected": "الإجمالي المتوقع في الصندوق",
+      "fundPlusCash": "الرصيد + النقد المحصل",
+      "ardoisesOpen": "{count} حساب(حسابات) مفتوح(ة) لا تزال مفتوحة",
+      "ardoisesTotal": "المبلغ الإجمالي: {total} FCFA — تذكر تحصيلها قبل الإغلاق.",
+      "confirmClose": "تأكيد الإغلاق"
+    }
+  },
+  "loading": "جاري تحميل المنتجات...",
+  "noProducts": "لا توجد منتجات",
+  "noProductsDesc": "عدّل عوامل التصفية أو أضف منتجات في المخزون",
+  "currentOrders": "الطلبات الحالية",
+  "currentOrdersDesc": "انقر على طلب لرؤية التفاصيل",
+  "orderCount": "{count} طلب(طلبات)",
+  "noActiveOrders": "لا توجد طلبات حالية",
+  "totalFCFA": "{amount} FCFA",
+  "paidWith": "الدفع عن طريق {method}",
+  "thankYou": "شكراً لزيارتكم!"
+}

@@ -30,6 +30,26 @@ import {
   qtyDefautParFormat,
 } from '@/utils/reapproStore';
 import { useCategories } from '@/utils/productStore';
+import { recordEntree } from '@/utils/movementStore';
+import { useTranslation } from 'react-i18next';
+
+// ── Vignette produit : photo réelle si dispo, sinon emoji générique ──
+// (même logique que dans Stocks.tsx — la photo du catalogue doit aussi
+// apparaître ici, dans l'écran de commande fournisseur)
+function ProductThumb({ product }: { product?: { photo?: string; image?: string; color?: string } | null }) {
+  if (product?.photo) {
+    return (
+      <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-slate-200">
+        <img src={product.photo} alt="" className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: product ? `${product.color || '#8B5CF6'}20` : '#f1f5f9' }}>
+      {product?.image || '📦'}
+    </div>
+  );
+}
 
 const fmt = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
 const fmtCompact = (n: number) => {
@@ -40,12 +60,13 @@ const fmtCompact = (n: number) => {
 
 type ReapproTab = 'overview' | 'order' | 'in_progress' | 'history' | 'suppliers';
 
-const TABS: { id: ReapproTab; label: string; icon: typeof Truck }[] = [
-  { id: 'overview',    label: "Vue d'ensemble", icon: LayoutGrid  },
-  { id: 'order',       label: 'Commande',        icon: ShoppingCart },
-  { id: 'in_progress', label: 'En cours',        icon: Clock       },
-  { id: 'history',     label: 'Historique',      icon: History     },
-  { id: 'suppliers',   label: 'Fournisseurs',    icon: Users       },
+// ✅ Garder label et labelKey
+const TABS: { id: ReapproTab; label: string; labelKey: string; icon: typeof Truck }[] = [
+  { id: 'overview',    label: "Vue d'ensemble", labelKey: 'tabs.overview', icon: LayoutGrid  },
+  { id: 'order',       label: 'Commande',       labelKey: 'tabs.order',    icon: ShoppingCart },
+  { id: 'in_progress', label: 'En cours',       labelKey: 'tabs.in_progress', icon: Clock },
+  { id: 'history',     label: 'Historique',     labelKey: 'tabs.history',  icon: History     },
+  { id: 'suppliers',   label: 'Fournisseurs',   labelKey: 'tabs.suppliers', icon: Users       },
 ];
 
 function AnimatedKpiCard({ icon, label, value, change, positive, color }: {
@@ -95,6 +116,7 @@ const StyledTooltip = ({ active, payload, label }: any) => {
 
 // ── Composant principal ───────────────────────────────────────
 export function Reappro() {
+  const { t } = useTranslation('reappro');
   const [activeTab, setActiveTab] = useState<ReapproTab>('overview');
 
   const products = useLiveQuery(() => universalSync.getProduits(), []);
@@ -113,10 +135,13 @@ export function Reappro() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">Réapprovisionnement</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">{t('title')}</h1>
             <p className="text-emerald-100 mt-1 flex items-center gap-2">
               <Activity size={14} />
-              {hasRealData ? `✅ ${orders.filter(o => o.status === 'reçue').length} commande(s) reçue(s) enregistrées` : 'Gestion des commandes fournisseurs'}
+              {hasRealData
+                ? `✅ ${orders.filter(o => o.status === 'reçue').length} ${t('info.real_data', { count: orders.filter(o => o.status === 'reçue').length })}`
+                : t('info.no_data')
+              }
             </p>
           </div>
         </div>
@@ -127,14 +152,14 @@ export function Reappro() {
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
             <CheckCircle size={15} className="text-emerald-600 shrink-0" />
             <p className="text-sm text-emerald-800 font-medium">
-              Données réelles — {orders.length} commande(s) enregistrée(s), sauvegardées localement et synchronisées.
+              {t('info.real_data', { count: orders.length })}
             </p>
           </div>
         ) : (
           <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
             <AlertCircle size={15} className="text-amber-600 shrink-0" />
             <p className="text-sm text-amber-800 font-medium">
-              Aucune commande fournisseur enregistrée — créez votre première commande dans l'onglet "Commande".
+              {t('info.no_data')}
             </p>
           </div>
         )}
@@ -145,12 +170,14 @@ export function Reappro() {
           {TABS.map(tab => {
             const Icon = tab.icon;
             const badge = tab.id === 'in_progress' ? orders.filter(o => o.status === 'envoyée' || o.status === 'brouillon').length : 0;
+            // ✅ Utiliser t avec fallback sur label
+            const label = t(tab.labelKey, tab.label);
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                 className={cn('flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                   activeTab === tab.id ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100')}>
                 <Icon size={16} />
-                {tab.label}
+                {label}
                 {badge > 0 && (
                   <span className="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
                 )}
@@ -173,6 +200,7 @@ export function Reappro() {
 
 // ── OVERVIEW ─────────────────────────────────────────────────
 function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
+  const { t } = useTranslation('reappro');
   const now = new Date();
   const receivedOrders = orders.filter(o => o.status === 'reçue');
   const monthlyOrders = receivedOrders.filter(o => {
@@ -232,8 +260,8 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-slate-400">
         <Package size={48} className="mb-4 opacity-30" />
-        <p className="text-lg font-semibold text-slate-500">Aucun achat enregistré</p>
-        <p className="text-sm mt-2">Créez votre première commande fournisseur dans l'onglet "Commande"</p>
+        <p className="text-lg font-semibold text-slate-500">{t('overview.no_data')}</p>
+        <p className="text-sm mt-2">{t('overview.no_data_desc')}</p>
       </div>
     );
   }
@@ -241,16 +269,16 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <AnimatedKpiCard icon={<DollarSign size={20} />} label="Total achats" value={`${fmt(totalAchats)} FCFA`} color="emerald" />
-        <AnimatedKpiCard icon={<ShoppingCart size={20} />} label="Commandes reçues" value={fmt(receivedOrders.length)} color="violet" />
-        <AnimatedKpiCard icon={<Package size={20} />} label="Articles commandés" value={fmt(totalArticles)} color="blue" />
-        <AnimatedKpiCard icon={<Clock size={20} />} label="Délai livraison moyen" value={`${avgDeliveryDays} jours`} color="amber" />
+        <AnimatedKpiCard icon={<DollarSign size={20} />} label={t('overview.total_purchases')} value={`${fmt(totalAchats)} FCFA`} color="emerald" />
+        <AnimatedKpiCard icon={<ShoppingCart size={20} />} label={t('overview.orders_received')} value={fmt(receivedOrders.length)} color="violet" />
+        <AnimatedKpiCard icon={<Package size={20} />} label={t('overview.items_ordered')} value={fmt(totalArticles)} color="blue" />
+        <AnimatedKpiCard icon={<Clock size={20} />} label={t('overview.avg_delivery')} value={`${avgDeliveryDays} jours`} color="amber" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <h2 className="font-semibold text-slate-900 text-lg flex items-center gap-2 mb-4">
-            <BarChart3 size={20} className="text-emerald-500" /> Achats mensuels
+            <BarChart3 size={20} className="text-emerald-500" /> {t('overview.monthly')}
           </h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -265,7 +293,7 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} />
                 <YAxis tickFormatter={fmtCompact} tick={{ fontSize: 11, fill: '#64748b' }} />
                 <Tooltip content={<StyledTooltip />} />
-                <Area type="monotone" dataKey="montant" stroke="#10B981" strokeWidth={2} fill="url(#monthGrad)" name="Achats (FCFA)" />
+                <Area type="monotone" dataKey="montant" stroke="#10B981" strokeWidth={2} fill="url(#monthGrad)" name={t('overview.monthly')} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -273,7 +301,7 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
 
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <h2 className="font-semibold text-slate-900 text-lg flex items-center gap-2 mb-4">
-            <PieChartIcon size={20} className="text-violet-500" /> Répartition par fournisseur
+            <PieChartIcon size={20} className="text-violet-500" /> {t('overview.supplier_detail')}
           </h2>
           <div className="h-64">
             {supplierChartData.length > 0 ? (
@@ -292,7 +320,7 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-full text-slate-400">
-                <p className="text-sm">Aucune donnée disponible</p>
+                <p className="text-sm">{t('overview.no_data')}</p>
               </div>
             )}
           </div>
@@ -303,28 +331,28 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
         <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Crown size={20} className="text-amber-500" />
-            <h2 className="font-semibold text-slate-900 text-lg">📦 Dernière commande reçue</h2>
+            <h2 className="font-semibold text-slate-900 text-lg">{t('overview.last_order')}</h2>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div><p className="text-sm text-slate-600">Commande</p><p className="text-xl font-bold text-slate-900">{lastOrder.id}</p><p className="text-sm text-slate-500 mt-1">{lastOrder.supplierName}</p></div>
-            <div className="text-center"><p className="text-sm text-slate-600">Date</p><p className="text-lg font-semibold text-slate-800">{new Date(lastOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p></div>
-            <div className="text-center"><p className="text-sm text-slate-600">Montant</p><p className="text-xl font-bold text-emerald-600">{fmt(lastOrder.totalAmount)} FCFA</p></div>
-            <div className="text-center"><p className="text-sm text-slate-600">Articles</p><p className="text-lg font-semibold text-slate-800">{lastOrder.items.reduce((s, i) => s + i.quantity, 0)} unités</p></div>
+            <div><p className="text-sm text-slate-600">{t('overview.order')}</p><p className="text-xl font-bold text-slate-900">{lastOrder.id}</p><p className="text-sm text-slate-500 mt-1">{lastOrder.supplierName}</p></div>
+            <div className="text-center"><p className="text-sm text-slate-600">{t('overview.date')}</p><p className="text-lg font-semibold text-slate-800">{new Date(lastOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p></div>
+            <div className="text-center"><p className="text-sm text-slate-600">{t('overview.amount')}</p><p className="text-xl font-bold text-emerald-600">{fmt(lastOrder.totalAmount)} FCFA</p></div>
+            <div className="text-center"><p className="text-sm text-slate-600">{t('overview.items')}</p><p className="text-lg font-semibold text-slate-800">{lastOrder.items.reduce((s, i) => s + i.quantity, 0)} {t('units.units')}</p></div>
           </div>
         </div>
       )}
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-          <h2 className="font-semibold text-slate-900 text-lg flex items-center gap-2"><Building2 size={20} className="text-emerald-500" /> Détail par fournisseur</h2>
+          <h2 className="font-semibold text-slate-900 text-lg flex items-center gap-2"><Building2 size={20} className="text-emerald-500" /> {t('overview.supplier_detail')}</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="bg-slate-50">
-              <th className="p-4 text-left font-semibold text-slate-600">Fournisseur</th>
-              <th className="p-4 text-center font-semibold text-slate-600">Nb commandes</th>
-              <th className="p-4 text-right font-semibold text-slate-600">Coût total (FCFA)</th>
-              <th className="p-4 text-center font-semibold text-slate-600">Dernière livraison</th>
+              <th className="p-4 text-left font-semibold text-slate-600">{t('overview.supplier')}</th>
+              <th className="p-4 text-center font-semibold text-slate-600">{t('overview.nb_orders')}</th>
+              <th className="p-4 text-right font-semibold text-slate-600">{t('overview.total_cost')}</th>
+              <th className="p-4 text-center font-semibold text-slate-600">{t('overview.last_delivery')}</th>
             </tr></thead>
             <tbody>
               {supplierStats.map((s, i) => (
@@ -342,14 +370,14 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl border border-violet-100 p-5">
-          <div className="flex items-center gap-2 mb-3"><CalendarDays size={18} className="text-violet-600" /><h3 className="font-semibold text-slate-800">📅 Ce mois-ci</h3></div>
-          <div className="flex justify-between"><span className="text-sm text-slate-600">Total achats</span><span className="text-xl font-bold text-violet-600">{fmt(totalAchatsMensuel)} FCFA</span></div>
-          <div className="flex justify-between mt-2"><span className="text-sm text-slate-600">Commandes reçues</span><span className="text-lg font-semibold text-slate-700">{monthlyOrders.length}</span></div>
+          <div className="flex items-center gap-2 mb-3"><CalendarDays size={18} className="text-violet-600" /><h3 className="font-semibold text-slate-800">{t('overview.this_month')}</h3></div>
+          <div className="flex justify-between"><span className="text-sm text-slate-600">{t('overview.total_purchases')}</span><span className="text-xl font-bold text-violet-600">{fmt(totalAchatsMensuel)} FCFA</span></div>
+          <div className="flex justify-between mt-2"><span className="text-sm text-slate-600">{t('overview.orders_received')}</span><span className="text-lg font-semibold text-slate-700">{monthlyOrders.length}</span></div>
         </div>
         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5">
-          <div className="flex items-center gap-2 mb-3"><CalendarDays size={18} className="text-emerald-600" /><h3 className="font-semibold text-slate-800">📆 Cette année</h3></div>
-          <div className="flex justify-between"><span className="text-sm text-slate-600">Total achats</span><span className="text-xl font-bold text-emerald-600">{fmt(totalAchatsAnnuel)} FCFA</span></div>
-          <div className="flex justify-between mt-2"><span className="text-sm text-slate-600">Commandes reçues</span><span className="text-lg font-semibold text-slate-700">{yearlyOrders.length}</span></div>
+          <div className="flex items-center gap-2 mb-3"><CalendarDays size={18} className="text-emerald-600" /><h3 className="font-semibold text-slate-800">{t('overview.this_year')}</h3></div>
+          <div className="flex justify-between"><span className="text-sm text-slate-600">{t('overview.total_purchases')}</span><span className="text-xl font-bold text-emerald-600">{fmt(totalAchatsAnnuel)} FCFA</span></div>
+          <div className="flex justify-between mt-2"><span className="text-sm text-slate-600">{t('overview.orders_received')}</span><span className="text-lg font-semibold text-slate-700">{yearlyOrders.length}</span></div>
         </div>
       </div>
     </div>
@@ -358,8 +386,8 @@ function OverviewTab({ orders }: { orders: ReapproOrder[] }) {
 
 // ── COMMANDE ─────────────────────────────────────────────────
 function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: any[] }) {
+  const { t } = useTranslation('reappro');
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
-  // ⭐ Utiliser l'index comme clé pour les quantités (pas productId)
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -376,7 +404,6 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
   }, 0);
   const itemsCount = Object.values(quantities).filter(q => q > 0).length;
 
-  // ⭐ QUANTITÉ INDÉPENDANTE pour chaque produit (par index)
   const handleQtyChange = (index: number, value: string) => {
     const qty = parseInt(value) || 0;
     setQuantities(prev => ({ ...prev, [index]: qty }));
@@ -387,38 +414,28 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
     setSaving(true);
 
     const items: ReapproOrderItem[] = supplierCatalogProducts
-      .filter((_, index) => (quantities[index] || 0) > 0)
-      .map(({ sp, catProd }, index) => {
+      .map(({ sp, catProd }, index) => ({ sp, catProd, index }))
+      .filter(({ index }) => (quantities[index] || 0) > 0)
+      .map(({ sp, catProd, index }) => {
         const qty = quantities[index] || 0;
-
-        // Nombre de bouteilles/unités par carton (qtyPerCarton sauvegardé dans SuppliersTab)
         const qtyParCarton = sp.qtyPerCarton || sp.qtyParCarton || 1;
-
-        // totalUnites = ce qui va dans le stock
-        // Si mode carton : qty cartons × qtyParCarton bouteilles
-        // Si mode unité  : qty directement
         const totalUnites = sp.unitType === 'carton' ? qty * qtyParCarton : qty;
-
-        // Prix du carton complet (affiché à la commande)
-        // Prix unitaire par bouteille = pricePerCarton / qtyParCarton
         const priceCarton = sp.pricePerCarton || 0;
         const pricePerUnit = sp.unitType === 'carton' && priceCarton > 0 && qtyParCarton > 0
           ? Math.round(priceCarton / qtyParCarton)
           : sp.pricePerUnit || 0;
-
-        // Prix affiché à la commande (prix du carton si carton, sinon prix unitaire)
         const prixCommande = sp.unitType === 'carton' ? priceCarton : pricePerUnit;
 
         return {
           productId: sp.productId || '',
           productName: sp.productName,
-          quantity: qty,                     // nb de cartons OU nb d'unités commandées
+          quantity: qty,
           formatLivraison: (sp.unitType === 'carton' ? 'carton' : 'unité') as any,
           qtyParCarton,
-          totalUnites,                       // ← nb de bouteilles réelles à ajouter au stock
+          totalUnites,
           totalCl: 0,
           contenanceClUnite: 0,
-          unitPrice: prixCommande,           // prix affiché par ligne (carton ou unité)
+          unitPrice: prixCommande,
           totalPrice: qty * prixCommande,
           unit: sp.unitType === 'carton' ? 'carton' : 'unité',
         };
@@ -443,13 +460,13 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
   return (
     <div className="space-y-5 max-w-4xl mx-auto">
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-        <label className="text-xs font-bold text-slate-600 uppercase tracking-wide block mb-2">Fournisseur</label>
+        <label className="text-xs font-bold text-slate-600 uppercase tracking-wide block mb-2">{t('order.supplier')}</label>
         <select value={selectedSupplierId} onChange={e => { setSelectedSupplierId(e.target.value); setQuantities({}); }}
           className="w-full p-3 rounded-xl border border-slate-200 text-sm bg-white font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-          <option value="">— Sélectionner un fournisseur —</option>
+          <option value="">{t('order.select_supplier')}</option>
           {suppliers.map(s => (<option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>))}
         </select>
-        {suppliers.length === 0 && <p className="text-xs text-amber-600 mt-2 font-medium">⚠️ Aucun fournisseur — ajoutez-en dans l'onglet "Fournisseurs".</p>}
+        {suppliers.length === 0 && <p className="text-xs text-amber-600 mt-2 font-medium">{t('order.no_supplier_warning')}</p>}
       </div>
 
       {selectedSupplier && (
@@ -457,26 +474,26 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
           {supplierCatalogProducts.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
               <Package size={36} className="mx-auto mb-3 text-slate-300" />
-              <p className="text-slate-500 font-semibold">Aucun produit lié au catalogue</p>
-              <p className="text-xs text-slate-400 mt-1">Modifiez ce fournisseur et liez ses produits.</p>
+              <p className="text-slate-500 font-semibold">{t('order.no_products')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('order.no_products_desc')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {supplierCatalogProducts.map(({ sp, catProd }, index) => {
                 const qty = quantities[index] || 0;
                 const displayPrice = sp.unitType === 'carton' && sp.pricePerCarton ? sp.pricePerCarton : sp.pricePerUnit;
-                const displayUnit = sp.unitType === 'carton' ? 'carton' : 'unité';
+                const displayUnit = sp.unitType === 'carton' ? t('units.carton') : t('units.unit');
                 const qtyPerCarton = sp.qtyPerCarton || 0;
                 return (
                   <div key={index} className={cn('bg-white rounded-2xl border-2 p-4 flex flex-col gap-3 transition-all', qty > 0 ? 'border-emerald-400 bg-emerald-50/40 shadow-md' : 'border-slate-200 hover:border-slate-300')}>
                     <div className="flex items-start gap-2">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: catProd ? `${catProd.color}20` : '#f1f5f9' }}>{catProd?.image || '📦'}</div>
+                      <ProductThumb product={catProd} />
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-bold text-slate-900">{sp.productName}</p>
-                        {catProd && <p className="text-[10px] text-slate-400">Stock: {catProd.stock}</p>}
+                        {catProd && <p className="text-[10px] text-slate-400">{t('product.stock')}: {catProd.stock}</p>}
                         <p className="text-[9px] text-slate-500">
-                          Commande en <strong>{displayUnit}</strong>
-                          {sp.unitType === 'carton' && qtyPerCarton > 0 && ` (×${qtyPerCarton} bouteilles/carton)`}
+                          {t('order.order_in')} <strong>{displayUnit}</strong>
+                          {sp.unitType === 'carton' && qtyPerCarton > 0 && ` (${t('order.per_carton')})`}
                         </p>
                       </div>
                     </div>
@@ -512,7 +529,7 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
                           = {fmt(qty * displayPrice)} F
                         </p>
                         {sp.unitType === 'carton' && qtyPerCarton > 0 && (
-                          <p className="text-[9px] text-slate-400">Soit {(qty * qtyPerCarton).toLocaleString()} bouteilles</p>
+                          <p className="text-[9px] text-slate-400">{t('order.so_bottles', { count: qty * qtyPerCarton })}</p>
                         )}
                       </div>
                     )}
@@ -525,20 +542,20 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
             {saveSuccess && (
               <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4">
                 <Check size={16} className="text-emerald-600" />
-                <p className="text-sm text-emerald-700 font-semibold">✅ Commande enregistrée et sauvegardée !</p>
+                <p className="text-sm text-emerald-700 font-semibold">{t('order.saved')}</p>
               </div>
             )}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
-                <p className="text-xs text-slate-500">Récapitulatif</p>
-                <p className="text-sm text-slate-700"><span className="font-bold">{itemsCount} produit(s)</span> · {Object.values(quantities).reduce((s, q) => s + (q || 0), 0)} unités</p>
+                <p className="text-xs text-slate-500">{t('order.recap')}</p>
+                <p className="text-sm text-slate-700"><span className="font-bold">{itemsCount} {t('order.products')}</span> · {Object.values(quantities).reduce((s, q) => s + (q || 0), 0)} {t('order.units')}</p>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-right"><p className="text-xs text-slate-500">Total estimé</p><p className="text-xl font-black text-slate-900">{fmt(total)} FCFA</p></div>
+                <div className="text-right"><p className="text-xs text-slate-500">{t('order.total_estimated')}</p><p className="text-xl font-black text-slate-900">{fmt(total)} FCFA</p></div>
                 <button onClick={handleSave} disabled={itemsCount === 0 || saving}
                   className={cn('px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all',
                     itemsCount > 0 && !saving ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg' : 'bg-slate-200 text-slate-400 cursor-not-allowed')}>
-                  <Check size={18} /> {saving ? 'Enregistrement...' : 'Enregistrer'}
+                  <Check size={18} /> {saving ? t('order.saving') : t('order.save')}
                 </button>
               </div>
             </div>
@@ -551,6 +568,7 @@ function OrderTab({ suppliers, products }: { suppliers: Supplier[]; products: an
 
 // ── EN COURS ──────────────────────────────────────────────────
 function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]; products: any[]; suppliers: Supplier[] }) {
+  const { t } = useTranslation('reappro');
   const [selectedOrder, setSelectedOrder] = useState<ReapproOrder | null>(null);
   const [receivedQtys, setReceivedQtys] = useState<Record<number, string>>({});
   const [success, setSuccess] = useState(false);
@@ -579,35 +597,37 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
       const supplier = suppliers.find((s: any) => s.id === selectedOrder.supplierId);
 
       for (const [i, item] of selectedOrder.items.entries()) {
-        // Quantité réelle de cartons/unités saisie dans le formulaire de réception
         const qtyRecu = parseInt(receivedQtys[i] || '0');
         if (qtyRecu <= 0) continue;
 
-        // Recalculer le nb de bouteilles à partir de la quantité réellement reçue
-        // (l'utilisateur peut avoir ajusté la quantité reçue)
         const qtyParCarton = item.qtyParCarton || 1;
         const totalUnitesRecus = item.formatLivraison === 'carton' || item.unit === 'carton'
           ? qtyRecu * qtyParCarton
           : qtyRecu;
 
-        // Chercher le produit existant par id OU par nom
         const existingProduct = item.productId
           ? products.find((p: any) => p.id === item.productId)
           : products.find((p: any) => p.nom === item.productName || p.name === item.productName);
 
         if (existingProduct) {
-          // Produit existant → incrémenter le stock du bon nombre de bouteilles
           await universalSync.updateProduit(existingProduct.id, {
             ...existingProduct,
             stock: existingProduct.stock + totalUnitesRecus,
           });
+
+          await recordEntree({
+            productId: existingProduct.id,
+            productName: existingProduct.nom || existingProduct.name || item.productName,
+            quantity: totalUnitesRecus,
+            supplier: selectedOrder.supplierName,
+            purchasePrice: item.unitPrice,
+            reason: `${t('in_progress.receive')} — ${selectedOrder.supplierName} (${selectedOrder.id})`,
+          });
         } else {
-          // Nouveau produit → création automatique dans le stock
           const supplierProduct = supplier?.products?.find(
             (sp: any) => sp.productId === item.productId || sp.productName === item.productName
           );
           const category = (supplierProduct as any)?.category || 'autre';
-          // Prix unitaire bouteille (on divise le prix carton si nécessaire)
           const priceParBouteille = item.unit === 'carton' && qtyParCarton > 0
             ? Math.round(item.unitPrice / qtyParCarton)
             : item.unitPrice || 0;
@@ -628,12 +648,20 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
             options: {},
           });
           newlyAddedIds.push(addedProduct.id);
+
+          await recordEntree({
+            productId: addedProduct.id,
+            productName: item.productName,
+            quantity: totalUnitesRecus,
+            supplier: selectedOrder.supplierName,
+            purchasePrice: priceParBouteille,
+            reason: `${t('in_progress.receive')} (nouveau produit) — ${selectedOrder.supplierName} (${selectedOrder.id})`,
+          });
         }
       }
 
       await reapproDB.updateOrderStatus(selectedOrder.id, 'reçue', new Date().toISOString());
 
-      // Rafraîchir Stocks.tsx
       window.dispatchEvent(new CustomEvent('productsUpdated', {
         detail: { addedProductIds: newlyAddedIds },
       }));
@@ -655,7 +683,7 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
     } catch (error) {
       console.error('Erreur lors de la réception:', error);
       setIsProcessing(false);
-      alert('Erreur lors de la réception de la commande. Vérifiez la console.');
+      alert(t('errors.reception_error'));
     }
   };
 
@@ -668,10 +696,10 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <Clock size={16} className="text-amber-500" />
-          <span className="text-sm font-semibold text-slate-700">{filteredOrders.length} commande(s) en attente</span>
+          <span className="text-sm font-semibold text-slate-700">{filteredOrders.length} {t('in_progress.waiting')}</span>
         </div>
         <select value={filterSupplier} onChange={e => setFilterSupplier(e.target.value)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white">
-          <option value="all">Tous les fournisseurs</option>
+          <option value="all">{t('in_progress.all_suppliers')}</option>
           {allSuppliers.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
@@ -679,7 +707,7 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
       {filteredOrders.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
           <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4"><PackageCheck size={28} className="text-emerald-400" /></div>
-          <p className="text-slate-600 font-semibold">Aucune commande en attente</p>
+          <p className="text-slate-600 font-semibold">{t('in_progress.empty')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -687,7 +715,7 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
             <button key={order.id} onClick={() => openOrder(order)} className="w-full bg-white rounded-xl border border-slate-200 p-4 text-left hover:shadow-md transition-all">
               <div className="flex items-center justify-between">
                 <div><p className="font-bold text-slate-800">{order.id}</p><p className="text-xs text-slate-500">{order.supplierName} · {new Date(order.createdAt).toLocaleDateString('fr-FR')}</p></div>
-                <div className="text-right"><p className="text-sm font-bold text-slate-900">{fmt(order.totalAmount)} F</p><p className="text-[10px] text-slate-400">{order.items.reduce((s, i) => s + (i.unit === 'carton' ? i.quantity * (i.qtyParCarton || 1) : i.quantity), 0)} bouteilles</p></div>
+                <div className="text-right"><p className="text-sm font-bold text-slate-900">{fmt(order.totalAmount)} F</p><p className="text-[10px] text-slate-400">{order.items.reduce((s, i) => s + (i.unit === 'carton' ? i.quantity * (i.qtyParCarton || 1) : i.quantity), 0)} {t('units.bottles')}</p></div>
               </div>
             </button>
           ))}
@@ -705,16 +733,16 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
             {success ? (
               <div className="flex-1 flex flex-col items-center justify-center py-16">
                 <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-4"><PackageCheck size={36} className="text-emerald-600" /></div>
-                <p className="text-xl font-bold text-slate-900">Commande reçue !</p>
-                <p className="text-sm text-slate-500 mt-2">Stocks mis à jour.</p>
-                <p className="text-xs text-violet-500 mt-1">Les nouveaux produits ont été créés automatiquement dans le stock.</p>
+                <p className="text-xl font-bold text-slate-900">{t('in_progress.success')}</p>
+                <p className="text-sm text-slate-500 mt-2">{t('in_progress.success_desc')}</p>
+                <p className="text-xs text-violet-500 mt-1">{t('in_progress.success_new')}</p>
               </div>
             ) : (
               <>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
-                    💡 Ajustez les quantités réellement reçues avant de confirmer.
-                    <span className="block text-blue-600 font-semibold mt-1">📦 Les produits inconnus seront créés automatiquement dans le stock.</span>
+                    {t('in_progress.adjust')}
+                    <span className="block text-blue-600 font-semibold mt-1">{t('in_progress.new_products')}</span>
                   </div>
                   
                   {selectedOrder.items.map((item, i) => {
@@ -728,14 +756,14 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
                         <div className="flex justify-between mb-2 flex-wrap gap-1">
                           <p className="font-semibold text-slate-800 flex items-center gap-2">
                             {item.productName}
-                            {!exists && <span className="text-[9px] bg-violet-200 text-violet-800 px-1.5 py-0.5 rounded-full font-bold">🆕 NOUVEAU</span>}
+                            {!exists && <span className="text-[9px] bg-violet-200 text-violet-800 px-1.5 py-0.5 rounded-full font-bold">🆕 {t('in_progress.new_products')}</span>}
                           </p>
                           <p className="text-sm font-bold text-emerald-600">
-                            {item.quantity} {isCarton ? `carton${item.quantity > 1 ? 's' : ''} × ${qtyParCarton}` : item.unit} = <strong>{item.quantity * (isCarton ? qtyParCarton : 1)} bouteilles</strong>
+                            {item.quantity} {isCarton ? `${t('units.carton')}${item.quantity > 1 ? 's' : ''} × ${qtyParCarton}` : item.unit} = <strong>{item.quantity * (isCarton ? qtyParCarton : 1)} {t('units.bottles')}</strong>
                           </p>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <label className="text-xs text-slate-600 shrink-0">Qté reçue :</label>
+                          <label className="text-xs text-slate-600 shrink-0">{t('in_progress.qty_received')}</label>
                           <input 
                             type="number" 
                             min={0} 
@@ -743,16 +771,16 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
                             onChange={e => setReceivedQtys(prev => ({ ...prev, [i]: e.target.value }))} 
                             className="w-24 p-2 rounded-lg border border-slate-200 text-sm text-center font-bold focus:outline-none focus:ring-2 focus:ring-emerald-400/40" 
                           />
-                          <span className="text-xs text-slate-500">{isCarton ? `carton${qtyRecu > 1 ? 's' : ''}` : 'unité(s)'}</span>
+                          <span className="text-xs text-slate-500">{isCarton ? `${t('units.carton')}${qtyRecu > 1 ? 's' : ''}` : t('units.unit_plural')}</span>
                           {qtyRecu > 0 && isCarton && (
                             <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                              = {bouteillesRecues} bouteilles en stock
+                              = {bouteillesRecues} {t('in_progress.received')}
                             </span>
                           )}
                           {receivedQtys[i] && parseInt(receivedQtys[i]) !== item.quantity && (
                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', 
                               parseInt(receivedQtys[i]) < item.quantity ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600')}>
-                              {parseInt(receivedQtys[i]) < item.quantity ? `⚠️ écart -${item.quantity - parseInt(receivedQtys[i])}` : `+${parseInt(receivedQtys[i]) - item.quantity}`}
+                              {parseInt(receivedQtys[i]) < item.quantity ? `⚠️ ${t('in_progress.gap_less', { count: item.quantity - parseInt(receivedQtys[i]) })}` : `${t('in_progress.gap_more', { count: parseInt(receivedQtys[i]) - item.quantity })}`}
                             </span>
                           )}
                         </div>
@@ -761,7 +789,7 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
                   })}
                   
                   <div className="bg-slate-900 rounded-2xl p-4 flex justify-between text-white">
-                    <span>Total reçu</span>
+                    <span>{t('in_progress.total_received')}</span>
                     <span className="text-lg font-bold text-emerald-400">{fmt(totalReceived)} FCFA</span>
                   </div>
                 </div>
@@ -771,7 +799,7 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
                     disabled={isProcessing}
                     className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium"
                   >
-                    Annuler
+                    {t('in_progress.cancel')}
                   </button>
                   <button 
                     onClick={handleConfirmReceived} 
@@ -782,12 +810,12 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
                     {isProcessing ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Traitement...
+                        {t('in_progress.processing')}
                       </>
                     ) : (
                       <>
                         <PackageCheck size={18} />
-                        Confirmer réception
+                        {t('in_progress.confirm')}
                       </>
                     )}
                   </button>
@@ -803,6 +831,7 @@ function InProgressTab({ orders, products, suppliers }: { orders: ReapproOrder[]
 
 // ── HISTORIQUE ────────────────────────────────────────────────
 function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
+  const { t } = useTranslation('reappro');
   const [filterStatus, setFilterStatus] = useState<ReapproOrder['status'] | 'all'>('all');
   const [filterSupplier, setFilterSupplier] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<ReapproOrder | null>(null);
@@ -815,7 +844,15 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
     return true;
   });
 
-  const statusLabel = (s: ReapproOrder['status']) => ({ brouillon: 'Brouillon', envoyée: 'Envoyée', reçue: 'Reçue', annulée: 'Annulée' }[s]);
+  const statusLabel = (s: ReapproOrder['status']) => {
+    const map = {
+      brouillon: t('history.status_draft'),
+      envoyée: t('history.status_sent'),
+      reçue: t('history.status_received'),
+      annulée: t('history.status_cancelled'),
+    };
+    return map[s] || s;
+  };
   const statusColor = (s: ReapproOrder['status']) => ({
     brouillon: 'bg-slate-100 text-slate-600', envoyée: 'bg-blue-100 text-blue-700',
     reçue: 'bg-emerald-100 text-emerald-700', annulée: 'bg-red-100 text-red-600',
@@ -836,47 +873,47 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
     doc.setFontSize(20);
     doc.text('BarFlow', 20, 20);
     doc.setFontSize(12);
-    doc.text('Détail Commande Fournisseur', 20, 32);
+    doc.text(t('pdf.title'), 20, 32);
     doc.setFontSize(9);
-    doc.text(`Généré le ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR')}`, 20, 40);
+    doc.text(`${t('pdf.generated', { date: now.toLocaleDateString('fr-FR'), time: now.toLocaleTimeString('fr-FR') })}`, 20, 40);
     
     let y = 60;
     doc.setFontSize(11);
     doc.setTextColor(15, 23, 42);
     doc.setFont('helvetica', 'bold');
-    doc.text('INFORMATIONS GÉNÉRALES', 20, y);
+    doc.text(t('pdf.general_info'), 20, y);
     y += 10;
     
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Commande : ${order.id}`, 20, y);
+    doc.text(`${t('pdf.order_id', { id: order.id })}`, 20, y);
     y += 8;
-    doc.text(`Fournisseur : ${order.supplierName}`, 20, y);
+    doc.text(`${t('pdf.supplier', { name: order.supplierName })}`, 20, y);
     y += 8;
-    if (order.supplierPhone) doc.text(`Téléphone : ${order.supplierPhone}`, 20, y);
+    if (order.supplierPhone) doc.text(`${t('pdf.phone', { phone: order.supplierPhone })}`, 20, y);
     y += 8;
-    doc.text(`Date : ${new Date(order.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}`, 20, y);
+    doc.text(`${t('pdf.date', { date: new Date(order.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) })}`, 20, y);
     y += 8;
-    if (order.receivedAt) doc.text(`Réception : ${new Date(order.receivedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}`, 20, y);
+    if (order.receivedAt) doc.text(`${t('pdf.receipt_date', { date: new Date(order.receivedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) })}`, 20, y);
     y += 8;
-    doc.text(`Statut : ${statusLabel(order.status)}`, 20, y);
+    doc.text(`${t('pdf.status', { status: statusLabel(order.status) })}`, 20, y);
     y += 12;
     
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('ARTICLES COMMANDÉS', 20, y);
+    doc.text(t('pdf.articles'), 20, y);
     y += 10;
     
     autoTable(doc, {
       startY: y,
-      head: [['Produit', 'Qté', 'Prix unitaire', 'Total']],
+      head: [[t('pdf.product'), t('pdf.qty'), t('pdf.unit_price'), t('pdf.total')]],
       body: order.items.map(item => [
         item.productName,
         `${item.quantity} ${item.unit}`,
         `${item.unitPrice.toLocaleString()} F`,
         `${item.totalPrice.toLocaleString()} F`
       ]),
-      foot: [['', '', 'TOTAL', `${order.totalAmount.toLocaleString()} FCFA`]],
+      foot: [['', '', t('pdf.total'), `${order.totalAmount.toLocaleString()} FCFA`]],
       theme: 'striped',
       headStyles: { fillColor: [16, 185, 129], textColor: 255, fontSize: 9 },
       footStyles: { fillColor: [240, 248, 240], textColor: [15, 23, 42], fontSize: 10, fontStyle: 'bold' },
@@ -887,8 +924,8 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
     const finalY = (doc as any).lastAutoTable.finalY + 10;
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text('BarFlow — Rapport confidentiel', 20, 280);
-    doc.text(`Page 1`, 190, 280, { align: 'right' });
+    doc.text(t('pdf.confidential'), 20, 280);
+    doc.text(t('pdf.page'), 190, 280, { align: 'right' });
     
     doc.save(`Commande_${order.id}_${now.toISOString().slice(0, 10)}.pdf`);
   };
@@ -897,24 +934,24 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
     <div className="space-y-4 max-w-5xl mx-auto">
       <div className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap gap-3">
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm">
-          <option value="all">Tous les statuts</option>
-          <option value="reçue">Reçue</option>
-          <option value="envoyée">Envoyée</option>
-          <option value="brouillon">Brouillon</option>
+          <option value="all">{t('history.all_status')}</option>
+          <option value="reçue">{t('history.status_received')}</option>
+          <option value="envoyée">{t('history.status_sent')}</option>
+          <option value="brouillon">{t('history.status_draft')}</option>
         </select>
         <select value={filterSupplier} onChange={e => setFilterSupplier(e.target.value)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm">
-          <option value="all">Tous les fournisseurs</option>
+          <option value="all">{t('history.all_suppliers')}</option>
           {allSuppliers.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <div className="ml-auto text-sm text-slate-500 flex items-center">{filteredOrders.length} commande(s)</div>
+        <div className="ml-auto text-sm text-slate-500 flex items-center">{filteredOrders.length} {t('history.commands')}</div>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-          <h2 className="font-semibold text-slate-900">📋 Historique des commandes</h2>
+          <h2 className="font-semibold text-slate-900">{t('history.title')}</h2>
         </div>
         {filteredOrders.length === 0 ? (
-          <div className="text-center py-16 text-slate-400"><AlertCircle size={40} className="mx-auto mb-3" /><p>Aucune commande</p></div>
+          <div className="text-center py-16 text-slate-400"><AlertCircle size={40} className="mx-auto mb-3" /><p>{t('history.empty')}</p></div>
         ) : (
           <div className="divide-y divide-slate-100">
             {filteredOrders.map(order => (
@@ -924,7 +961,7 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
                     <span className="font-bold text-slate-800">{order.id}</span>
                     <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', statusColor(order.status))}>{statusLabel(order.status)}</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{order.supplierName} · {new Date(order.createdAt).toLocaleDateString('fr-FR')} · {order.items.reduce((s, i) => s + i.quantity, 0)} unités</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{order.supplierName} · {new Date(order.createdAt).toLocaleDateString('fr-FR')} · {order.items.reduce((s, i) => s + i.quantity, 0)} {t('units.units')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <p className="text-sm font-bold text-slate-900">{fmt(order.totalAmount)} F</p>
@@ -932,7 +969,7 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
                     onClick={() => openDetail(order)}
                     className="px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 text-xs font-bold hover:bg-violet-100 transition"
                   >
-                    Détail
+                    {t('actions.detail')}
                   </button>
                 </div>
               </div>
@@ -958,11 +995,11 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs text-slate-500">Date commande</p>
+                  <p className="text-xs text-slate-500">{t('history.order_date')}</p>
                   <p className="text-sm font-semibold">{new Date(selectedOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs text-slate-500">Statut</p>
+                  <p className="text-xs text-slate-500">{t('history.status')}</p>
                   <p className={cn('text-sm font-semibold', 
                     selectedOrder.status === 'reçue' ? 'text-emerald-600' : 
                     selectedOrder.status === 'envoyée' ? 'text-blue-600' : 'text-slate-600')}>
@@ -971,32 +1008,32 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
                 </div>
                 {selectedOrder.supplierPhone && (
                   <div className="bg-slate-50 rounded-xl p-3 col-span-2">
-                    <p className="text-xs text-slate-500">Téléphone fournisseur</p>
+                    <p className="text-xs text-slate-500">{t('history.supplier_phone')}</p>
                     <p className="text-sm font-semibold">{selectedOrder.supplierPhone}</p>
                   </div>
                 )}
                 {selectedOrder.receivedAt && (
                   <div className="bg-slate-50 rounded-xl p-3 col-span-2">
-                    <p className="text-xs text-slate-500">Date de réception</p>
+                    <p className="text-xs text-slate-500">{t('history.received_date')}</p>
                     <p className="text-sm font-semibold">{new Date(selectedOrder.receivedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                   </div>
                 )}
                 {selectedOrder.notes && (
                   <div className="bg-amber-50 rounded-xl p-3 col-span-2 border border-amber-200">
-                    <p className="text-xs text-amber-600">📝 Note</p>
+                    <p className="text-xs text-amber-600">{t('history.note')}</p>
                     <p className="text-sm text-amber-800">{selectedOrder.notes}</p>
                   </div>
                 )}
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-800 mb-3">📦 Articles commandés</h4>
+                <h4 className="font-semibold text-slate-800 mb-3">{t('history.items_ordered')}</h4>
                 <div className="space-y-2">
                   {selectedOrder.items.map((item, idx) => (
                     <div key={idx} className="bg-slate-50 rounded-xl p-3 flex justify-between items-center">
                       <div>
                         <p className="font-semibold text-slate-800">{item.productName}</p>
-                        <p className="text-xs text-slate-500">{item.quantity} × {item.unit} · {item.unitPrice.toLocaleString()} F/unité</p>
+                        <p className="text-xs text-slate-500">{item.quantity} × {item.unit} · {item.unitPrice.toLocaleString()} F/{t('units.unit')}</p>
                       </div>
                       <p className="text-sm font-bold text-violet-700">{item.totalPrice.toLocaleString()} F</p>
                     </div>
@@ -1006,7 +1043,7 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
 
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-slate-800">TOTAL</span>
+                  <span className="text-lg font-bold text-slate-800">{t('history.total')}</span>
                   <span className="text-2xl font-bold text-emerald-700">{selectedOrder.totalAmount.toLocaleString()} FCFA</span>
                 </div>
               </div>
@@ -1014,14 +1051,14 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
 
             <div className="p-5 border-t border-slate-100 flex gap-3">
               <button onClick={() => setShowDetailModal(false)} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium">
-                Fermer
+                {t('actions.close')}
               </button>
               <button 
                 onClick={() => exportOrderPDF(selectedOrder)} 
                 className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-xl transition"
               >
                 <Download size={16} />
-                Exporter PDF
+                {t('history.export')}
               </button>
             </div>
           </div>
@@ -1033,6 +1070,7 @@ function HistoryTab({ orders }: { orders: ReapproOrder[] }) {
 
 // ── FOURNISSEURS ──────────────────────────────────────────────
 function SuppliersTab({ suppliers, products }: { suppliers: Supplier[]; products: any[] }) {
+  const { t } = useTranslation('reappro');
   const [showForm, setShowForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -1086,7 +1124,7 @@ function SuppliersTab({ suppliers, products }: { suppliers: Supplier[]; products
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Supprimer ce fournisseur ?')) return;
+    if (!window.confirm(t('suppliers.delete_confirm'))) return;
     await reapproDB.deleteSupplier(id);
   };
 
@@ -1116,15 +1154,15 @@ function SuppliersTab({ suppliers, products }: { suppliers: Supplier[]; products
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-slate-500">{suppliers.length} fournisseur(s)</p>
-        <button onClick={openNewForm} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold shadow-lg">+ Nouveau fournisseur</button>
+        <p className="text-sm text-slate-500">{suppliers.length} {t('suppliers.title').toLowerCase()}</p>
+        <button onClick={openNewForm} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold shadow-lg">{t('suppliers.add')}</button>
       </div>
 
       {suppliers.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
           <Building2 size={40} className="mx-auto mb-3 text-slate-300" />
-          <p className="text-slate-500 font-semibold">Aucun fournisseur</p>
-          <p className="text-xs text-slate-400 mt-1">Ajoutez vos fournisseurs pour créer des commandes</p>
+          <p className="text-slate-500 font-semibold">{t('suppliers.empty')}</p>
+          <p className="text-xs text-slate-400 mt-1">{t('suppliers.empty_desc')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -1137,7 +1175,7 @@ function SuppliersTab({ suppliers, products }: { suppliers: Supplier[]; products
                     <p className="font-bold text-slate-900">{supplier.name}</p>
                     <div className="flex items-center gap-3 mt-0.5">
                       {supplier.phone && <span className="text-xs text-slate-500">📞 {supplier.phone}</span>}
-                      <span className="text-xs text-slate-400">{supplier.products.length} produit(s)</span>
+                      <span className="text-xs text-slate-400">{supplier.products.length} {t('suppliers.products_count', { count: supplier.products.length })}</span>
                     </div>
                   </div>
                   <div className="ml-auto">{expandedId === supplier.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
@@ -1149,23 +1187,23 @@ function SuppliersTab({ suppliers, products }: { suppliers: Supplier[]; products
               </div>
               {expandedId === supplier.id && supplier.products.length > 0 && (
                 <div className="border-t border-slate-100 bg-slate-50 p-4">
-                  {supplier.notes && <p className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2 mb-2">📝 {supplier.notes}</p>}
+                  {supplier.notes && <p className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2 mb-2">{t('suppliers.notes')}: {supplier.notes}</p>}
                   <div className="space-y-2">
                     {supplier.products.map((sp, i) => (
                       <div key={i} className="bg-white rounded-xl border p-3 flex justify-between text-sm">
                         <div>
                           <p className="font-semibold">{sp.productName}</p>
                           <p className="text-xs text-slate-500">
-                            {sp.unitType === 'carton' ? `Carton ×${sp.qtyPerCarton || '?'}` : 'Unité'} 
-                            · {sp.category || 'Autre'}
+                            {sp.unitType === 'carton' ? `${t('suppliers.carton')} ×${sp.qtyPerCarton || '?'}` : t('suppliers.unit')} 
+                            · {sp.category || t('suppliers.other')}
                             {sp.unitType === 'carton' && sp.pricePerCarton && (
-                              <span className="ml-1 text-emerald-600 font-bold">{fmt(sp.pricePerCarton)} F/carton</span>
+                              <span className="ml-1 text-emerald-600 font-bold">{fmt(sp.pricePerCarton)} F/{t('suppliers.carton').toLowerCase()}</span>
                             )}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-emerald-600">{fmt(sp.pricePerUnit)} F</p>
-                          <p className="text-xs text-slate-400">/ {sp.unitType === 'carton' ? 'unité' : 'unité'}</p>
+                          <p className="text-xs text-slate-400">/ {sp.unitType === 'carton' ? t('units.unit') : t('units.unit')}</p>
                         </div>
                       </div>
                     ))}
@@ -1181,52 +1219,52 @@ function SuppliersTab({ suppliers, products }: { suppliers: Supplier[]; products
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowForm(false)}>
           <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between p-5 border-b">
-              <div><h3 className="font-bold text-lg">{editingSupplier ? 'Modifier' : 'Nouveau'} fournisseur</h3><p className="text-xs text-slate-500">Données sauvegardées localement</p></div>
+              <div><h3 className="font-bold text-lg">{editingSupplier ? t('suppliers.edit') : t('suppliers.add')} {t('suppliers.title').toLowerCase()}</h3><p className="text-xs text-slate-500">{t('suppliers.saved_local')}</p></div>
               <button onClick={() => setShowForm(false)} className="text-slate-400"><X size={20} /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              <input type="text" placeholder="Nom du fournisseur *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200" />
-              <input type="tel" placeholder="Téléphone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200" />
-              <input type="text" placeholder="Notes" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200" />
+              <input type="text" placeholder={t('suppliers.name_placeholder')} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200" />
+              <input type="tel" placeholder={t('suppliers.phone_placeholder')} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200" />
+              <input type="text" placeholder={t('suppliers.notes_placeholder')} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200" />
               <div className="border-t pt-3">
-                <div className="flex justify-between mb-3"><p className="font-semibold text-sm">Produits catalogués</p><button onClick={() => setFormProducts([...formProducts, { ...emptyProduct }])} className="text-emerald-600 text-sm font-semibold">+ Ajouter</button></div>
+                <div className="flex justify-between mb-3"><p className="font-semibold text-sm">{t('suppliers.products')}</p><button onClick={() => setFormProducts([...formProducts, { ...emptyProduct }])} className="text-emerald-600 text-sm font-semibold">{t('suppliers.add_product')}</button></div>
                 {formProducts.map((fp, idx) => (
                   <div key={idx} className="bg-slate-50 rounded-xl p-3 mt-2 space-y-2">
                     <select value={fp.productId} onChange={e => linkProductFromCatalog(idx, e.target.value)} className="w-full p-2 rounded-lg border text-sm bg-white">
-                      <option value="">Lier au catalogue produits</option>
+                      <option value="">{t('suppliers.catalog_link')}</option>
                       {products.map(p => <option key={p.id} value={p.id}>{p.image} {p.name}</option>)}
                     </select>
-                    <input type="text" placeholder="Nom produit *" value={fp.productName} onChange={e => updateFormProduct(idx, 'productName', e.target.value)} className="w-full p-2 rounded-lg border text-sm" />
+                    <input type="text" placeholder={t('suppliers.product_name')} value={fp.productName} onChange={e => updateFormProduct(idx, 'productName', e.target.value)} className="w-full p-2 rounded-lg border text-sm" />
                     
                     <div>
-                      <label className="text-[10px] font-semibold text-slate-500 block mb-1">Catégorie</label>
+                      <label className="text-[10px] font-semibold text-slate-500 block mb-1">{t('suppliers.category')}</label>
                       <select value={fp.category || ''} onChange={e => updateFormProduct(idx, 'category', e.target.value)} className="w-full p-2 rounded-lg border text-sm bg-white capitalize">
-                        <option value="">Sélectionner une catégorie</option>
+                        <option value="">{t('suppliers.select_category')}</option>
                         {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
                       </select>
                     </div>
                     
                     <div className="flex gap-2">
-                      <button onClick={() => updateFormProduct(idx, 'unitType', 'unité')} className={cn('flex-1 py-2 rounded-lg border text-sm', fp.unitType === 'unité' ? 'bg-emerald-100 border-emerald-400 font-semibold' : 'bg-white')}>Unité</button>
-                      <button onClick={() => updateFormProduct(idx, 'unitType', 'carton')} className={cn('flex-1 py-2 rounded-lg border text-sm', fp.unitType === 'carton' ? 'bg-emerald-100 border-emerald-400 font-semibold' : 'bg-white')}>Carton</button>
+                      <button onClick={() => updateFormProduct(idx, 'unitType', 'unité')} className={cn('flex-1 py-2 rounded-lg border text-sm', fp.unitType === 'unité' ? 'bg-emerald-100 border-emerald-400 font-semibold' : 'bg-white')}>{t('suppliers.unit')}</button>
+                      <button onClick={() => updateFormProduct(idx, 'unitType', 'carton')} className={cn('flex-1 py-2 rounded-lg border text-sm', fp.unitType === 'carton' ? 'bg-emerald-100 border-emerald-400 font-semibold' : 'bg-white')}>{t('suppliers.carton')}</button>
                     </div>
                     
                     {fp.unitType === 'unité' ? (
-                      <input type="number" placeholder="Prix unitaire (FCFA)" value={fp.pricePerUnit || ''} onChange={e => updateFormProduct(idx, 'pricePerUnit', Number(e.target.value))} className="w-full p-2 rounded-lg border text-sm" />
+                      <input type="number" placeholder={t('suppliers.price_unit')} value={fp.pricePerUnit || ''} onChange={e => updateFormProduct(idx, 'pricePerUnit', Number(e.target.value))} className="w-full p-2 rounded-lg border text-sm" />
                     ) : (
                       <div className="grid grid-cols-2 gap-2">
-                        <input type="number" placeholder="Prix du carton (FCFA)" value={fp.pricePerCarton || ''} onChange={e => updateFormProduct(idx, 'pricePerCarton', Number(e.target.value))} className="p-2 rounded-lg border text-sm" />
-                        <input type="number" placeholder="Unités par carton" value={fp.qtyPerCarton || ''} onChange={e => updateFormProduct(idx, 'qtyPerCarton', Number(e.target.value))} className="p-2 rounded-lg border text-sm" />
+                        <input type="number" placeholder={t('suppliers.price_carton')} value={fp.pricePerCarton || ''} onChange={e => updateFormProduct(idx, 'pricePerCarton', Number(e.target.value))} className="p-2 rounded-lg border text-sm" />
+                        <input type="number" placeholder={t('suppliers.qty_per_carton')} value={fp.qtyPerCarton || ''} onChange={e => updateFormProduct(idx, 'qtyPerCarton', Number(e.target.value))} className="p-2 rounded-lg border text-sm" />
                       </div>
                     )}
-                    {formProducts.length > 1 && <button onClick={() => setFormProducts(formProducts.filter((_, i) => i !== idx))} className="text-red-500 text-xs font-semibold">Supprimer ce produit</button>}
+                    {formProducts.length > 1 && <button onClick={() => setFormProducts(formProducts.filter((_, i) => i !== idx))} className="text-red-500 text-xs font-semibold">{t('suppliers.remove_product')}</button>}
                   </div>
                 ))}
               </div>
             </div>
             <div className="p-5 border-t flex gap-3">
-              <button onClick={() => setShowForm(false)} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium">Annuler</button>
-              <button onClick={handleSave} className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold">Enregistrer</button>
+              <button onClick={() => setShowForm(false)} className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium">{t('actions.cancel')}</button>
+              <button onClick={handleSave} className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold">{t('actions.save')}</button>
             </div>
           </div>
         </div>

@@ -1,0 +1,29 @@
+{
+  "title": "Navigation",
+  "links": {
+    "dashboard": "Tableau de bord",
+    "orders": "Commandes",
+    "stocks": "Stocks",
+    "reappro": "Réapprovisionnement",
+    "finance": "Finance",
+    "bilan": "Bilan",
+    "settings": "Paramètres",
+    "payments": "Paiements",
+    "users": "Utilisateurs",
+    "reports": "Rapports"
+  },
+  "brand": {
+    "name": "BarFlow",
+    "tagline": "Gestion de bar"
+  },
+  "user": {
+    "profile": "Profil",
+    "settings": "Mes paramètres",
+    "logout": "Déconnexion"
+  },
+  "status": {
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "syncing": "Synchronisation..."
+  }
+}

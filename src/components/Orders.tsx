@@ -1,9 +1,11 @@
 // Orders.tsx - Version avec persistance réelle (IndexedDB)
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   ShoppingCart, Plus, Minus, X, Table2, Search,
   Check, Receipt, CreditCard, Settings, Edit3, Trash2, Printer,
-  AlertCircle, BookOpen,
+  AlertCircle, BookOpen, Wallet, Lock, DoorOpen, DoorClosed,
+  TrendingUp, Banknote, ClipboardList, History, Shield,
+  ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { tables as defaultTables } from '@/data';
@@ -25,6 +27,56 @@ import {
 } from '@/utils/orderStore';
 
 type CartItem = OrderItem & { supplements?: string[] };
+
+// ── Vignette produit : photo réelle si dispo, sinon emoji générique ──
+// (même logique que dans Stocks.tsx — la photo doit s'afficher partout
+// où le produit apparaît : Commandes, Stocks, Réappro)
+function ProductThumb({ product, size = 'md', className }: {
+  product: { photo?: string; image?: string; color?: string };
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}) {
+  const sizeClasses = size === 'lg' ? 'w-14 h-14 text-3xl' : size === 'sm' ? 'w-8 h-8 text-lg' : 'w-12 h-12 text-2xl';
+  if (product.photo) {
+    return (
+      <div className={cn('rounded-xl overflow-hidden shrink-0 border border-slate-200', sizeClasses, className)}>
+        <img src={product.photo} alt="" className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div
+      className={cn('rounded-xl flex items-center justify-center shrink-0', sizeClasses, className)}
+      style={{ backgroundColor: `${product.color || '#8B5CF6'}20` }}
+    >
+      {product.image || '📦'}
+    </div>
+  );
+}
+
+// Session de caisse (fond + serveur + horaires)
+interface CaisseSession {
+  isOpen: boolean;
+  fondCaisse: number;
+  serverName: string;
+  openedAt: string | null;
+  closedAt: string | null;
+}
+
+// Entrée d'historique caisse (35 jours)
+interface CaisseHistoryEntry {
+  id: string;
+  fondCaisse: number;
+  serverName: string;
+  openedAt: string;
+  closedAt: string | null;
+  recettesEspeces: number;
+  totalAttendu: number;
+  montantCompte: number | null;
+  ecart: number | null;
+  nbCommandes: number;
+  caTotal: number;
+}
 
 // Convertir PersistedOrder → Order (pour compatibilité avec le reste du code)
 function toOrder(p: PersistedOrder): Order {
@@ -62,6 +114,128 @@ export function Orders() {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [showTablePicker, setShowTablePicker] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // ── CAISSE : ouverture/fermeture de service ────────────────
+  const loadCaisseFromStorage = (): CaisseSession => {
+    try {
+      const saved = localStorage.getItem('barflow_caisse_session');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return { isOpen: false, fondCaisse: 0, serverName: '', openedAt: null, closedAt: null };
+  };
+
+  const [caisseSession, setCaisseSession] = useState<CaisseSession>(loadCaisseFromStorage);
+  const [showCaisseModal, setShowCaisseModal] = useState(false);
+  const [showFermetureModal, setShowFermetureModal] = useState(false);
+  const [showCaisseHistory, setShowCaisseHistory] = useState(false);
+  const [fondCaisseInput, setFondCaisseInput] = useState('');
+  const [serverNameInput, setServerNameInput] = useState('');
+  const [montantCompteInput, setMontantCompteInput] = useState('');
+
+  // ── Historique caisse 35 jours ────────────────────────────
+  const loadCaisseHistory = (): CaisseHistoryEntry[] => {
+    try {
+      const saved = localStorage.getItem('barflow_caisse_history');
+      if (!saved) return [];
+      const all: CaisseHistoryEntry[] = JSON.parse(saved);
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 35);
+      return all.filter(e => new Date(e.openedAt) >= cutoff);
+    } catch { return []; }
+  };
+
+  const [caisseHistory, setCaisseHistory] = useState<CaisseHistoryEntry[]>(loadCaisseHistory);
+
+  const saveCaisseHistory = (entries: CaisseHistoryEntry[]) => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 35);
+    const filtered = entries.filter(e => new Date(e.openedAt) >= cutoff);
+    setCaisseHistory(filtered);
+    localStorage.setItem('barflow_caisse_history', JSON.stringify(filtered));
+  };
+
+  // ── Cancel order state ─────────────────────────────────────
+  // ── Cancel order state ─────────────────────────────────────
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelTargetOrder, setCancelTargetOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+
+  const saveCaisse = (session: CaisseSession) => {
+    setCaisseSession(session);
+    localStorage.setItem('barflow_caisse_session', JSON.stringify(session));
+  };
+
+  const ouvrirCaisse = () => {
+    const fond = parseFloat(fondCaisseInput.replace(/\s/g, '')) || 0;
+    if (fond <= 0) return;
+    const session: CaisseSession = {
+      isOpen: true,
+      fondCaisse: fond,
+      serverName: serverNameInput.trim(),
+      openedAt: new Date().toISOString(),
+      closedAt: null,
+    };
+    saveCaisse(session);
+    setShowCaisseModal(false);
+    setFondCaisseInput('');
+    setServerNameInput('');
+  };
+
+  const fermerCaisse = () => {
+    const now = new Date().toISOString();
+    const compte = parseFloat(montantCompteInput) || 0;
+    const ecart = montantCompteInput !== '' ? compte - totalCaisseAttendu : null;
+    const entry: CaisseHistoryEntry = {
+      id: `caisse-${Date.now()}`,
+      fondCaisse: caisseSession.fondCaisse,
+      serverName: caisseSession.serverName,
+      openedAt: caisseSession.openedAt || now,
+      closedAt: now,
+      recettesEspeces: recettesEspecesService,
+      totalAttendu: totalCaisseAttendu,
+      montantCompte: montantCompteInput !== '' ? compte : null,
+      ecart,
+      nbCommandes: allHistory.filter(o =>
+        caisseSession.openedAt && new Date(o.createdAt) >= new Date(caisseSession.openedAt)
+      ).length,
+      caTotal: allHistory
+        .filter(o => caisseSession.openedAt && new Date(o.createdAt) >= new Date(caisseSession.openedAt))
+        .reduce((s, o) => s + o.total, 0),
+    };
+    saveCaisseHistory([entry, ...caisseHistory]);
+    const session: CaisseSession = { ...caisseSession, isOpen: false, closedAt: now };
+    saveCaisse(session);
+    setMontantCompteInput('');
+    setShowFermetureModal(false);
+  };
+
+  // ── Annulation commande avec mot de passe ─────────────────
+  const openCancelOrder = (order: Order) => {
+    setCancelTargetOrder(order);
+    setCancelPassword('');
+    setCancelPasswordError('');
+    setCancelReason('');
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelOrder = async () => {
+    if (!cancelTargetOrder) return;
+    try {
+      const { cancelOrder } = await import('@/utils/orderStore');
+      await cancelOrder(cancelTargetOrder.id);
+      setOrders(prev => prev.filter(o => o.id !== cancelTargetOrder.id));
+      setManagedTables(prev => prev.map(table =>
+        table.number === cancelTargetOrder.tableNumber
+          ? { ...table, status: 'libre' as const, currentOrder: undefined }
+          : table
+      ));
+      setShowCancelModal(false);
+      setShowOrderDetail(null);
+      setCancelTargetOrder(null);
+    } catch (e) {
+      console.error('Erreur annulation commande:', e);
+    }
+  };
 
   // ── Commandes persistées depuis IndexedDB ──────────────────
   const [orders, setOrders] = useState<Order[]>([]);
@@ -125,7 +299,17 @@ export function Orders() {
     }
   };
 
+  const isCaisseOpen = (): boolean => {
+    if (!caisseSession.isOpen) {
+      setErrorMessage("🔒 Ouvrez d'abord la caisse pour commencer le service !");
+      setShowCaisseModal(true);
+      return false;
+    }
+    return true;
+  };
+
   const isTableSelected = (): boolean => {
+    if (!isCaisseOpen()) return false;
     if (selectedTable === null) {
       setErrorMessage("❌ Veuillez d'abord sélectionner une table !");
       setShowTablePicker(true);
@@ -135,6 +319,11 @@ export function Orders() {
   };
 
   const addToCart = useCallback((product: Product, format: keyof Product['prices'] = 'bouteille', supplements: string[] = []) => {
+    if (!caisseSession.isOpen) {
+      setErrorMessage("🔒 Ouvrez d'abord la caisse pour commencer le service !");
+      setShowCaisseModal(true);
+      return;
+    }
     if (!isTableSelected()) return;
     if (isProductOutOfStock(product)) return;
     const price = product.prices?.[format] || 0;
@@ -224,7 +413,7 @@ export function Orders() {
       id: newOrderId,
       items: cartItems.map(i => ({ ...i })),
       tableNumber: selectedTable,
-      server: 'Serveur 1',
+      server: caisseSession.serverName || 'Serveur',
       status: flow === 'later' ? 'en_attente' : 'en_cours',
       createdAt: new Date().toISOString(),
       total,
@@ -299,9 +488,8 @@ export function Orders() {
 
     setShowPayment(false);
 
-    if (showOrderDetail && showOrderDetail.id === payingOrder.id) {
-      setShowOrderDetail(paidOrder);
-    }
+    // Fermer automatiquement le détail commande après paiement
+    setShowOrderDetail(null);
 
     setPayingOrder(null);
   };
@@ -415,6 +603,17 @@ export function Orders() {
   const ardoises = orders.filter(o => o.status === 'en_attente');
   const allHistory = [...history.filter(o => o.status === 'payé'), ...orders.filter(o => o.status === 'payé')];
 
+  // Recettes espèces du service courant (depuis ouverture caisse)
+  const recettesEspecesService = useMemo(() => {
+    const openedAt = caisseSession.openedAt ? new Date(caisseSession.openedAt) : null;
+    if (!openedAt) return 0;
+    return allHistory
+      .filter(o => o.paymentMethod === 'espèces' && new Date(o.createdAt) >= openedAt)
+      .reduce((s, o) => s + o.total, 0);
+  }, [allHistory, caisseSession.openedAt]);
+
+  const totalCaisseAttendu = caisseSession.fondCaisse + recettesEspecesService;
+
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-slate-50">
@@ -441,10 +640,33 @@ export function Orders() {
             <div>
               <h1 className="text-xl font-bold text-slate-900">Commandes</h1>
               <p className="text-xs text-slate-500">
-                {selectedTable ? `Table ${selectedTable} sélectionnée` : '⚠️ Aucune table sélectionnée'}
+                {caisseSession.isOpen
+                  ? `🟢 Caisse ouverte${caisseSession.serverName ? ` · ${caisseSession.serverName}` : ''} · Fond : ${caisseSession.fondCaisse.toLocaleString()} FCFA`
+                  : selectedTable ? `Table ${selectedTable} sélectionnée` : '🔒 Caisse fermée — ouvrez la caisse pour commencer'
+                }
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              {/* BOUTON CAISSE */}
+              {caisseSession.isOpen ? (
+                <button
+                  onClick={() => setShowFermetureModal(true)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-md flex items-center gap-2 active:scale-95 transition-all"
+                >
+                  <DoorClosed size={16} />
+                  <span className="hidden sm:inline">Fermer caisse</span>
+                  <span className="sm:hidden">Caisse</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowCaisseModal(true)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md flex items-center gap-2 active:scale-95 transition-all animate-pulse"
+                >
+                  <DoorOpen size={16} />
+                  <span className="hidden sm:inline">Ouvrir caisse</span>
+                  <span className="sm:hidden">Caisse</span>
+                </button>
+              )}
               {/* Ardoise badge */}
               {ardoises.length > 0 && (
                 <button
@@ -456,11 +678,19 @@ export function Orders() {
                 </button>
               )}
               <button
+                onClick={() => setShowCaisseHistory(true)}
+                className="px-3 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1.5 active:scale-95"
+                title="Historique caisses"
+              >
+                <History size={15} />
+                <span className="hidden sm:inline">Historique</span>
+              </button>
+              <button
                 onClick={() => setShowHistory(true)}
                 className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md flex items-center gap-2 active:scale-95"
               >
                 <Receipt size={16} />
-                Historique
+                Commandes
               </button>
               <button
                 onClick={() => setShowTablePicker(true)}
@@ -501,7 +731,29 @@ export function Orders() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 lg:p-4">
+        <div className="flex-1 overflow-y-auto p-3 lg:p-4 relative">
+          {/* ── CAISSE FERMÉE : overlay bloquant ──────────────── */}
+          {!caisseSession.isOpen && (
+            <div className="absolute inset-0 z-10 bg-slate-900/70 backdrop-blur-sm flex flex-col items-center justify-center rounded-none">
+              <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+                <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <Lock size={36} className="text-slate-500" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">Caisse fermée</h2>
+                <p className="text-sm text-slate-500 mb-6">
+                  Ouvrez la caisse et renseignez le fond de caisse pour commencer à prendre des commandes.
+                </p>
+                <button
+                  onClick={() => setShowCaisseModal(true)}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-base shadow-lg flex items-center justify-center gap-2"
+                >
+                  <DoorOpen size={20} />
+                  Ouvrir la caisse
+                </button>
+              </div>
+            </div>
+          )}
+
           {filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-400">
               <Search size={40} className="mb-2 opacity-30" />
@@ -524,6 +776,10 @@ export function Orders() {
                   <button
                     key={product.id}
                     onClick={() => {
+                      if (!caisseSession.isOpen) {
+                        setShowCaisseModal(true);
+                        return;
+                      }
                       if (!selectedTable) {
                         setErrorMessage("❌ Veuillez d'abord sélectionner une table !");
                         setShowTablePicker(true);
@@ -540,12 +796,16 @@ export function Orders() {
                     )}
                   >
                     <div
-                      className="w-full aspect-square rounded-xl flex items-center justify-center text-4xl mb-2"
+                      className="w-full aspect-square rounded-xl flex items-center justify-center text-4xl mb-2 overflow-hidden"
                       style={{ backgroundColor: isOutOfStock ? '#f1f5f9' : `${product.color || '#8B5CF6'}15` }}
                     >
-                      <span className={cn('transition-transform duration-200', !isOutOfStock && 'group-hover:scale-110')}>
-                        {product.image || '📦'}
-                      </span>
+                      {product.photo ? (
+                        <img src={product.photo} alt="" className={cn('w-full h-full object-cover transition-transform duration-200', !isOutOfStock && 'group-hover:scale-110')} />
+                      ) : (
+                        <span className={cn('transition-transform duration-200', !isOutOfStock && 'group-hover:scale-110')}>
+                          {product.image || '📦'}
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm font-bold text-slate-800 truncate">{product.name}</p>
                     <div className="flex items-center justify-between mt-1">
@@ -650,18 +910,76 @@ export function Orders() {
         </div>
 
         {cartItems.length > 0 && (
-          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-slate-600">Panier (Table {selectedTable})</span>
-              <span className="text-xl font-bold text-slate-900">{cartTotal.toLocaleString()} FCFA</span>
+          <div className="border-t border-slate-100 bg-white flex flex-col max-h-[55%]">
+            {/* Header panier */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 shrink-0">
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                🛒 Panier — Table {selectedTable}
+              </span>
+              <span className="text-sm font-bold text-violet-700">{cartTotal.toLocaleString()} F</span>
             </div>
-            <button
-              onClick={submitOrder}
-              className="w-full py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-              <Check size={16} />
-              Valider la commande
-            </button>
+
+            {/* Liste articles scrollable */}
+            <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5">
+              {cartItems.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-slate-50 rounded-xl p-2 group">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-slate-800 truncate">{item.productName}</p>
+                    <p className="text-[10px] text-slate-500 capitalize">{item.format} · {item.unitPrice.toLocaleString()} F</p>
+                  </div>
+                  {/* Contrôles quantité */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => updateQty(idx, -1)}
+                      className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-red-100 hover:text-red-600 flex items-center justify-center text-slate-600 font-bold text-sm transition-colors"
+                    >
+                      <Minus size={11} />
+                    </button>
+                    <span className="w-6 text-center text-sm font-bold text-slate-800">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQty(idx, +1)}
+                      className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-emerald-100 hover:text-emerald-700 flex items-center justify-center text-slate-600 font-bold text-sm transition-colors"
+                    >
+                      <Plus size={11} />
+                    </button>
+                  </div>
+                  {/* Total ligne */}
+                  <span className="text-xs font-bold text-violet-700 w-16 text-right shrink-0">
+                    {(item.quantity * item.unitPrice).toLocaleString()} F
+                  </span>
+                  {/* Supprimer */}
+                  <button
+                    onClick={() => setCartItems(prev => prev.filter((_, i) => i !== idx))}
+                    className="w-6 h-6 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-100 flex items-center justify-center text-red-400 hover:text-red-600 transition-all shrink-0"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer : total + valider */}
+            <div className="px-3 pb-3 pt-2 border-t border-slate-100 shrink-0 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-500">{cartCount} article(s)</span>
+                <span className="text-lg font-black text-slate-900">{cartTotal.toLocaleString()} FCFA</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCartItems([])}
+                  className="px-3 py-2.5 rounded-xl border border-red-200 text-red-500 text-xs font-bold hover:bg-red-50 transition-colors"
+                >
+                  Vider
+                </button>
+                <button
+                  onClick={submitOrder}
+                  className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <Check size={15} />
+                  Valider la commande
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -703,16 +1021,24 @@ export function Orders() {
                       </div>
                     ))}
                   </div>
-                  <button
-                    onClick={() => {
-                      setPayingOrder(order);
-                      setShowPayment(true);
-                      setShowArdoise(false);
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2"
-                  >
-                    <CreditCard size={16} /> Encaisser maintenant
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { openCancelOrder(order); setShowArdoise(false); }}
+                      className="flex-1 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-sm flex items-center justify-center gap-1.5 border border-red-200"
+                    >
+                      <Trash2 size={14} /> Annuler
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPayingOrder(order);
+                        setShowPayment(true);
+                        setShowArdoise(false);
+                      }}
+                      className="flex-[2] py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2"
+                    >
+                      <CreditCard size={16} /> Encaisser maintenant
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -750,7 +1076,7 @@ export function Orders() {
                   <div key={idx} className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{product?.image || '🍺'}</span>
+                        <ProductThumb product={product || {}} size="sm" />
                         <p className="font-semibold text-slate-800">{item.productName}</p>
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">{item.format} · {item.quantity} × {item.unitPrice.toLocaleString()} F</p>
@@ -783,18 +1109,26 @@ export function Orders() {
               </button>
               {showOrderDetail.status === 'payé' ? (
                 <button
-                  onClick={() => closeOrderDetail(showOrderDetail)}
+                  onClick={() => setShowOrderDetail(null)}
                   className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md flex items-center justify-center gap-2"
                 >
                   <Check size={16} /> Fermer
                 </button>
               ) : (
-                <button
-                  onClick={() => { setPayingOrder(showOrderDetail); setShowPayment(true); }}
-                  className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md flex items-center justify-center gap-2"
-                >
-                  <CreditCard size={16} /> Payer
-                </button>
+                <>
+                  <button
+                    onClick={() => { openCancelOrder(showOrderDetail); }}
+                    className="py-3 px-4 rounded-xl font-semibold text-sm bg-red-50 text-red-600 border border-red-200 flex items-center justify-center gap-1.5 hover:bg-red-100 transition-all"
+                  >
+                    <Trash2 size={15} /> Annuler
+                  </button>
+                  <button
+                    onClick={() => { setPayingOrder(showOrderDetail); setShowPayment(true); }}
+                    className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md flex items-center justify-center gap-2"
+                  >
+                    <CreditCard size={16} /> Payer
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -807,9 +1141,7 @@ export function Orders() {
           <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl" style={{ backgroundColor: `${selectedProduct.color || '#8B5CF6'}20` }}>
-                  {selectedProduct.image || '📦'}
-                </div>
+                <ProductThumb product={selectedProduct} size="lg" className="text-3xl" />
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">{selectedProduct.name}</h3>
                   <p className="text-xs text-slate-500 capitalize">{selectedProduct.category}</p>
@@ -1088,6 +1420,467 @@ export function Orders() {
           onConfirm={handlePayment}
           allowedMethods={['espèces', 'wave', 'orange_money']}
         />
+      )}
+
+      {/* ── MODAL ANNULATION COMMANDE (protégée par mot de passe) ── */}
+      {showCancelModal && cancelTargetOrder && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={() => setShowCancelModal(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-red-500 to-red-600 p-5 text-white text-center">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-3">
+                <Shield size={28} />
+              </div>
+              <h2 className="text-xl font-bold">Annuler la commande</h2>
+              <p className="text-red-100 text-sm mt-1">Table {cancelTargetOrder.tableNumber} · {cancelTargetOrder.total.toLocaleString()} FCFA</p>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* Rappel des articles */}
+              <div className="bg-slate-50 rounded-xl p-3 max-h-32 overflow-y-auto">
+                {cancelTargetOrder.items.map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-xs text-slate-600 py-0.5">
+                    <span>{item.quantity}× {item.productName}</span>
+                    <span>{(item.quantity * item.unitPrice).toLocaleString()} F</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Motif (optionnel) */}
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Motif de l'annulation <span className="font-normal text-slate-400">(optionnel)</span></label>
+                <input
+                  type="text"
+                  value={cancelReason}
+                  onChange={e => setCancelReason(e.target.value)}
+                  placeholder="Ex: Erreur de saisie, client a changé d'avis..."
+                  autoFocus
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-300/40"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm"
+                >
+                  Garder la commande
+                </button>
+                <button
+                  onClick={confirmCancelOrder}
+                  className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md"
+                >
+                  <Trash2 size={16} /> Confirmer annulation
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL HISTORIQUE CAISSES (35 jours) ─────────────────── */}
+      {showCaisseHistory && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-end sm:items-center justify-center p-4" onClick={() => setShowCaisseHistory(false)}>
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+              <div className="flex items-center gap-2">
+                <History size={20} className="text-slate-600" />
+                <h3 className="text-lg font-bold text-slate-900">Historique des caisses</h3>
+                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">35 derniers jours</span>
+              </div>
+              <button onClick={() => setShowCaisseHistory(false)} className="text-slate-400"><X size={20} /></button>
+            </div>
+
+            {/* Session en cours */}
+            {caisseSession.isOpen && caisseSession.openedAt && (
+              <div className="mx-5 mt-4 bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-sm font-bold text-emerald-800">Service en cours</span>
+                    {caisseSession.serverName && <span className="text-xs text-emerald-600">· {caisseSession.serverName}</span>}
+                  </div>
+                  <span className="text-xs text-emerald-600">
+                    Ouverture : {new Date(caisseSession.openedAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-slate-500">Fond caisse</p>
+                    <p className="font-bold text-slate-800">{caisseSession.fondCaisse.toLocaleString()} F</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-slate-500">Recettes espèces</p>
+                    <p className="font-bold text-blue-700">+{recettesEspecesService.toLocaleString()} F</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 text-center">
+                    <p className="text-slate-500">Total attendu</p>
+                    <p className="font-bold text-emerald-700">{totalCaisseAttendu.toLocaleString()} F</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              {caisseHistory.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                  <History size={40} className="mb-3 opacity-30" />
+                  <p className="text-sm font-medium">Aucun historique disponible</p>
+                  <p className="text-xs mt-1">Les sessions fermées apparaîtront ici</p>
+                </div>
+              ) : (
+                caisseHistory.map((entry, idx) => (
+                  <CaisseHistoryCard key={entry.id} entry={entry} />
+                ))
+              )}
+            </div>
+
+            {/* Total général */}
+            {caisseHistory.length > 0 && (
+              <div className="p-4 border-t border-slate-100 bg-slate-50 grid grid-cols-3 gap-3 text-center text-xs">
+                <div>
+                  <p className="text-slate-500">Sessions ({caisseHistory.length})</p>
+                  <p className="font-bold text-slate-800">{caisseHistory.length} ouvertures</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">CA total (35j)</p>
+                  <p className="font-bold text-violet-700">{caisseHistory.reduce((s, e) => s + e.caTotal, 0).toLocaleString()} F</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Espèces totales (35j)</p>
+                  <p className="font-bold text-emerald-700">{caisseHistory.reduce((s, e) => s + e.recettesEspeces, 0).toLocaleString()} F</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL OUVERTURE DE CAISSE ─────────────────────────── */}
+      {showCaisseModal && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={() => setShowCaisseModal(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-6 text-white text-center">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-3">
+                <DoorOpen size={32} />
+              </div>
+              <h2 className="text-2xl font-bold">Ouverture de caisse</h2>
+              <p className="text-emerald-100 text-sm mt-1">
+                {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </p>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Fond de caisse */}
+              <div>
+                <label className="text-sm font-bold text-slate-700 block mb-2 flex items-center gap-2">
+                  <Banknote size={16} className="text-emerald-600" />
+                  Fond de caisse (FCFA) *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={fondCaisseInput}
+                  onChange={e => setFondCaisseInput(e.target.value)}
+                  placeholder="Ex: 50 000"
+                  autoFocus
+                  className="w-full p-4 rounded-2xl border-2 border-slate-200 text-xl font-bold text-center text-slate-900 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                />
+                <p className="text-xs text-slate-500 mt-1.5 text-center">Montant en espèces dans la caisse en début de service</p>
+              </div>
+
+              {/* Nom du serveur (optionnel) */}
+              <div>
+                <label className="text-sm font-bold text-slate-700 block mb-2 flex items-center gap-2">
+                  <ClipboardList size={16} className="text-slate-500" />
+                  Nom du serveur <span className="text-xs font-normal text-slate-400">(optionnel)</span>
+                </label>
+                <input
+                  type="text"
+                  value={serverNameInput}
+                  onChange={e => setServerNameInput(e.target.value)}
+                  placeholder="Ex: Fatou, Jean-Pierre..."
+                  className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300/40 focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Bouton ouvrir */}
+              <button
+                onClick={ouvrirCaisse}
+                disabled={!fondCaisseInput || parseFloat(fondCaisseInput) <= 0}
+                className={cn(
+                  'w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition-all',
+                  fondCaisseInput && parseFloat(fondCaisseInput) > 0
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg hover:shadow-xl'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                )}
+              >
+                <Check size={20} />
+                Ouvrir la caisse
+              </button>
+
+              <button onClick={() => setShowCaisseModal(false)} className="w-full py-2.5 text-sm text-slate-500 font-medium hover:text-slate-700">
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL FERMETURE DE CAISSE ─────────────────────────── */}
+      {showFermetureModal && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={() => setShowFermetureModal(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white text-center">
+              <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-3">
+                <DoorClosed size={32} />
+              </div>
+              <h2 className="text-2xl font-bold">Fermeture de caisse</h2>
+              <p className="text-slate-300 text-sm mt-1">
+                {caisseSession.openedAt
+                  ? `Ouverture : ${new Date(caisseSession.openedAt).toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+                  : ''}
+                {caisseSession.serverName ? ` · ${caisseSession.serverName}` : ''}
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Récapitulatif */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <Wallet size={16} className="text-emerald-600" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">Fond de caisse</span>
+                  </div>
+                  <span className="text-base font-bold text-slate-900">{caisseSession.fondCaisse.toLocaleString()} F</span>
+                </div>
+
+                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-2xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <TrendingUp size={16} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-blue-800 block">Recettes en espèces</span>
+                      <span className="text-xs text-blue-500">{allHistory.filter(o => o.paymentMethod === 'espèces' && caisseSession.openedAt && new Date(o.createdAt) >= new Date(caisseSession.openedAt)).length} paiement(s)</span>
+                    </div>
+                  </div>
+                  <span className="text-base font-bold text-blue-700">+{recettesEspecesService.toLocaleString()} F</span>
+                </div>
+
+                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+                      <Banknote size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-emerald-800 block">Total attendu en caisse</span>
+                      <span className="text-xs text-emerald-600">Fond + Espèces encaissées</span>
+                    </div>
+                  </div>
+                  <span className="text-xl font-black text-emerald-700">{totalCaisseAttendu.toLocaleString()} F</span>
+                </div>
+
+                {/* Montant compté physiquement */}
+                <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4">
+                  <label className="text-sm font-bold text-slate-700 block mb-2 flex items-center gap-2">
+                    <Banknote size={16} className="text-slate-500" />
+                    Montant compté en caisse (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={montantCompteInput}
+                    onChange={e => setMontantCompteInput(e.target.value)}
+                    placeholder="Entrez le montant physique compté..."
+                    className="w-full p-3 rounded-xl border border-slate-300 text-base font-bold text-center text-slate-900 focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                  />
+                </div>
+
+                {/* Écart si montant saisi */}
+                {montantCompteInput !== '' && (() => {
+                  const compte = parseFloat(montantCompteInput) || 0;
+                  const ecart = compte - totalCaisseAttendu;
+                  const isOk = Math.abs(ecart) < 1;
+                  return (
+                    <div className={cn(
+                      'flex justify-between items-center p-4 rounded-2xl border-2',
+                      isOk ? 'bg-emerald-50 border-emerald-300' :
+                      ecart < 0 ? 'bg-red-50 border-red-300' : 'bg-amber-50 border-amber-300'
+                    )}>
+                      <div>
+                        <span className={cn('text-sm font-bold block',
+                          isOk ? 'text-emerald-800' : ecart < 0 ? 'text-red-800' : 'text-amber-800'
+                        )}>
+                          {isOk ? '✅ Caisse exacte' : ecart < 0 ? '🔴 Trou de caisse' : '🟡 Excédent de caisse'}
+                        </span>
+                        <span className={cn('text-xs',
+                          isOk ? 'text-emerald-600' : ecart < 0 ? 'text-red-600' : 'text-amber-600'
+                        )}>
+                          {isOk ? 'Tout est en ordre.' : ecart < 0
+                            ? `Il manque ${Math.abs(ecart).toLocaleString()} FCFA`
+                            : `Excédent de ${ecart.toLocaleString()} FCFA`}
+                        </span>
+                      </div>
+                      <span className={cn('text-xl font-black',
+                        isOk ? 'text-emerald-700' : ecart < 0 ? 'text-red-700' : 'text-amber-700'
+                      )}>
+                        {ecart >= 0 ? '+' : ''}{ecart.toLocaleString()} F
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Ardoises en cours ? */}
+              {ardoises.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                  <p className="text-sm font-bold text-amber-800 flex items-center gap-2">
+                    <BookOpen size={16} />
+                    {ardoises.length} ardoise(s) encore ouvertes
+                  </p>
+                  <p className="text-xs text-amber-600 mt-1">
+                    Montant total : {ardoises.reduce((s, o) => s + o.total, 0).toLocaleString()} FCFA — Pensez à les encaisser avant de fermer.
+                  </p>
+                </div>
+              )}
+
+              {/* Boutons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowFermetureModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={fermerCaisse}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2"
+                >
+                  <DoorClosed size={16} />
+                  Confirmer la fermeture
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Sous-composant carte historique caisse ────────────────────
+function CaisseHistoryCard({ entry }: { entry: CaisseHistoryEntry }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const duration = entry.closedAt
+    ? (() => {
+        const ms = new Date(entry.closedAt).getTime() - new Date(entry.openedAt).getTime();
+        const h = Math.floor(ms / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        return `${h}h${m.toString().padStart(2, '0')}`;
+      })()
+    : null;
+
+  const dateStr = new Date(entry.openedAt).toLocaleDateString('fr-FR', {
+    weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+      <button
+        className="w-full p-4 text-left hover:bg-slate-50 transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+              <DoorClosed size={18} className="text-slate-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900 capitalize">{dateStr}</p>
+              <p className="text-xs text-slate-500">
+                {new Date(entry.openedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                {' → '}
+                {entry.closedAt
+                  ? new Date(entry.closedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                  : '—'}
+                {duration && ` (${duration})`}
+                {entry.serverName && ` · ${entry.serverName}`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-sm font-bold text-emerald-700">{entry.totalAttendu.toLocaleString()} F</p>
+              <p className="text-xs text-slate-400">en caisse</p>
+            </div>
+            {expanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+          </div>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-slate-50 rounded-xl p-3 text-center">
+              <p className="text-xs text-slate-500">Fond de caisse</p>
+              <p className="text-base font-bold text-slate-800">{entry.fondCaisse.toLocaleString()} F</p>
+            </div>
+            <div className="bg-blue-50 rounded-xl p-3 text-center">
+              <p className="text-xs text-slate-500">Recettes espèces</p>
+              <p className="text-base font-bold text-blue-700">+{entry.recettesEspeces.toLocaleString()} F</p>
+            </div>
+            <div className="bg-emerald-50 rounded-xl p-3 text-center">
+              <p className="text-xs text-slate-500">Total attendu</p>
+              <p className="text-base font-bold text-emerald-700">{entry.totalAttendu.toLocaleString()} F</p>
+            </div>
+            <div className="bg-violet-50 rounded-xl p-3 text-center">
+              <p className="text-xs text-slate-500">CA total service</p>
+              <p className="text-base font-bold text-violet-700">{entry.caTotal.toLocaleString()} F</p>
+            </div>
+          </div>
+
+          {/* Montant compté + écart si disponible */}
+          {entry.montantCompte !== null && entry.montantCompte !== undefined && (
+            <div className={cn(
+              'rounded-xl p-3 flex justify-between items-center',
+              entry.ecart === 0 || (entry.ecart !== null && Math.abs(entry.ecart) < 1)
+                ? 'bg-emerald-50 border border-emerald-200'
+                : entry.ecart !== null && entry.ecart < 0
+                  ? 'bg-red-50 border border-red-200'
+                  : 'bg-amber-50 border border-amber-200'
+            )}>
+              <div>
+                <p className="text-xs font-semibold text-slate-700">Montant compté physiquement</p>
+                <p className="text-base font-bold text-slate-900">{entry.montantCompte.toLocaleString()} F</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-500">Écart</p>
+                <p className={cn('text-base font-black',
+                  entry.ecart !== null && Math.abs(entry.ecart) < 1 ? 'text-emerald-700' :
+                  entry.ecart !== null && entry.ecart < 0 ? 'text-red-700' : 'text-amber-700'
+                )}>
+                  {entry.ecart !== null
+                    ? `${entry.ecart >= 0 ? '+' : ''}${entry.ecart.toLocaleString()} F`
+                    : '—'}
+                </p>
+                <p className="text-[10px] font-semibold text-slate-500">
+                  {entry.ecart !== null && Math.abs(entry.ecart) < 1 ? '✅ Exact' :
+                   entry.ecart !== null && entry.ecart < 0 ? '🔴 Trou de caisse' : '🟡 Excédent'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-amber-50 rounded-xl p-3 flex justify-between items-center">
+            <span className="text-xs text-amber-700 font-medium">Nb commandes payées</span>
+            <span className="text-sm font-bold text-amber-800">{entry.nbCommandes} commande(s)</span>
+          </div>
+        </div>
       )}
     </div>
   );

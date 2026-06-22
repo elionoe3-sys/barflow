@@ -2,11 +2,11 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Search, Plus, X, Settings,
-  History, ClipboardCheck, TrendingUp, PackagePlus, PackageCheck, Edit3, Trash2, Check, FlaskConical
+  History, ClipboardCheck, TrendingUp, PackagePlus, PackageCheck, Edit3, Trash2, Check, FlaskConical,
+  Camera, Link as LinkIcon, ImageOff,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { stockMovements } from '@/data';
-import { useCategories, initCategories, loadCategoriesFromStorage } from '@/utils/productStore';
+import { useCategories, initCategories, loadCategoriesFromStorage, CATEGORY_ICONS } from '@/utils/productStore';
 import { defaultCategories } from '@/data';
 import type { Product, VolumeConfig, getClPourFormat as GetClFn } from '@/types';
 import { getClPourFormat, formatStockDisplay, getStockBouteilles } from '@/types';
@@ -14,6 +14,7 @@ import { useLosses, type LossReason } from '@/utils/lossStore';
 import { predictStockRupture } from '@/utils/stockPrediction';
 import { universalSync } from '@/services/universalSync';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useRecentMovements, recordEntree, recordCorrection, type MovementType } from '@/utils/movementStore';
 
 // ── Valeurs par défaut contenance selon catégorie ─────────────
 function contenanceDefaut(category: string): number {
@@ -32,6 +33,110 @@ function clVerreDefaut(category: string): number {
   if (category === 'softs') return 33;
   if (category === 'cocktails') return 25;
   return 10;
+}
+
+// ── Vignette produit : photo réelle si dispo, sinon emoji générique ──
+function ProductThumb({ product, size = 'md' }: { product: { photo?: string; image: string; color?: string }; size?: 'sm' | 'md' | 'lg' }) {
+  const sizeClasses = size === 'lg' ? 'w-14 h-14 text-3xl' : size === 'sm' ? 'w-10 h-10 text-xl' : 'w-12 h-12 text-2xl';
+  if (product.photo) {
+    return (
+      <div className={cn('rounded-xl overflow-hidden shrink-0 border border-slate-200', sizeClasses)}>
+        <img src={product.photo} alt="" className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div
+      className={cn('rounded-xl flex items-center justify-center shrink-0', sizeClasses)}
+      style={{ backgroundColor: `${product.color || '#8B5CF6'}20` }}
+    >
+      {product.image || '📦'}
+    </div>
+  );
+}
+
+// ── Convertit un fichier image en base64 data-URL ─────────────
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Sélecteur de photo produit (upload fichier ou URL) ────────
+function PhotoPicker({ photo, onChange }: { photo?: string; onChange: (photo: string | undefined) => void }) {
+  const [mode, setMode] = useState<'upload' | 'url'>('upload');
+  const [urlInput, setUrlInput] = useState(photo && photo.startsWith('http') ? photo : '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    try {
+      const base64 = await fileToBase64(file);
+      onChange(base64);
+    } catch {
+      // ignore silencieusement, l'utilisateur peut réessayer
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-semibold text-slate-600 block">Photo du produit (optionnel)</label>
+      <div className="flex items-center gap-3">
+        <div className="w-16 h-16 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center shrink-0">
+          {photo ? (
+            <img src={photo} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <ImageOff size={20} className="text-slate-300" />
+          )}
+        </div>
+        <div className="flex-1 space-y-1.5">
+          <div className="flex gap-1.5">
+            <button type="button" onClick={() => setMode('upload')}
+              className={cn('flex-1 py-1.5 rounded-lg text-[11px] font-bold border flex items-center justify-center gap-1', mode === 'upload' ? 'bg-violet-100 border-violet-300 text-violet-700' : 'bg-white border-slate-200 text-slate-500')}>
+              <Camera size={12} /> Fichier
+            </button>
+            <button type="button" onClick={() => setMode('url')}
+              className={cn('flex-1 py-1.5 rounded-lg text-[11px] font-bold border flex items-center justify-center gap-1', mode === 'url' ? 'bg-violet-100 border-violet-300 text-violet-700' : 'bg-white border-slate-200 text-slate-500')}>
+              <LinkIcon size={12} /> URL
+            </button>
+            {photo && (
+              <button type="button" onClick={() => { onChange(undefined); setUrlInput(''); }}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-bold border border-red-200 bg-red-50 text-red-600">
+                <X size={12} />
+              </button>
+            )}
+          </div>
+          {mode === 'upload' ? (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={e => handleFile(e.target.files?.[0] || null)}
+              className="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-2 file:rounded-lg file:border-0 file:bg-violet-50 file:text-violet-700 file:text-[11px] file:font-bold"
+            />
+          ) : (
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                value={urlInput}
+                onChange={e => setUrlInput(e.target.value)}
+                placeholder="https://..."
+                className="flex-1 p-1.5 rounded-lg border border-slate-200 text-xs"
+              />
+              <button type="button" onClick={() => urlInput.trim() && onChange(urlInput.trim())}
+                className="px-2.5 py-1.5 rounded-lg bg-violet-600 text-white text-[11px] font-bold">
+                OK
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ── Affichage stock lisible ───────────────────────────────────
@@ -56,6 +161,7 @@ export function Stocks() {
   const { addLoss } = useLosses();
   const { categories: categoryList, addNewCategory, editCategory, removeCategory, refreshCategories } = useCategories();
   const categories = categoryList.map(c => c.name);
+  const recentMovements = useRecentMovements(100);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -78,8 +184,10 @@ export function Stocks() {
   const [lossReason, setLossReason] = useState<LossReason>('casse');
   const [lossNote, setLossNote] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryIcon, setNewCategoryIcon] = useState<string>('autre');
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [editingCategoryIcon, setEditingCategoryIcon] = useState<string>('autre');
   const [isLoading, setIsLoading] = useState(true);
   const [newlyAddedIds, setNewlyAddedIds] = useState<Set<string>>(new Set());
   const newlyAddedTimeoutRef = useRef<number | null>(null);
@@ -87,7 +195,7 @@ export function Stocks() {
   // ── Formulaire nouveau produit ────────────────────────────
   const defaultNewProduct = {
     name: '', category: 'bières', stock: '', stockUnit: 'bouteilles',
-    seuilAlerte: '10', seuilCritique: '5', image: '🍺',
+    seuilAlerte: '10', seuilCritique: '5', image: '🍺', photo: undefined as string | undefined,
     prices: { bouteille: '', demi: '', quart: '', verre: '', canette: '' },
     activePriceFormats: ['bouteille'] as ('bouteille' | 'demi' | 'quart' | 'verre' | 'canette')[],
     // Volume config
@@ -105,6 +213,7 @@ export function Stocks() {
   const [editProductForm, setEditProductForm] = useState({
     name: '', category: 'bières', stock: '', stockUnit: 'bouteilles',
     seuilAlerte: '', seuilCritique: '', bottleSize: '', supplements: '', notes: '',
+    photo: undefined as string | undefined,
     prices: { bouteille: '', demi: '', quart: '', verre: '', canette: '' },
     activePriceFormats: [] as ('bouteille' | 'demi' | 'quart' | 'verre' | 'canette')[],
     useVolumeCl: false,
@@ -137,6 +246,7 @@ export function Stocks() {
         bottleSize: editingProduct.options?.bottleSize || '',
         supplements: editingProduct.options?.supplements?.join(', ') || '',
         notes: editingProduct.options?.notes || '',
+        photo: editingProduct.photo,
         prices: {
           bouteille: editingProduct.prices?.bouteille ? String(editingProduct.prices.bouteille) : '',
           demi: editingProduct.prices?.demi ? String(editingProduct.prices.demi) : '',
@@ -280,7 +390,19 @@ export function Stocks() {
   };
 
   // ── Helpers construction volumeConfig ─────────────────────
-  const buildVolumeConfig = (form: typeof newProduct): VolumeConfig | undefined => {
+  // Typage souple : accepte newProduct ET editProductForm, qui partagent
+  // les mêmes champs cl/useVolumeCl/category mais diffèrent sur le reste.
+  type VolumeFormShape = {
+    useVolumeCl: boolean;
+    contenanceCl: string;
+    clParBouteille: string;
+    clParDemi: string;
+    clParQuart: string;
+    clParVerre: string;
+    clParCanette: string;
+    category: string;
+  };
+  const buildVolumeConfig = (form: VolumeFormShape): VolumeConfig | undefined => {
     if (!form.useVolumeCl) return undefined;
     const contenance = parseFloat(form.contenanceCl) || 75;
     return {
@@ -296,15 +418,24 @@ export function Stocks() {
   // ── Handlers CRUD ─────────────────────────────────────────
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
-    const ok = await addNewCategory(newCategoryName.trim(), '📦', '#8B5CF6');
-    if (ok) { setNewCategoryName(''); refreshCategories(); window.dispatchEvent(new Event('categoriesUpdated')); }
+    const iconOption = CATEGORY_ICONS.find(i => i.id === newCategoryIcon);
+    const emoji = iconOption?.emoji || '📦';
+    const ok = await addNewCategory(newCategoryName.trim(), emoji, '#8B5CF6', newCategoryIcon);
+    if (ok) {
+      setNewCategoryName('');
+      setNewCategoryIcon('autre');
+      refreshCategories();
+      window.dispatchEvent(new Event('categoriesUpdated'));
+    }
   };
 
   const handleEditCategory = async (oldName: string) => {
     if (!editingCategoryName.trim()) return;
     const newName = editingCategoryName.trim().toLowerCase();
-    if (newName !== oldName) await editCategory(oldName, newName);
-    setEditingCategory(null); setEditingCategoryName('');
+    const iconOption = CATEGORY_ICONS.find(i => i.id === editingCategoryIcon);
+    const emoji = iconOption?.emoji;
+    await editCategory(oldName, newName, emoji, undefined, editingCategoryIcon);
+    setEditingCategory(null); setEditingCategoryName(''); setEditingCategoryIcon('autre');
     refreshCategories();
     if (selectedCategory === oldName) setSelectedCategory(newName);
     window.dispatchEvent(new Event('categoriesUpdated'));
@@ -348,8 +479,21 @@ export function Stocks() {
       seuilAlerte: parseInt(newProduct.seuilAlerte) || 10,
       seuilCritique: parseInt(newProduct.seuilCritique) || 5,
       image: newProduct.image,
+      photo: newProduct.photo,
     };
-    await universalSync.addProduit(product);
+    const created = await universalSync.addProduit(product);
+
+    // Enregistrer le stock initial comme un vrai mouvement d'entrée (traçabilité)
+    if (stockInit > 0) {
+      await recordEntree({
+        productId: created?.id || '',
+        productName: newProduct.name,
+        quantity: stockInit,
+        quantityCl: stockCl,
+        reason: 'Création produit — stock initial',
+      });
+    }
+
     setShowNewProduct(false);
     setNewProduct({ ...defaultNewProduct });
   };
@@ -382,6 +526,7 @@ export function Stocks() {
       seuilAlerte: parseInt(editProductForm.seuilAlerte) || 10,
       seuilCritique: parseInt(editProductForm.seuilCritique) || 5,
       activePriceFormats: editProductForm.activePriceFormats || ['bouteille'],
+      photo: editProductForm.photo,
       prices: {
         bouteille: editProductForm.prices.bouteille ? parseFloat(editProductForm.prices.bouteille) : undefined,
         demi:      editProductForm.prices.demi      ? parseFloat(editProductForm.prices.demi)      : undefined,
@@ -395,6 +540,19 @@ export function Stocks() {
         notes: editProductForm.notes,
       },
     };
+
+    // Si l'utilisateur a modifié manuellement le stock dans le formulaire, on
+    // trace l'écart comme une correction (sans quoi ce changement resterait invisible)
+    const stockDelta = stockVal - editingProduct.stock;
+    if (stockDelta !== 0) {
+      await recordCorrection({
+        productId: editingProduct.id,
+        productName: editProductForm.name,
+        quantity: Math.abs(stockDelta),
+        reason: stockDelta > 0 ? 'Ajustement manuel (+) — modification produit' : 'Ajustement manuel (-) — modification produit',
+      });
+    }
+
     await universalSync.updateProduit(editingProduct.id, updatedProduct);
     setEditingProduct(null);
   };
@@ -422,6 +580,17 @@ export function Stocks() {
     }
     await universalSync.updateProduit(reapproProductId, { ...prod, ...updatedFields });
 
+    // ⭐ Mouvement réel : entrée de stock (réception fournisseur)
+    await recordEntree({
+      productId: reapproProductId,
+      productName: prod.name,
+      quantity: totalUnites,
+      quantityCl: totalCl > 0 ? totalCl : undefined,
+      supplier: reapproSupplier || undefined,
+      purchasePrice: reapproPrice ? parseFloat(reapproPrice) : undefined,
+      reason: reapproSupplier ? `Réception — ${reapproSupplier}` : 'Réception fournisseur',
+    });
+
     setReapproSuccess(true);
     setTimeout(() => {
       setReapproSuccess(false); setShowReappro(false);
@@ -440,19 +609,23 @@ export function Stocks() {
     let quantitePerdue = qty;
     let nouveauStock = inventoryProduct.stock;
     let newStockCl = inventoryProduct.stockCl;
+    let clPerdus: number | undefined;
 
     if (lossReason === 'inventaire') {
       // qty = stock réel en bouteilles
       quantitePerdue = Math.max(0, inventoryProduct.stock - qty);
       nouveauStock = qty;
       if (inventoryProduct.volumeConfig && newStockCl != null) {
+        const clAvant = newStockCl;
         newStockCl = qty * inventoryProduct.volumeConfig.contenanceCl;
+        clPerdus = Math.max(0, clAvant - newStockCl);
       }
     } else {
       nouveauStock = Math.max(0, inventoryProduct.stock - qty);
       if (inventoryProduct.volumeConfig && newStockCl != null) {
         const clADeduire = qty * inventoryProduct.volumeConfig.contenanceCl;
         newStockCl = Math.max(0, newStockCl - clADeduire);
+        clPerdus = clADeduire;
       }
     }
 
@@ -473,6 +646,21 @@ export function Stocks() {
     const updatePayload: any = { ...inventoryProduct, stock: nouveauStock };
     if (newStockCl !== undefined) updatePayload.stockCl = newStockCl;
     await universalSync.updateProduit(inventoryProduct.id, updatePayload);
+
+    // ⭐ Mouvement réel : correction (perte, écart, inventaire...)
+    const reasonLabels: Record<string, string> = {
+      casse: 'Casse', offert: 'Offert', ecart: 'Écart constaté',
+      peremption: 'Péremption', inventaire: 'Ajustement inventaire', autre: 'Autre',
+    };
+    if (quantitePerdue > 0) {
+      await recordCorrection({
+        productId: inventoryProduct.id,
+        productName: inventoryProduct.name,
+        quantity: quantitePerdue,
+        quantityCl: clPerdus,
+        reason: lossNote ? `${reasonLabels[lossReason] || lossReason} — ${lossNote}` : (reasonLabels[lossReason] || lossReason),
+      });
+    }
 
     setShowInventory(false); setInventoryProduct(null);
     setInventoryQty(''); setLossReason('casse'); setLossNote('');
@@ -691,9 +879,7 @@ export function Stocks() {
                 <div>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style={{ backgroundColor: `${product.color}20` }}>
-                        {product.image}
-                      </div>
+                      <ProductThumb product={product} size="md" />
                       <div>
                         <h3 className="text-sm font-semibold text-slate-900">{product.name}</h3>
                         <p className="text-[10px] text-slate-500 capitalize flex items-center gap-1">
@@ -788,7 +974,7 @@ export function Stocks() {
                     prediction.status === 'warning' ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100')}>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{product.image}</span>
+                        <ProductThumb product={product} size="sm" />
                         <p className="font-semibold text-slate-800 text-sm">{product.name}</p>
                         {product.volumeConfig && <span className="text-[9px] bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded-full font-bold">cl</span>}
                       </div>
@@ -813,36 +999,76 @@ export function Stocks() {
       {/* ── MODAL GESTION CATÉGORIES ─────────────────────────── */}
       {showManageCategories && (
         <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center" onClick={() => setShowManageCategories(false)}>
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-md w-full shadow-2xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl p-5 max-w-md w-full shadow-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4 shrink-0">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2"><Settings size={20} className="text-violet-600" /> Catégories</h3>
               <button onClick={() => setShowManageCategories(false)} className="text-slate-400"><X size={20} /></button>
             </div>
-            <div className="flex gap-2 mb-4 shrink-0">
+
+            {/* ── Formulaire nouvelle catégorie ── */}
+            <div className="mb-4 shrink-0 space-y-2">
               <input type="text" placeholder="Nouvelle catégorie..." value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)}
-                className="flex-1 p-2.5 border rounded-xl text-sm" />
-              <button onClick={handleAddCategory} className="px-4 py-2.5 bg-violet-600 text-white font-bold text-sm rounded-xl flex items-center gap-1">
-                <Plus size={16} /> Ajouter
+                className="w-full p-2.5 border rounded-xl text-sm" />
+              <div>
+                <p className="text-[10px] font-semibold text-slate-500 mb-1.5">Icône générique</p>
+                <div className="grid grid-cols-7 gap-1.5 max-h-28 overflow-y-auto p-1 bg-slate-50 rounded-xl border border-slate-100">
+                  {CATEGORY_ICONS.map(opt => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      title={opt.label}
+                      onClick={() => setNewCategoryIcon(opt.id)}
+                      className={cn(
+                        'w-9 h-9 rounded-lg flex items-center justify-center text-lg border transition-all',
+                        newCategoryIcon === opt.id ? 'bg-violet-100 border-violet-400 ring-2 ring-violet-200' : 'bg-white border-slate-200 hover:border-slate-300'
+                      )}
+                    >
+                      {opt.emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={handleAddCategory} className="w-full px-4 py-2.5 bg-violet-600 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-1">
+                <Plus size={16} /> Ajouter la catégorie
               </button>
             </div>
-            <div className="space-y-2 overflow-y-auto flex-1">
+
+            <div className="space-y-2 overflow-y-auto flex-1 border-t border-slate-100 pt-3">
               {categoryList.map(cat => (
-                <div key={cat.id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border text-sm">
+                <div key={cat.id} className="bg-slate-50 rounded-xl border text-sm p-2.5">
                   {editingCategory === cat.name ? (
-                    <div className="flex items-center gap-2 flex-1 mr-2">
-                      <input type="text" value={editingCategoryName} onChange={e => setEditingCategoryName(e.target.value)}
-                        className="flex-1 p-1.5 border rounded-lg text-xs bg-white" autoFocus />
-                      <button onClick={() => handleEditCategory(cat.name)} className="p-1.5 bg-emerald-500 text-white rounded-lg"><Check size={14} /></button>
-                      <button onClick={() => setEditingCategory(null)} className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"><X size={14} /></button>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input type="text" value={editingCategoryName} onChange={e => setEditingCategoryName(e.target.value)}
+                          className="flex-1 p-1.5 border rounded-lg text-xs bg-white" autoFocus />
+                        <button onClick={() => handleEditCategory(cat.name)} className="p-1.5 bg-emerald-500 text-white rounded-lg"><Check size={14} /></button>
+                        <button onClick={() => setEditingCategory(null)} className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"><X size={14} /></button>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1.5 max-h-24 overflow-y-auto p-1 bg-white rounded-lg border border-slate-200">
+                        {CATEGORY_ICONS.map(opt => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            title={opt.label}
+                            onClick={() => setEditingCategoryIcon(opt.id)}
+                            className={cn(
+                              'w-8 h-8 rounded-lg flex items-center justify-center text-base border transition-all',
+                              editingCategoryIcon === opt.id ? 'bg-violet-100 border-violet-400 ring-2 ring-violet-200' : 'bg-slate-50 border-slate-200'
+                            )}
+                          >
+                            {opt.emoji}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <>
+                    <div className="flex items-center justify-between">
                       <span className="capitalize font-medium text-slate-700">{cat.emoji} {cat.name}</span>
                       <div className="flex items-center gap-1">
-                        <button onClick={() => { setEditingCategory(cat.name); setEditingCategoryName(cat.name); }} className="p-1.5 text-slate-500 hover:text-violet-600 rounded-lg"><Edit3 size={14} /></button>
+                        <button onClick={() => { setEditingCategory(cat.name); setEditingCategoryName(cat.name); setEditingCategoryIcon(cat.icon || 'autre'); }} className="p-1.5 text-slate-500 hover:text-violet-600 rounded-lg"><Edit3 size={14} /></button>
                         <button onClick={() => handleDeleteCategory(cat.name)} className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg"><Trash2 size={14} /></button>
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
               ))}
@@ -1062,6 +1288,7 @@ export function Stocks() {
                     className="w-full p-2.5 border rounded-xl text-sm" />
                 </div>
               </div>
+              <PhotoPicker photo={newProduct.photo} onChange={photo => setNewProduct({ ...newProduct, photo })} />
               <PrixVolumeForm form={newProduct} setForm={setNewProduct} />
               <button onClick={handleNewProductSubmit}
                 className="w-full py-3 bg-violet-600 text-white font-bold rounded-xl text-sm mt-2">
@@ -1105,6 +1332,7 @@ export function Stocks() {
                     className="w-full p-2.5 border rounded-xl text-sm" />
                 </div>
               </div>
+              <PhotoPicker photo={editProductForm.photo} onChange={photo => setEditProductForm({ ...editProductForm, photo })} />
               <PrixVolumeForm form={editProductForm} setForm={setEditProductForm} />
               <div className="space-y-2 pt-2 border-t">
                 <div>
@@ -1135,19 +1363,41 @@ export function Stocks() {
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2"><History size={20} /> Flux Récents</h3>
               <button onClick={() => setShowMovements(false)} className="text-slate-400"><X size={20} /></button>
             </div>
-            <div className="space-y-2">
-              {stockMovements.map(m => (
-                <div key={m.id} className="flex justify-between items-center text-xs p-2.5 bg-slate-50 border rounded-xl">
-                  <div>
-                    <p className="font-semibold text-slate-800">{m.productId}</p>
-                    <p className="text-[10px] text-slate-400">{m.date instanceof Date ? m.date.toLocaleDateString() : m.date} — {m.type}</p>
-                  </div>
-                  <span className={cn('font-bold', m.type === 'entrée' ? 'text-emerald-600' : 'text-red-500')}>
-                    {m.type === 'entrée' ? '+' : '-'}{m.quantity}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {(!recentMovements || recentMovements.length === 0) ? (
+              <div className="text-center py-12 text-slate-400">
+                <History size={36} className="mx-auto mb-2 opacity-40" />
+                <p className="text-sm">Aucun mouvement enregistré pour le moment</p>
+                <p className="text-xs mt-1">Les réceptions, ventes et ajustements apparaîtront ici automatiquement.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentMovements.map(m => {
+                  const isEntree = m.type === 'entrée';
+                  const isSortie = m.type === 'sortie';
+                  return (
+                    <div key={m.id} className="flex justify-between items-center text-xs p-2.5 bg-slate-50 border rounded-xl">
+                      <div className="min-w-0 flex-1 mr-2">
+                        <p className="font-semibold text-slate-800 truncate">{m.productName}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          {new Date(m.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                          {' à '}
+                          {new Date(m.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {' — '}{m.reason}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className={cn('font-bold block', isEntree ? 'text-emerald-600' : isSortie ? 'text-red-500' : 'text-amber-600')}>
+                          {isEntree ? '+' : '−'}{m.quantity}
+                        </span>
+                        {m.quantityCl != null && m.quantityCl > 0 && (
+                          <span className="text-[9px] text-slate-400">{Math.round(m.quantityCl * 10) / 10}cl</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

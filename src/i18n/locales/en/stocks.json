@@ -1,0 +1,165 @@
+{
+  "title": "Inventory Management",
+  "subtitle": "Real-time stock tracking",
+  "header": {
+    "title": "Inventory Management",
+    "subtitle": "Real-time tracking — centiliter stock for wines & spirits"
+  },
+  "actions": {
+    "new": "New product",
+    "reappro": "Restock",
+    "inventory": "Inventory",
+    "movements": "Movements",
+    "predictions": "Forecasts",
+    "categories": "Categories"
+  },
+  "search": {
+    "placeholder": "Search for a product..."
+  },
+  "status": {
+    "critical": "Critical",
+    "low": "Low",
+    "medium": "Medium",
+    "good": "Good",
+    "critical_label": "🔴 Critical",
+    "low_label": "🟡 Low",
+    "medium_label": "🔵 Medium",
+    "good_label": "🟢 Good"
+  },
+  "volume": {
+    "title": "Centiliter Management",
+    "bottle": "Bottle capacity",
+    "service": "Volume served per format",
+    "enable": "Centiliter management (wines, spirits, beers)",
+    "bottle_capacity": "Bottle capacity (cl) *",
+    "examples": "Examples: 75cl wine, 70cl whisky/gin, 65cl Flag/Gazelle beer, 33cl can",
+    "format_volume": "Volume served per format (cl):",
+    "bottle": "Bottle",
+    "half": "Half",
+    "quarter": "Quarter",
+    "glass": "Glass",
+    "can": "Can",
+    "bottle_hint": "Full bottle",
+    "half_hint": "Half bottle",
+    "quarter_hint": "Quarter bottle",
+    "glass_hint": "Glass service",
+    "can_hint": "Full can",
+    "services_per_bottle": "{cl}cl → {services} service(s)/btl",
+    "recap": "Summary:"
+  },
+  "reappro": {
+    "title": "Restock",
+    "format": "Delivery format",
+    "quantity": "Quantity received",
+    "supplier": "Supplier",
+    "price": "Purchase price",
+    "confirm": "Confirm receipt",
+    "product": "Product *",
+    "select_product": "— Select —",
+    "unit": "📦 Unit",
+    "unit_desc": "1 bottle at a time",
+    "carton12": "📦 Box ×12",
+    "carton12_desc": "12 bottles/box",
+    "carton24": "📦 Box ×24",
+    "carton24_desc": "24 bottles/box",
+    "carton_custom": "📦 Custom box",
+    "carton_custom_desc": "Custom quantity",
+    "bottles_per_carton": "Bottles per box",
+    "quantity_received": "Quantity received ({format}) *",
+    "placeholder": "Ex: 2",
+    "supplier_placeholder": "Ex: Castel",
+    "price_placeholder": "FCFA",
+    "recap_title": "Receipt summary:",
+    "recap_bottles": "+ {bottles} bottles of {product}",
+    "recap_cl": "= {cl}cl added to stock",
+    "recap_cartons": "({qty} box{es} × {perCarton} btl)",
+    "recap_total_cost": "Total cost: {total} FCFA",
+    "success": "Stock updated!",
+    "success_cl": "+{bottles} bottles · +{cl}cl",
+    "success_units": "+{units} units"
+  },
+  "inventory": {
+    "title": "Losses & Adjustments",
+    "reason": "Reason",
+    "quantity": "Quantity",
+    "note": "Note (optional)",
+    "product": "Product affected",
+    "select_product": "-- Select --",
+    "reasons": {
+      "breakage": "💥 Breakage",
+      "offered": "🎁 Complimentary",
+      "gap": "⚖️ Variance",
+      "expiry": "🗑️ Expired",
+      "inventory": "📋 Inventory",
+      "other": "📝 Other"
+    },
+    "stock_reel": "Actual stock (current: {stock} btl)",
+    "quantity_lost": "Quantity lost (bottles)",
+    "cl_approx": "≈ {cl} cl",
+    "save": "Save",
+    "success": "Adjustment saved"
+  },
+  "movements": {
+    "title": "Recent Movements",
+    "entry": "Incoming",
+    "exit": "Outgoing",
+    "type": "Type",
+    "date": "Date",
+    "product": "Product",
+    "empty": "No movements"
+  },
+  "predictions": {
+    "title": "Stockout Forecasts",
+    "stock": "Stock: {stock}",
+    "stock_cl": "({cl}cl)"
+  },
+  "categories": {
+    "title": "Categories",
+    "new": "New category...",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "all": "All"
+  },
+  "product_form": {
+    "create": "Create product",
+    "edit": "Edit product",
+    "name": "Name *",
+    "category": "Category *",
+    "initial_stock": "Initial stock *",
+    "unit": "Unit",
+    "alert_threshold": "Alert threshold",
+    "critical_threshold": "Critical threshold",
+    "supplements": "Supplements",
+    "supplements_placeholder": "Lemon, Ice cubes",
+    "internal_notes": "Internal notes",
+    "create_button": "Create product",
+    "edit_button": "Save changes",
+    "price_required": "Please set at least one price.",
+    "formats": "Formats & Prices (FCFA)",
+    "price_placeholder": "Price FCFA"
+  },
+  "stock_display": {
+    "bottles": "btl",
+    "cl": "cl",
+    "stock": "Stock",
+    "vol_bottle": "Vol. btl: {cl}cl",
+    "glass_services": "Glass: {cl}cl ({services} services/btl)"
+  },
+  "product_actions": {
+    "add_stock": "+ Stock",
+    "inventory": "Inventory",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "status_badge": {
+    "critical": "🔴 Critical",
+    "low": "🟡 Low",
+    "medium": "🔵 Medium",
+    "good": "🟢 Good"
+  },
+  "errors": {
+    "delete_confirm": "Delete {name} permanently?",
+    "delete_error": "Unable to delete"
+  }
+}

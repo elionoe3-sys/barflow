@@ -4,6 +4,7 @@
 
 import Dexie, { Table } from 'dexie';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { enqueueSync } from '@/utils/syncBridge';
 
 // ── Types ─────────────────────────────────────────────────────
 export interface PersistedOrderItem {
@@ -213,7 +214,15 @@ export const orderDb = new OrderDatabase();
 
 // Sauvegarder une commande (ardoise ou en cours)
 export async function saveOrder(order: PersistedOrder): Promise<void> {
+  const existing = await orderDb.orders.get(order.id);
   await orderDb.orders.put(order);
+  await enqueueSync({
+    store: 'orders',
+    operation: existing ? 'UPDATE' : 'CREATE',
+    entityId: order.id,
+    apiCall: existing ? 'updateCommande' : 'createCommande',
+    payload: existing ? [order.id, order] : order,
+  });
 }
 
 // Marquer une commande comme payée + décrémenter le stock
@@ -232,6 +241,13 @@ export async function payOrder(
     paidAt: new Date().toISOString(),
   };
   await orderDb.orders.put(paid);
+  await enqueueSync({
+    store: 'orders',
+    operation: 'UPDATE',
+    entityId: paid.id,
+    apiCall: 'updateCommande',
+    payload: [paid.id, paid],
+  });
 
   // Décrémenter le stock de chaque produit
   if (updateStockFn) {
@@ -261,6 +277,16 @@ export async function loadOrderHistory(days = 30): Promise<PersistedOrder[]> {
 // Annuler une commande
 export async function cancelOrder(orderId: string): Promise<void> {
   await orderDb.orders.update(orderId, { status: 'annulé' });
+  const updated = await orderDb.orders.get(orderId);
+  if (updated) {
+    await enqueueSync({
+      store: 'orders',
+      operation: 'UPDATE',
+      entityId: orderId,
+      apiCall: 'updateCommande',
+      payload: [orderId, updated],
+    });
+  }
 }
 
 // ── Hooks React ───────────────────────────────────────────────

@@ -1,0 +1,44 @@
+{
+  "title": "Export PDF",
+  "report": {
+    "title": "Rapport",
+    "generated": "Généré le",
+    "period": "Période",
+    "summary": "Résumé",
+    "details": "Détails"
+  },
+  "sections": {
+    "order": "Commande",
+    "ticket": "Ticket de caisse",
+    "invoice": "Facture",
+    "receipt": "Reçu",
+    "report": "Rapport financier",
+    "inventory": "Inventaire",
+    "purchase": "Bon de commande"
+  },
+  "fields": {
+    "order_id": "N° commande",
+    "date": "Date",
+    "time": "Heure",
+    "table": "Table",
+    "server": "Serveur",
+    "items": "Articles",
+    "subtotal": "Sous-total",
+    "tax": "Taxe",
+    "total": "Total",
+    "payment_method": "Moyen de paiement",
+    "customer": "Client",
+    "address": "Adresse",
+    "phone": "Téléphone"
+  },
+  "footer": {
+    "thank_you": "Merci de votre visite !",
+    "copyright": "© {year} BarFlow. Tous droits réservés.",
+    "confidential": "Document confidentiel"
+  },
+  "buttons": {
+    "export": "Exporter en PDF",
+    "download": "Télécharger",
+    "print": "Imprimer"
+  }
+}

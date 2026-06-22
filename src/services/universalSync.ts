@@ -8,6 +8,22 @@ let isOnline = navigator.onLine;
 window.addEventListener('online',  () => { isOnline = true;  synchronizeAll(); });
 window.addEventListener('offline', () => { isOnline = false; });
 
+// ── Appel API "best effort" ────────────────────────────────────
+// Le serveur Express (localhost:3001) n'est pas toujours lancé (usage
+// tablette hors-ligne). Si l'appel échoue (réseau, serveur down, timeout),
+// on ne doit JAMAIS faire planter l'opération locale qui l'a déclenché :
+// l'écriture est déjà sécurisée dans Dexie + la syncQueue la rejouera plus
+// tard (via synchronizeAll). Sans ce garde-fou, une simple absence de
+// serveur backend bloque silencieusement tous les boutons "Enregistrer".
+async function safeApiCall<T>(fn: () => Promise<T>): Promise<T | null> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.warn('[universalSync] Appel API serveur échoué (sera resynchronisé plus tard) :', error);
+    return null;
+  }
+}
+
 // ══════════════════════════════════════════════════════════════
 // SYNC MONTANTE : rejoue la syncQueue vers le serveur
 // ══════════════════════════════════════════════════════════════
@@ -24,8 +40,9 @@ async function synchronizeAll() {
           const d = { id: p.id, nom: p.nom || p.name, prix: p.prix || p.price || 0,
             categorie: p.categorie || p.category || 'autre', stock: p.stock || 0,
             stockUnit: p.stockUnit, seuilAlerte: p.seuilAlerte, seuilCritique: p.seuilCritique,
-            image: p.image, color: p.color, popularite: p.popularite,
-            activePriceFormats: p.activePriceFormats, prices: p.prices, options: p.options };
+            image: p.image, photo: p.photo ?? null, color: p.color, popularite: p.popularite,
+            activePriceFormats: p.activePriceFormats, prices: p.prices, options: p.options,
+            stockCl: p.stockCl ?? null, volumeConfig: p.volumeConfig ?? null };
           if (item.operation === 'CREATE') await api.createProduit(d);
           if (item.operation === 'UPDATE') await api.updateProduit(item.entityId, d);
           if (item.operation === 'DELETE') await api.deleteProduit(item.entityId);
@@ -140,10 +157,17 @@ async function syncFromServer() {
     const serverProduits = await api.getProduits();
     for (const p of serverProduits) {
       const existing = await db.produits.get(p.id);
+      // Ne jamais écraser une photo/stockCl/volumeConfig locale par une valeur
+      // vide venant du serveur (cas où le serveur n'a pas encore reçu la donnée
+      // la plus récente, p.ex. juste après une modif locale pas encore re-synchronisée).
+      const photo = p.photo ?? (existing as any)?.photo;
+      const stockCl = p.stockCl ?? (existing as any)?.stockCl;
+      const volumeConfig = p.volumeConfig ?? (existing as any)?.volumeConfig;
       const data = { nom: p.nom, prix: p.prix, categorie: p.categorie, stock: p.stock,
         stockUnit: p.stockUnit || 'unités', seuilAlerte: p.seuilAlerte ?? 10, seuilCritique: p.seuilCritique ?? 5,
-        image: p.image || '📦', color: p.color || '#8B5CF6', popularite: p.popularite ?? 50,
+        image: p.image || '📦', photo, color: p.color || '#8B5CF6', popularite: p.popularite ?? 50,
         activePriceFormats: p.activePriceFormats || ['bouteille'], prices: p.prices || {}, options: p.options || {},
+        stockCl, volumeConfig,
         synced: true, deleted: false, updatedAt: new Date() };
       if (!existing) await db.produits.add({ ...data, id: p.id, createdAt: new Date() });
       else await db.produits.update(p.id, data);
@@ -245,176 +269,178 @@ export const universalSync = {
   return produits.map(p => ({
     id: p.id, name: p.nom, price: p.prix, category: p.categorie, stock: p.stock,
     stockUnit: p.stockUnit, seuilAlerte: p.seuilAlerte, seuilCritique: p.seuilCritique,
-    image: p.image, color: p.color, popularite: p.popularite,
+    image: p.image, photo: (p as any).photo, color: p.color, popularite: p.popularite,
     activePriceFormats: p.activePriceFormats, prices: p.prices, options: p.options,
+    stockCl: (p as any).stockCl, volumeConfig: (p as any).volumeConfig,
     synced: p.synced, deleted: p.deleted, createdAt: p.createdAt, updatedAt: p.updatedAt,
-  }));
+  })) as any[];
 },
   async addProduit(data: any) {
     const p = await db.addProduit(data);
     if (isOnline) {
-      await api.createProduit({ id: p.id, nom: p.nom, prix: p.prix, categorie: p.categorie, stock: p.stock,
+      await safeApiCall(() => api.createProduit({ id: p.id, nom: p.nom, prix: p.prix, categorie: p.categorie, stock: p.stock,
         stockUnit: p.stockUnit, seuilAlerte: p.seuilAlerte, seuilCritique: p.seuilCritique,
-        image: p.image, color: p.color, popularite: p.popularite,
-        activePriceFormats: p.activePriceFormats, prices: p.prices, options: p.options });
+        image: p.image, photo: (p as any).photo, color: p.color, popularite: p.popularite,
+        activePriceFormats: p.activePriceFormats, prices: p.prices, options: p.options,
+        stockCl: (p as any).stockCl, volumeConfig: (p as any).volumeConfig }));
     }
     return p;
   },
   async updateProduit(id: string, data: any) {
     await db.updateProduit(id, data);
-    if (isOnline) await api.updateProduit(id, data);
+    if (isOnline) await safeApiCall(() => api.updateProduit(id, data));
   },
   async deleteProduit(id: string) {
     await db.deleteProduit(id);
-    if (isOnline) await api.deleteProduit(id);
+    if (isOnline) await safeApiCall(() => api.deleteProduit(id));
   },
 
   // ── COMMANDES ───────────────────────────────────────────────
   async getCommandes() { return await db.getActiveCommandes(); },
   async addCommande(data: any) {
     const c = await db.addCommande(data);
-    if (isOnline) await api.createCommande({ id: c.id, numero: c.numero, date: c.date,
+    if (isOnline) await safeApiCall(() => api.createCommande({ id: c.id, numero: c.numero, date: c.date,
       total: c.total, statut: c.statut, items: c.items, tableNumber: c.tableNumber,
-      server: c.server, paymentMethod: c.paymentMethod, comment: c.comment });
+      server: c.server, paymentMethod: c.paymentMethod, comment: c.comment }));
     return c;
   },
   async updateCommande(id: string, data: any) {
     await db.updateCommande(id, data);
-    if (isOnline) await api.updateCommande(id, data);
+    if (isOnline) await safeApiCall(() => api.updateCommande(id, data));
   },
   async deleteCommande(id: string) {
     await db.deleteCommande(id);
-    if (isOnline) await api.deleteCommande(id);
+    if (isOnline) await safeApiCall(() => api.deleteCommande(id));
   },
 
   // ── CHARGES ─────────────────────────────────────────────────
   async getCharges() { return await db.getActiveCharges(); },
   async addCharge(data: any) {
     const c = await db.addCharge(data);
-    if (isOnline) await api.createCharge({ id: c.id, nom: c.nom, categorie: c.categorie, montantMensuel: c.montantMensuel, periodicite: c.periodicite });
+    if (isOnline) await safeApiCall(() => api.createCharge({ id: c.id, nom: c.nom, categorie: c.categorie, montantMensuel: c.montantMensuel, periodicite: c.periodicite }));
     return c;
   },
   async updateCharge(id: string, data: any) {
     await db.updateCharge(id, data);
-    if (isOnline) await api.updateCharge(id, data);
+    if (isOnline) await safeApiCall(() => api.updateCharge(id, data));
   },
   async deleteCharge(id: string) {
     await db.deleteCharge(id);
-    if (isOnline) await api.deleteCharge(id);
+    if (isOnline) await safeApiCall(() => api.deleteCharge(id));
   },
 
   // ── EMPLOYÉS ────────────────────────────────────────────────
   async getEmployes() { return await db.getActiveEmployes(); },
   async addEmploye(data: any) {
     const e = await db.addEmploye(data);
-    if (isOnline) await api.createEmploye({ id: e.id, nom: e.nom, poste: e.poste, salaireBrut: e.salaireBrut, prime: e.prime, avantages: e.avantages });
+    if (isOnline) await safeApiCall(() => api.createEmploye({ id: e.id, nom: e.nom, poste: e.poste, salaireBrut: e.salaireBrut, prime: e.prime, avantages: e.avantages }));
     return e;
   },
   async updateEmploye(id: string, data: any) {
     await db.updateEmploye(id, data);
-    if (isOnline) await api.updateEmploye(id, data);
+    if (isOnline) await safeApiCall(() => api.updateEmploye(id, data));
   },
   async deleteEmploye(id: string) {
     await db.deleteEmploye(id);
-    if (isOnline) await api.deleteEmploye(id);
+    if (isOnline) await safeApiCall(() => api.deleteEmploye(id));
   },
 
   // ── INVESTISSEMENTS ─────────────────────────────────────────
   async getInvestissements() { return await db.getActiveInvestissements(); },
   async addInvestissement(data: any) {
     const i = await db.addInvestissement(data);
-    if (isOnline) await api.createInvestissement({ id: i.id, nom: i.nom, type: i.type, montant: i.montant, amortissementAnnees: i.amortissementAnnees });
+    if (isOnline) await safeApiCall(() => api.createInvestissement({ id: i.id, nom: i.nom, type: i.type, montant: i.montant, amortissementAnnees: i.amortissementAnnees }));
     return i;
   },
   async updateInvestissement(id: string, data: any) {
     await db.updateInvestissement(id, data);
-    if (isOnline) await api.updateInvestissement(id, data);
+    if (isOnline) await safeApiCall(() => api.updateInvestissement(id, data));
   },
   async deleteInvestissement(id: string) {
     await db.deleteInvestissement(id);
-    if (isOnline) await api.deleteInvestissement(id);
+    if (isOnline) await safeApiCall(() => api.deleteInvestissement(id));
   },
 
   // ── DAILY STATS ─────────────────────────────────────────────
   async getDailyStats() { return await db.dailyStats.toArray(); },
   async addDailyStat(date: string, ca: number, clients: number = 0) {
     await db.addDailyStat(date, ca, clients);
-    if (isOnline) await api.updateDailyStats(date, ca, clients);
+    if (isOnline) await safeApiCall(() => api.updateDailyStats(date, ca, clients));
   },
 
   // ── FOURNISSEURS ────────────────────────────────────────────
   async getFournisseurs() { return await db.getActiveFournisseurs(); },
   async addFournisseur(data: any) {
     const f = await db.addFournisseur(data);
-    if (isOnline) await api.createFournisseur({ id: f.id, nom: f.nom, telephone: f.telephone, notes: f.notes, produits: f.produits });
+    if (isOnline) await safeApiCall(() => api.createFournisseur({ id: f.id, nom: f.nom, telephone: f.telephone, notes: f.notes, produits: f.produits }));
     return f;
   },
   async updateFournisseur(id: string, data: any) {
     await db.updateFournisseur(id, data);
-    if (isOnline) await api.updateFournisseur(id, data);
+    if (isOnline) await safeApiCall(() => api.updateFournisseur(id, data));
   },
   async deleteFournisseur(id: string) {
     await db.deleteFournisseur(id);
-    if (isOnline) await api.deleteFournisseur(id);
+    if (isOnline) await safeApiCall(() => api.deleteFournisseur(id));
   },
 
   // ── REAPPRO COMMANDES ───────────────────────────────────────
   async getReapproCommandes() { return await db.getActiveReapproCommandes(); },
   async addReapproCommande(data: any) {
     const r = await db.addReapproCommande(data);
-    if (isOnline) await api.createReapproCommande({ id: r.id, fournisseurId: r.fournisseurId,
+    if (isOnline) await safeApiCall(() => api.createReapproCommande({ id: r.id, fournisseurId: r.fournisseurId,
       fournisseurNom: r.fournisseurNom, fournisseurTel: r.fournisseurTel, items: r.items,
-      totalAmount: r.totalAmount, statut: r.statut, receivedAt: r.receivedAt });
+      totalAmount: r.totalAmount, statut: r.statut, receivedAt: r.receivedAt }));
     return r;
   },
   async updateReapproCommande(id: string, data: any) {
     await db.updateReapproCommande(id, data);
-    if (isOnline) await api.updateReapproCommande(id, data);
+    if (isOnline) await safeApiCall(() => api.updateReapproCommande(id, data));
   },
   async deleteReapproCommande(id: string) {
     await db.deleteReapproCommande(id);
-    if (isOnline) await api.deleteReapproCommande(id);
+    if (isOnline) await safeApiCall(() => api.deleteReapproCommande(id));
   },
 
   // ── PERTES ──────────────────────────────────────────────────
   async getPertes() { return await db.getActivePertes(); },
   async addPerte(data: any) {
     const p = await db.addPerte(data);
-    if (isOnline) await api.createPerte({ id: p.id, productId: p.productId, productName: p.productName,
+    if (isOnline) await safeApiCall(() => api.createPerte({ id: p.id, productId: p.productId, productName: p.productName,
       productPrice: p.productPrice, quantity: p.quantity, reason: p.reason, stockAvant: p.stockAvant,
-      stockReel: p.stockReel, valeurPerdue: p.valeurPerdue, date: p.date, note: p.note });
+      stockReel: p.stockReel, valeurPerdue: p.valeurPerdue, date: p.date, note: p.note }));
     return p;
   },
   async deletePerte(id: string) {
     await db.deletePerte(id);
-    if (isOnline) await api.deletePerte(id);
+    if (isOnline) await safeApiCall(() => api.deletePerte(id));
   },
 
   // ── CATÉGORIES ──────────────────────────────────────────────
   async getCategories() { return await db.getActiveCategories(); },
   async addCategorie(data: any) {
     const c = await db.addCategorie(data);
-    if (isOnline) await api.createCategorie({ id: c.id, nom: c.nom, emoji: c.emoji, color: c.color });
+    if (isOnline) await safeApiCall(() => api.createCategorie({ id: c.id, nom: c.nom, emoji: c.emoji, color: c.color }));
     return c;
   },
   async updateCategorie(id: string, data: any) {
     await db.updateCategorie(id, data);
-    if (isOnline) await api.updateCategorie(id, data);
+    if (isOnline) await safeApiCall(() => api.updateCategorie(id, data));
   },
   async deleteCategorie(id: string) {
     await db.deleteCategorie(id);
-    if (isOnline) await api.deleteCategorie(id);
+    if (isOnline) await safeApiCall(() => api.deleteCategorie(id));
   },
 
   // ── SETTINGS ────────────────────────────────────────────────
   async getSetting(key: string) { return await db.getSetting(key); },
   async setSetting(key: string, value: any) {
     await db.setSetting(key, value);
-    if (isOnline) await api.setSetting(key, value);
+    if (isOnline) await safeApiCall(() => api.setSetting(key, value));
   },
   async deleteSetting(key: string) {
     await db.barSettings.delete(key);
-    if (isOnline) await api.deleteSetting(key);
+    if (isOnline) await safeApiCall(() => api.deleteSetting(key));
   },
 
   // ── SYNC MANUELLES ──────────────────────────────────────────

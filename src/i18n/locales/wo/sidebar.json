@@ -1,0 +1,29 @@
+{
+  "title": "Téerekaay",
+  "brand": {
+    "name": "BarFlow",
+    "tagline": "Gestion de bar"
+  },
+  "links": {
+    "dashboard": "Panneau njiite",
+    "orders": "Njaay",
+    "stocks": "Détt",
+    "reappro": "Wéy dara",
+    "finance": "Koom",
+    "bilan": "Bilan",
+    "settings": "Setti",
+    "payments": "Fayal",
+    "users": "Jëfandikoo",
+    "reports": "Xaaj"
+  },
+  "user": {
+    "profile": "Sàngu",
+    "settings": "Setti sama",
+    "logout": "Tàbb"
+  },
+  "status": {
+    "online": "Nekk ci nét",
+    "offline": "Nekk ci nét bi",
+    "syncing": "Sicc biy dugg"
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "title": "Gestionu Stocks",
+  "subtitle": "Suivi ci lu nékk ci biir",
+  "header": {
+    "title": "Gestionu Stocks",
+    "subtitle": "Suivi ci lu nékk — stock ci centilitres ngir biiir ak spiritueux"
+  },
+  "actions": {
+    "new": "Produit bu yees",
+    "reappro": "Defaat stock",
+    "inventory": "Inventaire",
+    "movements": "Flux",
+    "predictions": "Li ñu gëmoon",
+    "categories": "Xeet"
+  },
+  "search": {
+    "placeholder": "Seetlu produit..."
+  },
+  "status": {
+    "critical": "Critique",
+    "low": "Tuuti",
+    "medium": "Matt",
+    "good": "Baax",
+    "critical_label": "🔴 Critique",
+    "low_label": "🟡 Tuuti",
+    "medium_label": "🔵 Matt",
+    "good_label": "🟢 Baax"
+  },
+  "volume": {
+    "title": "Gestion ci centilitres",
+    "bottle": "Li bëy bi mën a nattu",
+    "service": "Volume bu ñu natt ci format",
+    "enable": "Gestion ci centilitres (biiir, spiritueux, bière)",
+    "bottle_capacity": "Li bëy bi mën a nattu (cl) *",
+    "examples": "Exemples : 75cl biir, 70cl whisky/gin, 65cl bière Flag/Gazelle, 33cl canette",
+    "format_volume": "Volume bu ñu natt ci format (cl) :",
+    "bottle": "Bëy",
+    "half": "Demi",
+    "quarter": "Quart",
+    "glass": "Kopp",
+    "can": "Canette",
+    "bottle_hint": "Bëy bu mat",
+    "half_hint": "Demi-bëy",
+    "quarter_hint": "Quartu bëy",
+    "glass_hint": "Nattu ci kopp",
+    "can_hint": "Canette bu mat",
+    "services_per_bottle": "{cl}cl → {services} nattu/bëy",
+    "recap": "Récapitulatif :"
+  },
+  "reappro": {
+    "title": "Defaat stock",
+    "format": "Format bi ñu indi",
+    "quantity": "Li ñu jot",
+    "supplier": "Fournisseur",
+    "price": "Pëyu njott",
+    "confirm": "Dëggël njott bi",
+    "product": "Produit *",
+    "select_product": "— Tànnal —",
+    "unit": "📦 Unité",
+    "unit_desc": "Bénn bëy ci bénn yoon",
+    "carton12": "📦 Carton ×12",
+    "carton12_desc": "12 bëy ci carton",
+    "carton24": "📦 Carton ×24",
+    "carton24_desc": "24 bëy ci carton",
+    "carton_custom": "📦 Carton weneen",
+    "carton_custom_desc": "Li ñu def ci carton",
+    "bottles_per_carton": "Bëy ci carton",
+    "quantity_received": "Li ñu jot ({format}) *",
+    "placeholder": "Ex: 2",
+    "supplier_placeholder": "Ex: Castel",
+    "price_placeholder": "FCFA",
+    "recap_title": "Récapitulatif njott bi :",
+    "recap_bottles": "+ {bottles} bëyu {product}",
+    "recap_cl": "= {cl}cl yokk na ci stock bi",
+    "recap_cartons": "({qty} carton{s} × {perCarton} btl)",
+    "recap_total_cost": "Total bi : {total} FCFA",
+    "success": "Stock bi yees na!",
+    "success_cl": "+{bottles} bëy · +{cl}cl",
+    "success_units": "+{units} unités"
+  },
+  "inventory": {
+    "title": "Li ñu sànni ak soppi",
+    "reason": "Motif",
+    "quantity": "Li ñu yor",
+    "note": "Note (bu nekké)",
+    "product": "Produit bi",
+    "select_product": "-- Tànnal --",
+    "reasons": {
+      "breakage": "💥 Rëccu",
+      "offered": "🎁 Mayé",
+      "gap": "⚖️ Écart",
+      "expiry": "🗑️ Jeex na",
+      "inventory": "📋 Inventaire",
+      "other": "📝 Weneen"
+    },
+    "stock_reel": "Stock bi nekk ({stock} btl)",
+    "quantity_lost": "Li ñu sànni (bëy)",
+    "cl_approx": "≈ {cl} cl",
+    "save": "Denc",
+    "success": "Dëggël nañu ko"
+  },
+  "movements": {
+    "title": "Flux yu mujj",
+    "entry": "Dugg",
+    "exit": "Génn",
+    "type": "Xeet",
+    "date": "Fan",
+    "product": "Produit",
+    "empty": "Amul benn flux"
+  },
+  "predictions": {
+    "title": "Li mën a jeex",
+    "stock": "Stock : {stock}",
+    "stock_cl": "({cl}cl)"
+  },
+  "categories": {
+    "title": "Xeet",
+    "new": "Weneen xeet...",
+    "add": "Defal",
+    "edit": "Soppi",
+    "delete": "Dindi",
+    "all": "Lépp"
+  },
+  "product_form": {
+    "create": "Defal produit",
+    "edit": "Soppi produit",
+    "name": "Tur *",
+    "category": "Xeet *",
+    "initial_stock": "Stock bu njëkk *",
+    "unit": "Unité",
+    "alert_threshold": "Li ñu wara xool",
+    "critical_threshold": "Li ñu wara dindi",
+    "supplements": "Suppléments",
+    "supplements_placeholder": "Limo, Glaçons",
+    "internal_notes": "Note ci biir",
+    "create_button": "Defal produit",
+    "edit_button": "Denc soppi yi",
+    "price_required": "Defal bénn pëy.",
+    "formats": "Format & Pëy (FCFA)",
+    "price_placeholder": "Pëy FCFA"
+  },
+  "stock_display": {
+    "bottles": "btl",
+    "cl": "cl",
+    "stock": "Stock",
+    "vol_bottle": "Vol. btl : {cl}cl",
+    "glass_services": "Kopp : {cl}cl ({services} nattu/bëy)"
+  },
+  "product_actions": {
+    "add_stock": "+ Stock",
+    "inventory": "Inventaire",
+    "edit": "Soppi",
+    "delete": "Dindi"
+  },
+  "status_badge": {
+    "critical": "🔴 Critique",
+    "low": "🟡 Tuuti",
+    "medium": "🔵 Matt",
+    "good": "🟢 Baax"
+  },
+  "errors": {
+    "delete_confirm": "Dindi {name} ba fàww?",
+    "delete_error": "Mënul dindi"
+  }
+}

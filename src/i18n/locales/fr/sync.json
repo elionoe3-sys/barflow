@@ -1,0 +1,25 @@
+{
+  "title": "Synchronisation",
+  "status": {
+    "idle": "En attente",
+    "syncing": "Synchronisation en cours...",
+    "success": "Synchronisation réussie",
+    "error": "Erreur de synchronisation"
+  },
+  "actions": {
+    "sync_now": "Synchroniser maintenant",
+    "auto_sync": "Synchronisation automatique",
+    "last_sync": "Dernière synchronisation"
+  },
+  "sources": {
+    "cloud": "Cloud",
+    "local": "Local",
+    "conflicts": "Conflits"
+  },
+  "messages": {
+    "confirm": "Voulez-vous synchroniser les données ?",
+    "conflict_detected": "Conflit détecté",
+    "resolved": "Conflit résolu",
+    "select_version": "Sélectionnez la version à conserver"
+  }
+}

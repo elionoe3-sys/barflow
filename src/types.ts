@@ -44,6 +44,9 @@ export interface Product {
   seuilCritique: number;
   bouteilleEquivalence?: number;
   image: string;
+  // Photo réelle du produit (base64 data-URL ou URL externe). Si absente,
+  // toutes les vignettes (Stocks, Commandes) retombent sur l'emoji `image`.
+  photo?: string;
   color: string;
   popularite: number;
   options?: {

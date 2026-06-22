@@ -1,0 +1,156 @@
+{
+  "title": "Commandes",
+  "subtitle": "Gestion des commandes",
+  "status": {
+    "pending": "En attente",
+    "in_progress": "En cours",
+    "paid": "Payé",
+    "cancelled": "Annulé"
+  },
+  "caisse": {
+    "open": "Ouvrir la caisse",
+    "close": "Fermer la caisse",
+    "opened": "Caisse ouverte",
+    "closed": "Caisse fermée",
+    "fund": "Fond de caisse",
+    "server": "Nom du serveur",
+    "openedAt": "Ouverture : {time}",
+    "totalExpected": "Total attendu en caisse",
+    "fundPlusCash": "Fond + Espèces encaissées",
+    "confirmClose": "Confirmer la fermeture"
+  },
+  "cart": {
+    "title": "Panier",
+    "total": "Total",
+    "submit": "Valider la commande",
+    "empty": "Panier vide",
+    "items": "articles",
+    "table": "Panier (Table {table})"
+  },
+  "payment": {
+    "title": "Paiement",
+    "methods": {
+      "cash": "Espèces",
+      "wave": "Wave",
+      "orange_money": "Orange Money"
+    },
+    "amount": "Montant à payer",
+    "confirm": "Confirmer le paiement"
+  },
+  "ardoise": {
+    "title": "Ardoises",
+    "empty": "Aucune ardoise en cours",
+    "total": "Total ardoises",
+    "pay": "Encaisser maintenant",
+    "warning": "Ces clients ont consommé mais n'ont pas encore payé. Ils règleront à la fermeture ou au départ.",
+    "existingNote": "Note ouverte sur la Table {table}",
+    "itemsAdded": "Les articles seront ajoutés à l'ardoise existante."
+  },
+  "history": {
+    "title": "Historique",
+    "empty": "Aucune commande dans l'historique",
+    "details": "Détails de la commande",
+    "total": "Total encaissé",
+    "orders": "Commandes",
+    "avgTicket": "Ticket moyen",
+    "lastDays": "30 derniers jours · {count} commandes payées",
+    "paid": "Payé"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."
+  },
+  "product": {
+    "outOfStock": "Rupture de stock",
+    "stock": "Stock",
+    "price": "Prix",
+    "category": "Catégorie",
+    "inStock": "En stock",
+    "critical": "Stock critique"
+  },
+  "table": {
+    "title": "Plan de salle",
+    "select": "Choisissez une table pour commencer",
+    "manage": "Gérer",
+    "free": "Libre",
+    "occupied": "Occupé",
+    "waiting": "En attente",
+    "seats": "{seats} pers.",
+    "number": "Numéro",
+    "places": "Nombre de places",
+    "status": "Statut",
+    "add": "Ajouter une table",
+    "edit": "Modifier la table",
+    "delete": "Supprimer",
+    "editTitle": "Modifier table {number}",
+    "addTitle": "Ajouter une table",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "deleteConfirm": "Supprimer la table {number} ?"
+  },
+  "order": {
+    "detail": "Détail de la commande",
+    "table": "Table {table}",
+    "id": "Commande: {id}",
+    "items": "{count} article(s)",
+    "total": "TOTAL",
+    "paid": "Payé",
+    "pending": "Ardoise",
+    "inProgress": "En cours",
+    "print": "Imprimer ticket",
+    "close": "Fermer",
+    "pay": "Payer",
+    "ardoise": "ARDOISE",
+    "ticketPrinted": "Le ticket ne peut être imprimé qu'après paiement !",
+    "payFirst": "Veuillez d'abord payer la commande avant de fermer !"
+  },
+  "validation": {
+    "title": "Valider la commande",
+    "table": "Table {table} · {total} FCFA",
+    "ardoise": "Mettre sur ardoise",
+    "ardoiseDesc": "La table reste occupée. Le client paiera plus tard.",
+    "payNow": "Payer tout de suite",
+    "payNowDesc": "Encaissement immédiat : Espèces, Wave ou Orange Money."
+  },
+  "errors": {
+    "caisseClosed": "Ouvrez d'abord la caisse pour commencer le service !",
+    "selectTable": "Veuillez d'abord sélectionner une table !",
+    "paymentRequired": "Veuillez d'abord payer la commande avant de fermer !",
+    "printNotPaid": "Le ticket ne peut être imprimé qu'après paiement !",
+    "printError": "Impossible d'ouvrir la fenêtre d'impression.",
+    "cartEmpty": "Votre panier est vide"
+  },
+  "modals": {
+    "caisse": {
+      "open": "Ouverture de caisse",
+      "openDesc": "Montant en espèces dans la caisse en début de service",
+      "serverLabel": "Nom du serveur (optionnel)",
+      "serverPlaceholder": "Ex: Fatou, Jean-Pierre...",
+      "openButton": "Ouvrir la caisse",
+      "cancel": "Annuler",
+      "date": "{weekday} {day} {month}"
+    },
+    "fermeture": {
+      "title": "Fermeture de caisse",
+      "openedAt": "Ouverture : {time}",
+      "server": "{server}",
+      "fund": "Fond de caisse",
+      "cashReceipts": "Recettes en espèces",
+      "payments": "{count} paiement(s)",
+      "totalExpected": "Total attendu en caisse",
+      "fundPlusCash": "Fond + Espèces encaissées",
+      "ardoisesOpen": "{count} ardoise(s) encore ouvertes",
+      "ardoisesTotal": "Montant total : {total} FCFA — Pensez à les encaisser avant de fermer.",
+      "confirmClose": "Confirmer la fermeture"
+    }
+  },
+  "loading": "Chargement des produits...",
+  "noProducts": "Aucun produit trouvé",
+  "noProductsDesc": "Modifiez vos filtres ou ajoutez des produits dans Stocks",
+  "currentOrders": "Commandes en cours",
+  "currentOrdersDesc": "Cliquez sur une commande pour voir les détails",
+  "orderCount": "{count} commande(s)",
+  "noActiveOrders": "Aucune commande en cours",
+  "totalFCFA": "{amount} FCFA",
+  "paidWith": "Règlement par {method}",
+  "thankYou": "Merci de votre visite !"
+}

@@ -1,0 +1,75 @@
+{
+  "title": "Jir-boon",
+  "subtitle": "Këfulukë kënë kënë kënë kënë kënë",
+  "loading": "U fiibë kënë...",
+  "period_days": "{{count}} fëñ",
+  "period": {
+    "weekend": "Weekend",
+    "weekday": "Fëñu yili"
+  },
+  "stats": {
+    "ca": "CA Tëñ",
+    "clients": "Bë-ñaw Tëñ",
+    "ticket": "Ticket bii",
+    "marge": "Marge Tëñ"
+  },
+  "estimation": {
+    "title": "Estimason bi-fëñ",
+    "based_on": "Këfulukë kënë {{days}} fëñ yi kënë",
+    "click_details": "🔍 Fëñël ngir këmë",
+    "clients": "Bë-ñaw bi ñu estimer",
+    "ca": "CA bi ñu estimer",
+    "beers": "Bii bi ñu mande",
+    "cocktails": "Cocktails bi ñu mande",
+    "weekend": "Weekend → +40%",
+    "weekday": "Fëñu yili",
+    "bottles": "Bëy bi ñu estimer",
+    "glasses": "Kopp bi ñu estimer"
+  },
+  "modal": {
+    "title": "Détailsu estimason bi",
+    "subtitle": "Këfulukë {{days}} fëñ yi kënë",
+    "clients": "Bë-ñaw",
+    "ca": "CA bi ñu estimer",
+    "beers": "Bii",
+    "cocktails": "Cocktails",
+    "weekend_boost": "Weekend (+40%)",
+    "method_title": "Methodu kalkul",
+    "method_clients": "Bë-ñaw : Moyenneu {{days}} fëñ yi kënë {{weekend}}",
+    "method_weekend_suffix": "× 1.4 (weekend)",
+    "method_ca": "CA : Bë-ñaw estimer × Ticket moyen ({{ticket}} F)",
+    "method_beers": "Bii : {{count}} bëy kënë fëñu yili",
+    "method_cocktails": "Cocktails : {{count}} kopp kënë fëñu yili",
+    "trends_title": "Tëndans",
+    "ca_variation": "Variation CA",
+    "clients_variation": "Variation bë-ñaw",
+    "close": "Tëj"
+  },
+  "charts": {
+    "ca_evolution": "Évoluson CA (7 fëñ)",
+    "sales_by_hour": "Jaay ci waxtu",
+    "top_products": "Top 10 Produit",
+    "category_consumption": "Kënë mande (30 fëñ)",
+    "units": "{{count}} unité",
+    "sales_count": "{{count}} jaay"
+  },
+  "alerts": {
+    "stock_alert": "Alërt bi stock bi jeex",
+    "no_stock": "Amul benn produit critique",
+    "critical_count": "{{count}} produit(s) critique(s)",
+    "remaining": "{{count}} kënë nuku",
+    "daily_consumption": "Kënë mande : {{value}}/fëñ",
+    "restock_tip": "💡 Defal stock bi kënë leegi ngir dëgël jeex"
+  },
+  "products": {
+    "top_to_promote": "Top produit yi ñu wara yëkkël",
+    "score": "Scoreu rentable",
+    "score_tip": "Produit yii a ëpp rentabilité",
+    "star": "🔥 Produit star",
+    "solid": "✅ Produit dëgër",
+    "high_margin": "🔥 Marge bi ëpp",
+    "happy_hour": "✅ Produit baax - Idéal ngir happy hour",
+    "fast_rotation": "✅ Yëngu gënë gaaw",
+    "bundle": "📊 Marge baax - Defal ci pack"
+  }
+}

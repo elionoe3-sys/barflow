@@ -151,6 +151,71 @@ html[data-theme="dark"] {
   --app-primary-dark: #a78bfa;
 }
 
+/* Thème Sénégal */
+html[data-theme="senegal"] {
+  --app-bg: #f5f7f5;
+  --app-surface: #ffffff;
+  --app-text: #0f172a;
+  --app-muted: #64748b;
+  --app-border: #e2e8f0;
+  --app-primary-light: #e8f5e9;
+  --app-primary-dark: #008544;
+}
+
+/* Couleurs Sénégal pour data-color="senegal" */
+html[data-color="senegal"] {
+  --color-barflow-primary: #00a859;
+  --color-barflow-secondary: #e31b23;
+  --color-barflow-accent: #fdce12;
+  --color-barflow-primary-light: #e8f5e9;
+  --color-barflow-primary-dark: #008544;
+  --app-primary-light: #e8f5e9;
+  --app-primary-dark: #008544;
+}
+
+/* Override des dégradés pour le thème Sénégal */
+html[data-color="senegal"] .bg-gradient-to-r.from-violet-500,
+html[data-color="senegal"] .bg-gradient-to-r.from-violet-600,
+html[data-color="senegal"] .bg-gradient-to-r.from-violet-500.to-purple-600,
+html[data-color="senegal"] .bg-gradient-to-r.from-violet-600.to-purple-600,
+html[data-color="senegal"] .bg-gradient-to-r.from-violet-500.to-purple-600 {
+  background-image: linear-gradient(to right, #00a859, #008544) !important;
+}
+
+html[data-color="senegal"] .from-violet-500 { 
+  --tw-gradient-from: #00a859 !important; 
+}
+html[data-color="senegal"] .to-purple-600 { 
+  --tw-gradient-to: #008544 !important; 
+}
+html[data-color="senegal"] .via-purple-600 { 
+  --tw-gradient-via: #008544 !important; 
+}
+
+html[data-color="senegal"] .bg-violet-50 { 
+  background-color: #e8f5e9 !important; 
+}
+html[data-color="senegal"] .text-violet-600 { 
+  color: #00a859 !important; 
+}
+html[data-color="senegal"] .text-violet-700 { 
+  color: #008544 !important; 
+}
+html[data-color="senegal"] .border-violet-200 { 
+  border-color: #c8e6c9 !important; 
+}
+html[data-color="senegal"] .border-violet-500 { 
+  border-color: #00a859 !important; 
+}
+html[data-color="senegal"] .ring-violet-200 { 
+  --tw-ring-color: #c8e6c9 !important; 
+}
+
+/* Style spécifique pour l'en-tête en dégradé du drapeau sénégalais */
+html[data-theme="senegal"] .relative.overflow-hidden.rounded-2xl.bg-gradient-to-r {
+  background: linear-gradient(135deg, #00a859 0%, #fdce12 50%, #e31b23 100%) !important;
+}
+
 /* ========== COULEURS D'ACCENT ========== */
 
 /* Violet (par défaut) */
@@ -273,4 +338,721 @@ html[data-color] .to-fuchsia-700 {
 /* Pour la sidebar et autres éléments qui utilisent des dégradés spécifiques */
 html[data-color] .bg-gradient-to-b.from-slate-900.via-slate-800.to-slate-900 {
   background: linear-gradient(to bottom, #0f172a, #1e293b, #0f172a);
+}
+
+/* ============================================================ */
+/* EN-TÊTES DYNAMIQUES - VERSION SIMPLIFIÉE                    */
+/* ============================================================ */
+
+/* On cible tous les grands conteneurs d'en-tête avec shadow-xl */
+.relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+.relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+.relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  transition: background 0.3s ease;
+}
+
+/* Tous les dégradés d'en-tête (quelque soit la couleur source) */
+html[data-color="violet"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+html[data-color="violet"] .relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+html[data-color="violet"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  background: linear-gradient(to right, #8B5CF6, #7c3aed, #6d28d9) !important;
+}
+
+html[data-color="emerald"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+html[data-color="emerald"] .relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+html[data-color="emerald"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  background: linear-gradient(to right, #10B981, #059669, #047857) !important;
+}
+
+html[data-color="blue"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+html[data-color="blue"] .relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+html[data-color="blue"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  background: linear-gradient(to right, #3B82F6, #2563eb, #1d4ed8) !important;
+}
+
+html[data-color="rose"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+html[data-color="rose"] .relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+html[data-color="rose"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  background: linear-gradient(to right, #F43F5E, #e11d48, #be123c) !important;
+}
+
+html[data-color="amber"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+html[data-color="amber"] .relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+html[data-color="amber"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  background: linear-gradient(to right, #F59E0B, #d97706, #b45309) !important;
+}
+
+html[data-theme="senegal"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6,
+html[data-theme="senegal"] .relative.overflow-hidden.rounded-2xl.shadow-xl.lg\:p-8,
+html[data-theme="senegal"] .relative.overflow-hidden.rounded-2xl.shadow-xl.p-6.lg\:p-8 {
+  background: linear-gradient(135deg, #00a859 0%, #fdce12 50%, #e31b23 100%) !important;
+}
+
+/* ============================================================ */
+/* BOUTONS EN-TÊTE - VERSION GLASS (Thème Sénégal)             */
+/* ============================================================ */
+
+html[data-theme="senegal"] .page-header button {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  font-weight: 500 !important;
+}
+
+html[data-theme="senegal"] .page-header button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Ardoise - Jaune */
+html[data-theme="senegal"] .page-header button:has(.BookOpen) {
+  background: rgba(253, 206, 18, 0.3) !important;
+  border-color: rgba(253, 206, 18, 0.5) !important;
+  color: #fdce12 !important;
+}
+
+html[data-theme="senegal"] .page-header button:has(.BookOpen):hover {
+  background: rgba(253, 206, 18, 0.5) !important;
+}
+
+/* Fermer caisse - Rouge */
+html[data-theme="senegal"] .page-header button:has(.DoorClosed) {
+  background: rgba(227, 27, 35, 0.3) !important;
+  border-color: rgba(227, 27, 35, 0.5) !important;
+  color: #ff6b6b !important;
+}
+
+html[data-theme="senegal"] .page-header button:has(.DoorClosed):hover {
+  background: rgba(227, 27, 35, 0.5) !important;
+}
+
+/* Ouvrir caisse - Vert */
+html[data-theme="senegal"] .page-header button:has(.DoorOpen) {
+  background: rgba(0, 168, 89, 0.3) !important;
+  border-color: rgba(0, 168, 89, 0.5) !important;
+  color: #4ade80 !important;
+}
+
+html[data-theme="senegal"] .page-header button:has(.DoorOpen):hover {
+  background: rgba(0, 168, 89, 0.5) !important;
+}
+
+/* ============================================================ */
+/* ♿ MODE DALTONIEN - Accessibilité universelle                */
+/* ============================================================ */
+
+html[data-theme="daltonien"] {
+  /* Fond clair contrasté */
+  --app-bg: #f5f0e8;
+  --app-surface: #ffffff;
+  --app-text: #1a1a1a;
+  --app-muted: #4a4a4a;
+  --app-border: #d4c9b8;
+  --app-primary-light: #e6f0fa;
+  --app-primary-dark: #005588;
+  
+  /* Couleurs adaptées au daltonisme (rouge-vert) */
+  --color-barflow-primary: #0077BB;
+  --color-barflow-secondary: #EE7733;
+  --color-barflow-accent: #009988;
+  --color-barflow-primary-light: #e6f0fa;
+  --color-barflow-primary-dark: #005588;
+  
+  /* Nuances pour statuts */
+  --color-success: #009988;
+  --color-warning: #EE7733;
+  --color-danger: #CC6677;
+  --color-info: #0077BB;
+}
+
+/* ============================================================ */
+/* COULEURS SPÉCIFIQUES POUR LE MODE DALTONIEN                 */
+/* ============================================================ */
+
+/* Dégradés principaux */
+html[data-theme="daltonien"] .bg-gradient-to-r.from-violet-500,
+html[data-theme="daltonien"] .bg-gradient-to-r.from-violet-600,
+html[data-theme="daltonien"] .bg-gradient-to-r.from-violet-500.to-purple-600,
+html[data-theme="daltonien"] .bg-gradient-to-r.from-violet-600.to-purple-600,
+html[data-theme="daltonien"] .bg-gradient-to-r.from-violet-500.to-purple-600 {
+  background-image: linear-gradient(to right, #0077BB, #005588) !important;
+}
+
+html[data-theme="daltonien"] .from-violet-500 { 
+  --tw-gradient-from: #0077BB !important; 
+}
+html[data-theme="daltonien"] .to-purple-600 { 
+  --tw-gradient-to: #005588 !important; 
+}
+html[data-theme="daltonien"] .via-purple-600 { 
+  --tw-gradient-via: #005588 !important; 
+}
+html[data-theme="daltonien"] .via-fuchsia-600 {
+  --tw-gradient-via: #EE7733 !important;
+}
+
+/* Couleurs de fond et texte */
+html[data-theme="daltonien"] .bg-violet-50 { 
+  background-color: #e6f0fa !important; 
+}
+html[data-theme="daltonien"] .bg-violet-100 { 
+  background-color: #cce0f5 !important; 
+}
+html[data-theme="daltonien"] .text-violet-600 { 
+  color: #0077BB !important; 
+}
+html[data-theme="daltonien"] .text-violet-700 { 
+  color: #005588 !important; 
+}
+html[data-theme="daltonien"] .text-violet-800 { 
+  color: #003366 !important; 
+}
+html[data-theme="daltonien"] .border-violet-200 { 
+  border-color: #b3d4f0 !important; 
+}
+html[data-theme="daltonien"] .border-violet-500 { 
+  border-color: #0077BB !important; 
+}
+html[data-theme="daltonien"] .ring-violet-200 { 
+  --tw-ring-color: #b3d4f0 !important; 
+}
+
+/* Couleurs Émeraude → Turquoise (succès) */
+html[data-theme="daltonien"] .bg-emerald-50 { 
+  background-color: #e6f5f2 !important; 
+}
+html[data-theme="daltonien"] .bg-emerald-100 { 
+  background-color: #ccebe5 !important; 
+}
+html[data-theme="daltonien"] .text-emerald-600 { 
+  color: #009988 !important; 
+}
+html[data-theme="daltonien"] .text-emerald-700 { 
+  color: #007766 !important; 
+}
+html[data-theme="daltonien"] .border-emerald-200 { 
+  border-color: #b3ddd5 !important; 
+}
+html[data-theme="daltonien"] .border-emerald-500 { 
+  border-color: #009988 !important; 
+}
+html[data-theme="daltonien"] .bg-emerald-500 {
+  background-color: #009988 !important;
+}
+html[data-theme="daltonien"] .bg-emerald-600 {
+  background-color: #008877 !important;
+}
+
+/* Couleurs Rouge → Rose (danger) */
+html[data-theme="daltonien"] .bg-red-50 { 
+  background-color: #fdf2f3 !important; 
+}
+html[data-theme="daltonien"] .bg-red-100 { 
+  background-color: #fce5e7 !important; 
+}
+html[data-theme="daltonien"] .text-red-600 { 
+  color: #CC6677 !important; 
+}
+html[data-theme="daltonien"] .text-red-700 { 
+  color: #B35566 !important; 
+}
+html[data-theme="daltonien"] .border-red-200 { 
+  border-color: #f5d5d9 !important; 
+}
+html[data-theme="daltonien"] .border-red-500 { 
+  border-color: #CC6677 !important; 
+}
+html[data-theme="daltonien"] .bg-red-500 {
+  background-color: #CC6677 !important;
+}
+html[data-theme="daltonien"] .bg-red-600 {
+  background-color: #B35566 !important;
+}
+
+/* Couleurs Ambre → Orange (avertissement) */
+html[data-theme="daltonien"] .bg-amber-50 { 
+  background-color: #fdf6ed !important; 
+}
+html[data-theme="daltonien"] .bg-amber-100 { 
+  background-color: #fcecdb !important; 
+}
+html[data-theme="daltonien"] .text-amber-600 { 
+  color: #EE7733 !important; 
+}
+html[data-theme="daltonien"] .text-amber-700 { 
+  color: #D56622 !important; 
+}
+html[data-theme="daltonien"] .border-amber-200 { 
+  border-color: #fae0cc !important; 
+}
+html[data-theme="daltonien"] .border-amber-500 { 
+  border-color: #EE7733 !important; 
+}
+html[data-theme="daltonien"] .bg-amber-500 {
+  background-color: #EE7733 !important;
+}
+html[data-theme="daltonien"] .bg-amber-600 {
+  background-color: #D56622 !important;
+}
+
+/* Couleurs Bleu → Bleu foncé (info) */
+html[data-theme="daltonien"] .bg-blue-50 { 
+  background-color: #e6f0fa !important; 
+}
+html[data-theme="daltonien"] .text-blue-600 { 
+  color: #0055AA !important; 
+}
+html[data-theme="daltonien"] .border-blue-200 { 
+  border-color: #b3d4f0 !important; 
+}
+html[data-theme="daltonien"] .bg-blue-500 {
+  background-color: #0077BB !important;
+}
+html[data-theme="daltonien"] .bg-blue-600 {
+  background-color: #0055AA !important;
+}
+
+/* ============================================================ */
+/* BOUTONS DANS LES EN-TÊTES - MODE DALTONIEN                  */
+/* ============================================================ */
+
+html[data-theme="daltonien"] .page-header button {
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme="daltonien"] .page-header button:hover {
+  background: rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Ardoise - Orange */
+html[data-theme="daltonien"] .page-header button:has(.BookOpen) {
+  background: rgba(238, 119, 51, 0.3) !important;
+  border-color: rgba(238, 119, 51, 0.6) !important;
+  color: #EE7733 !important;
+}
+
+html[data-theme="daltonien"] .page-header button:has(.BookOpen):hover {
+  background: rgba(238, 119, 51, 0.5) !important;
+}
+
+/* Fermer caisse - Rose */
+html[data-theme="daltonien"] .page-header button:has(.DoorClosed) {
+  background: rgba(204, 102, 119, 0.3) !important;
+  border-color: rgba(204, 102, 119, 0.6) !important;
+  color: #CC6677 !important;
+}
+
+html[data-theme="daltonien"] .page-header button:has(.DoorClosed):hover {
+  background: rgba(204, 102, 119, 0.5) !important;
+}
+
+/* Ouvrir caisse - Turquoise */
+html[data-theme="daltonien"] .page-header button:has(.DoorOpen) {
+  background: rgba(0, 153, 136, 0.3) !important;
+  border-color: rgba(0, 153, 136, 0.6) !important;
+  color: #009988 !important;
+}
+
+html[data-theme="daltonien"] .page-header button:has(.DoorOpen):hover {
+  background: rgba(0, 153, 136, 0.5) !important;
+}
+
+/* Historique - Bleu */
+html[data-theme="daltonien"] .page-header button:has(.Receipt) {
+  background: rgba(0, 119, 187, 0.3) !important;
+  border-color: rgba(0, 119, 187, 0.6) !important;
+  color: #0077BB !important;
+}
+
+html[data-theme="daltonien"] .page-header button:has(.Receipt):hover {
+  background: rgba(0, 119, 187, 0.5) !important;
+}
+
+/* Table - Bleu */
+html[data-theme="daltonien"] .page-header button:has(.Table2) {
+  background: rgba(0, 119, 187, 0.25) !important;
+  border-color: rgba(0, 119, 187, 0.5) !important;
+  color: #0077BB !important;
+}
+
+html[data-theme="daltonien"] .page-header button:has(.Table2):hover {
+  background: rgba(0, 119, 187, 0.45) !important;
+}
+
+/* ============================================================ */
+/* EN-TÊTES DANS LE MODE DALTONIEN                             */
+/* ============================================================ */
+
+html[data-theme="daltonien"] .page-header {
+  background: linear-gradient(135deg, #0077BB, #005588, #003366) !important;
+}
+
+html[data-theme="daltonien"] .page-header .text-violet-200 {
+  color: #b3d4f0 !important;
+}
+
+html[data-theme="daltonien"] .page-header .text-violet-100 {
+  color: #cce0f5 !important;
+}
+
+/* ============================================================ */
+/* AMÉLIORATIONS DE CONTRASTE POUR LE MODE DALTONIEN          */
+/* ============================================================ */
+
+html[data-theme="daltonien"] .text-slate-400,
+html[data-theme="daltonien"] .text-slate-500 {
+  color: #6b6b6b !important;
+}
+
+html[data-theme="daltonien"] .text-slate-300 {
+  color: #8a8a8a !important;
+}
+
+html[data-theme="daltonien"] .bg-slate-50 {
+  background-color: #f5f0e8 !important;
+}
+
+html[data-theme="daltonien"] .bg-slate-100 {
+  background-color: #ece5db !important;
+}
+
+html[data-theme="daltonien"] .border-slate-200 {
+  border-color: #d4c9b8 !important;
+}
+
+html[data-theme="daltonien"] .border-slate-300 {
+  border-color: #c4b8a5 !important;
+}
+
+/* ============================================================ */
+/* INDICATEURS DE STATUT AVEC PATTERN POUR DALTONIENS          */
+/* ============================================================ */
+
+html[data-theme="daltonien"] .status-success {
+  background-color: #009988 !important;
+  color: #ffffff !important;
+  position: relative;
+}
+
+html[data-theme="daltonien"] .status-success::before {
+  content: "✓ ";
+}
+
+html[data-theme="daltonien"] .status-warning {
+  background-color: #EE7733 !important;
+  color: #ffffff !important;
+  position: relative;
+}
+
+html[data-theme="daltonien"] .status-warning::before {
+  content: "⚠ ";
+}
+
+html[data-theme="daltonien"] .status-danger {
+  background-color: #CC6677 !important;
+  color: #ffffff !important;
+  position: relative;
+}
+
+html[data-theme="daltonien"] .status-danger::before {
+  content: "✗ ";
+}
+
+html[data-theme="daltonien"] .status-info {
+  background-color: #0077BB !important;
+  color: #ffffff !important;
+  position: relative;
+}
+
+html[data-theme="daltonien"] .status-info::before {
+  content: "ℹ ";
+}
+
+/* ============================================================ */
+/* LOGO ADAPTÉ POUR LE MODE DALTONIEN                          */
+/* ============================================================ */
+
+/* Si tu as un logo SVG dans ton app */
+html[data-theme="daltonien"] .app-logo svg {
+  filter: hue-rotate(180deg) saturate(0.8) !important;
+}
+
+/* Ou si tu veux remplacer le logo par un logo daltonien */
+html[data-theme="daltonien"] .app-logo .logo-image {
+  content: url('/logo-daltonien.svg') !important;
+}
+
+ /* ============================================================ */
+/* ♿ MODE DALTONIEN - Support pour Reappro.tsx                */
+/* ============================================================ */
+
+/* En-tête principal - dégradé émeraude → bleu daltonien */
+html[data-theme="daltonien"] .bg-gradient-to-r.from-emerald-600.via-teal-600.to-cyan-600 {
+  background: linear-gradient(to right, #0077BB, #005588, #003366) !important;
+}
+
+/* Boutons d'onglets actifs - émeraude → turquoise */
+html[data-theme="daltonien"] .bg-gradient-to-r.from-emerald-500.to-teal-600 {
+  background: linear-gradient(to right, #009988, #007766) !important;
+}
+
+/* Couleurs texte */
+html[data-theme="daltonien"] .text-emerald-100 {
+  color: #b3d4f0 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-200 {
+  color: #80bde0 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-300 {
+  color: #4da6d0 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-400 {
+  color: #1a8fc0 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-500 {
+  color: #0077BB !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-600 {
+  color: #009988 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-700 {
+  color: #007766 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-800 {
+  color: #005544 !important;
+}
+
+html[data-theme="daltonien"] .text-emerald-900 {
+  color: #003322 !important;
+}
+
+/* Couleurs de fond */
+html[data-theme="daltonien"] .bg-emerald-50 {
+  background-color: #e6f5f2 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-100 {
+  background-color: #ccebe5 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-200 {
+  background-color: #b3ddd5 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-300 {
+  background-color: #80cbbc !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-400 {
+  background-color: #4db9a3 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-500 {
+  background-color: #009988 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-600 {
+  background-color: #008877 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-700 {
+  background-color: #007766 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-800 {
+  background-color: #005544 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-900 {
+  background-color: #003322 !important;
+}
+
+/* Bordures */
+html[data-theme="daltonien"] .border-emerald-100 {
+  border-color: #ccebe5 !important;
+}
+
+html[data-theme="daltonien"] .border-emerald-200 {
+  border-color: #b3ddd5 !important;
+}
+
+html[data-theme="daltonien"] .border-emerald-300 {
+  border-color: #80cbbc !important;
+}
+
+html[data-theme="daltonien"] .border-emerald-400 {
+  border-color: #4db9a3 !important;
+}
+
+html[data-theme="daltonien"] .border-emerald-500 {
+  border-color: #009988 !important;
+}
+
+/* Gradients - from-emerald-* to-teal-* */
+html[data-theme="daltonien"] .from-emerald-500 {
+  --tw-gradient-from: #009988 !important;
+}
+
+html[data-theme="daltonien"] .from-emerald-600 {
+  --tw-gradient-from: #008877 !important;
+}
+
+html[data-theme="daltonien"] .to-teal-600 {
+  --tw-gradient-to: #007766 !important;
+}
+
+html[data-theme="daltonien"] .via-teal-600 {
+  --tw-gradient-via: #007766 !important;
+}
+
+/* Gradients complets */
+html[data-theme="daltonien"] .bg-gradient-to-r.from-emerald-500.to-teal-600 {
+  background-image: linear-gradient(to right, #009988, #007766) !important;
+}
+
+html[data-theme="daltonien"] .bg-gradient-to-r.from-emerald-600.to-teal-600 {
+  background-image: linear-gradient(to right, #008877, #007766) !important;
+}
+
+/* Animation KPI Cards - couleurs */
+html[data-theme="daltonien"] .from-emerald-500.to-teal-600 {
+  background-image: linear-gradient(to right, #009988, #007766) !important;
+}
+
+/* Boutons de confirmation */
+html[data-theme="daltonien"] .bg-gradient-to-r.from-emerald-500.to-emerald-600 {
+  background-image: linear-gradient(to right, #009988, #008877) !important;
+}
+
+/* Badges de statut */
+html[data-theme="daltonien"] .bg-emerald-100.text-emerald-700 {
+  background-color: #ccebe5 !important;
+  color: #007766 !important;
+}
+
+html[data-theme="daltonien"] .bg-emerald-50.border-emerald-200 {
+  background-color: #e6f5f2 !important;
+  border-color: #b3ddd5 !important;
+}
+
+/* Texte de description */
+html[data-theme="daltonien"] .text-emerald-100.mt-1 {
+  color: #b3d4f0 !important;
+}
+
+/* Conteneur avec dégradé de fond */
+html[data-theme="daltonien"] .bg-gradient-to-br.from-emerald-50.to-teal-50 {
+  background-image: linear-gradient(to bottom right, #e6f5f2, #d0ebe6) !important;
+}
+
+html[data-theme="daltonien"] .bg-gradient-to-br.from-violet-50.to-purple-50 {
+  background-image: linear-gradient(to bottom right, #e6f0fa, #d4e0f5) !important;
+}
+
+/* Pour les badges en amber */
+html[data-theme="daltonien"] .bg-amber-50.border-amber-200 {
+  background-color: #fdf6ed !important;
+  border-color: #fae0cc !important;
+}
+
+html[data-theme="daltonien"] .text-amber-600 {
+  color: #EE7733 !important;
+}
+
+html[data-theme="daltonien"] .text-amber-700 {
+  color: #D56622 !important;
+}
+
+html[data-theme="daltonien"] .text-amber-800 {
+  color: #BB5511 !important;
+}
+
+/* Pour les badges de statut */
+html[data-theme="daltonien"] .bg-blue-100.text-blue-700 {
+  background-color: #cce0f5 !important;
+  color: #0055AA !important;
+}
+
+html[data-theme="daltonien"] .bg-red-100.text-red-600 {
+  background-color: #fce5e7 !important;
+  color: #CC6677 !important;
+}
+
+/* ============================================================ */
+/* PROTECTION DES BOUTONS DE COULEUR - PARAMÈTRES              */
+/* ============================================================ */
+
+/* On cible spécifiquement les boutons dans la section Thème & Apparence */
+.settings-card .grid.grid-cols-2.md\:grid-cols-5 button,
+.settings-card .grid.md\:grid-cols-5 button {
+  /* On annule tous les overrides des thèmes */
+  background-color: transparent !important;
+  border-color: #e2e8f0 !important;
+  background-image: none !important;
+  color: #0f172a !important;
+}
+
+/* On restaure les couleurs des dégradés pour chaque bouton */
+.settings-card .grid button .bg-gradient-to-r.from-violet-500.to-purple-600 {
+  background-image: linear-gradient(to right, #8B5CF6, #7c3aed) !important;
+}
+.settings-card .grid button .bg-gradient-to-r.from-emerald-500.to-teal-600 {
+  background-image: linear-gradient(to right, #10B981, #059669) !important;
+}
+.settings-card .grid button .bg-gradient-to-r.from-blue-500.to-cyan-600 {
+  background-image: linear-gradient(to right, #3B82F6, #2563eb) !important;
+}
+.settings-card .grid button .bg-gradient-to-r.from-rose-500.to-pink-600 {
+  background-image: linear-gradient(to right, #F43F5E, #e11d48) !important;
+}
+.settings-card .grid button .bg-gradient-to-r.from-amber-500.to-orange-600 {
+  background-image: linear-gradient(to right, #F59E0B, #d97706) !important;
+}
+
+/* Pour le bouton sélectionné - on restaure ses couleurs */
+.settings-card .grid button.border-violet-500 {
+  border-color: #8B5CF6 !important;
+}
+
+.settings-card .grid button.ring-2.ring-violet-200 {
+  --tw-ring-color: #ede9fe !important;
+}
+
+/* Mode daltonien - on protège aussi */
+html[data-theme="daltonien"] .settings-card .grid button {
+  background-color: transparent !important;
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme="daltonien"] .settings-card .grid button.border-violet-500 {
+  border-color: #8B5CF6 !important;
+}
+
+/* Mode Sénégal - on protège aussi */
+html[data-theme="senegal"] .settings-card .grid button {
+  background-color: transparent !important;
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme="senegal"] .settings-card .grid button.border-violet-500 {
+  border-color: #8B5CF6 !important;
 }

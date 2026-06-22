@@ -1,0 +1,46 @@
+{
+  "app": {
+    "name": "BarFlow",
+    "title": "Saytu Bar"
+  },
+  "nav": {
+    "dashboard": "Panneau njiite",
+    "orders": "Komànd",
+    "stocks": "Stock yi",
+    "reappro": "Yokkati stock",
+    "settings": "Parameetar yi",
+    "logout": "Génn"
+  },
+  "actions": {
+    "save": "Denc",
+    "cancel": "Neenal",
+    "delete": "Màbb",
+    "edit": "Soppi",
+    "add": "Yokk",
+    "search": "Wut",
+    "confirm": "Dëggal",
+    "close": "Tëj",
+    "export": "Génne",
+    "import": "Dugal",
+    "print": "Móol"
+  },
+  "status": {
+    "success": "Jàll na",
+    "error": "Njuumte",
+    "loading": "Yebum données yi...",
+    "empty": "Amul données"
+  },
+  "tables": {
+    "title": "Taabal yi",
+    "free": "Gor",
+    "occupied": "Jàppalees na",
+    "waiting": "Xaar"
+  },
+  "common": {
+    "yes": "Waaw",
+    "no": "Déedéet",
+    "all": "Yépp",
+    "none": "Benn",
+    "total": "Mboolem"
+  }
+}

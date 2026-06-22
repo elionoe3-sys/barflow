@@ -1,0 +1,250 @@
+{
+  "title": "الإعدادات",
+  "subtitle": "تكوين تطبيقك",
+  "tabs": {
+    "general": "المظهر واللغات",
+    "network": "إعدادات الشبكة",
+    "backup": "النسخ الاحتياطي والبيانات",
+    "payments": "المدفوعات",
+    "security": "الأمان"
+  },
+  "themes": {
+    "title": "المظهر",
+    "light": "فاتح",
+    "daltonien": "ملائم لضعاف البصر",
+    "senegal": "السنغال",
+    "dark": "داكن",
+    "senegal_desc": "ألوان علم السنغال"
+  },
+  "colors": {
+    "title": "اللون الأساسي",
+    "violet": "بنفسجي",
+    "emerald": "زمردي",
+    "blue": "أزرق",
+    "rose": "وردي",
+    "amber": "عنبر"
+  },
+  "languages": {
+    "title": "اللغات",
+    "french": "الفرنسية",
+    "english": "الإنجليزية",
+    "wolof": "الولوفية",
+    "select": "اختر لغتك"
+  },
+  "restaurant": {
+    "title": "معلومات المنشأة",
+    "subtitle": "ستظهر هذه المعلومات على الإيصالات والفواتير",
+    "name": "اسم الحانة",
+    "name_placeholder": "مثال: Le Teranga Bar",
+    "phone": "الهاتف",
+    "phone_placeholder": "+221 77 000 00 00",
+    "email": "البريد الإلكتروني",
+    "email_placeholder": "contact@votrebar.sn",
+    "address": "العنوان",
+    "address_placeholder": "رقم الشارع، الحي، المدينة",
+    "taxNumber": "الرقم الضريبي / NIF",
+    "taxNumber_placeholder": "مثال: 0000000 0A 0000",
+    "save": "حفظ المعلومات",
+    "saved": "تم حفظ المعلومات!"
+  },
+  "network": {
+    "title": "إعدادات الشبكة",
+    "wifi": "واي فاي",
+    "printer": "الطابعة",
+    "caisse": "صندوق ثانوي",
+    "offline_mode": "وضع عدم الاتصال",
+    "offline_mode_desc": "يتم حفظ البيانات محلياً ومزامنتها تلقائياً",
+    "sync_now": "مزامنة الآن",
+    "last_sync": "آخر مزامنة",
+    "never": "أبداً",
+    "sync_status": "حالة المزامنة",
+    "pending_changes": "تغييرات معلقة",
+    "synced": "كل شيء متزامن"
+  },
+  "backup": {
+    "title": "النسخ الاحتياطي للبيانات",
+    "subtitle": "تصدير أو استيراد أو إعادة تعيين بياناتك",
+    "export": "تصدير البيانات",
+    "export_desc": "تحميل جميع بياناتك بصيغة JSON",
+    "import": "استيراد البيانات",
+    "import_desc": "استعادة البيانات من ملف JSON",
+    "reset": "إعادة تعيين",
+    "resetSettings": "إعادة تعيين الإعدادات",
+    "resetSettings_desc": "إعادة جميع الإعدادات إلى قيمها الافتراضية",
+    "resetAll": "إعادة تعيين كل شيء",
+    "resetAll_desc": "حذف جميع بيانات التطبيق (الطلبات، المنتجات، إلخ)",
+    "last_backup": "آخر نسخ احتياطي",
+    "never": "أبداً",
+    "export_success": "تم تصدير البيانات بنجاح!",
+    "import_success": "تم استيراد البيانات بنجاح!",
+    "reset_confirm": "هل أنت متأكد من رغبتك في إعادة تعيين كل شيء؟ هذا الإجراء لا رجعة فيه.",
+    "reset_settings_confirm": "هل أنت متأكد من رغبتك في إعادة تعيين الإعدادات؟",
+    "password_required": "كلمة المرور مطلوبة لهذا الإجراء"
+  },
+  "payments": {
+    "title": "المدفوعات عبر الهاتف المحمول",
+    "subtitle": "تكوين واجهات برمجة تطبيقات Wave و Orange Money",
+    "locked": "علامة تبويب محمية",
+    "lockedMessage": "مفاتيح واجهة برمجة التطبيقات حساسة. أدخل كلمة مرور المدير للوصول إليها.",
+    "unlock": "فتح",
+    "unlocked": "تم فتح علامة التبويب",
+    "wave": {
+      "title": "واجهة برمجة تطبيقات Wave Business",
+      "subtitle": "تكوين واجهة برمجة تطبيقات Wave للمدفوعات عبر الهاتف المحمول",
+      "merchantId": "معرف التاجر",
+      "merchantId_placeholder": "معرف التاجر الخاص بـ Wave",
+      "apiKey": "مفتاح واجهة برمجة التطبيقات",
+      "apiKey_placeholder": "مفتاح واجهة برمجة تطبيقات Wave",
+      "apiSecret": "المفتاح السري لواجهة برمجة التطبيقات",
+      "apiSecret_placeholder": "المفتاح السري لواجهة برمجة تطبيقات Wave",
+      "webhookSecret": "المفتاح السري للويب هوك",
+      "webhookSecret_placeholder": "المفتاح السري للويب هوك Wave",
+      "test": "اختبار الاتصال",
+      "test_success": "✅ تم الاتصال بـ Wave بنجاح!",
+      "test_failed": "❌ فشل الاتصال بـ Wave",
+      "merchant_number": "رقم التاجر Wave",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "orange": {
+      "title": "واجهة برمجة تطبيقات Orange Money",
+      "subtitle": "تكوين واجهة برمجة تطبيقات Orange Money",
+      "merchantId": "معرف التاجر",
+      "merchantId_placeholder": "معرف التاجر الخاص بـ Orange",
+      "apiLogin": "اسم المستخدم لواجهة برمجة التطبيقات",
+      "apiLogin_placeholder": "اسم المستخدم لواجهة برمجة تطبيقات Orange Money",
+      "apiPassword": "كلمة مرور واجهة برمجة التطبيقات",
+      "apiPassword_placeholder": "كلمة مرور واجهة برمجة تطبيقات Orange Money",
+      "apiKey": "مفتاح واجهة برمجة التطبيقات",
+      "apiKey_placeholder": "مفتاح واجهة برمجة تطبيقات Orange Money",
+      "test": "اختبار الاتصال",
+      "test_success": "✅ تم الاتصال بـ Orange Money بنجاح!",
+      "test_failed": "❌ فشل الاتصال بـ Orange Money",
+      "merchant_number": "رقم التاجر Orange Money",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "merchant_sticker": {
+      "title": "ملصق التاجر",
+      "desc": "يمكن للعملاء الدفع عن طريق مسح رمز QR الخاص بك حتى في وضع عدم الاتصال",
+      "show_qr": "عرض رمز QR",
+      "download_qr": "تحميل رمز QR"
+    },
+    "save": "حفظ",
+    "saved": "تم حفظ التكوين!",
+    "testing": "جاري الاختبار..."
+  },
+  "security": {
+    "title": "الأمان",
+    "subtitle": "إدارة الوصول والأمان لتطبيقك",
+    "password": {
+      "title": "كلمة مرور المدير",
+      "current": "كلمة المرور الحالية",
+      "current_placeholder": "أدخل كلمة المرور الحالية",
+      "new": "كلمة المرور الجديدة",
+      "new_placeholder": "أدخل كلمة مرور جديدة",
+      "confirm": "تأكيد كلمة المرور الجديدة",
+      "confirm_placeholder": "تأكيد كلمة المرور الجديدة",
+      "change": "تغيير كلمة المرور",
+      "forgot": "نسيت كلمة المرور؟",
+      "change_success": "✅ تم تغيير كلمة المرور بنجاح!",
+      "change_failed": "❌ فشل تغيير كلمة المرور",
+      "incorrect": "كلمة المرور الحالية غير صحيحة",
+      "mismatch": "كلمات المرور غير متطابقة",
+      "min_length": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل"
+    },
+    "secret": {
+      "title": "السؤال السري",
+      "desc": "يستخدم لإعادة تعيين كلمة المرور في حالة النسيان",
+      "question": "السؤال",
+      "question_placeholder": "مثال: ما هو اسم حيوانك الأليف الأول؟",
+      "answer": "الإجابة",
+      "answer_placeholder": "إجابتك",
+      "save": "حفظ السؤال السري"
+    },
+    "info": "الإجراءات الحساسة (الاستيراد، إعادة التعيين) محمية بكلمة مرور.",
+    "two_factor": {
+      "title": "المصادقة ذات العاملين (2FA)",
+      "enable": "تفعيل 2FA",
+      "disable": "إلغاء تفعيل 2FA",
+      "code": "رمز التحقق",
+      "setup": "إعداد 2FA",
+      "enabled": "✅ تم تفعيل 2FA",
+      "disabled": "❌ تم إلغاء تفعيل 2FA"
+    },
+    "session": {
+      "title": "الجلسة",
+      "expire_after": "انتهاء الجلسة",
+      "expire_after_desc": "تسجيل الخروج التلقائي بعد عدم النشاط",
+      "never": "أبداً",
+      "minutes": "{minutes} دقيقة",
+      "hours": "{hours} ساعة"
+    }
+  },
+  "theme": {
+    "title": "المظهر",
+    "appearance": "المظهر",
+    "select_color": "اختر لونك الأساسي",
+    "preview": "معاينة"
+  },
+  "language": {
+    "title": "اللغة",
+    "select": "اختر لغتك"
+  },
+  "info": {
+    "title": "حول",
+    "version": "الإصدار {version}",
+    "build": "البناء {build}",
+    "license": "الترخيص",
+    "copyright": "© {year} BarFlow. جميع الحقوق محفوظة.",
+    "support": "الدعم",
+    "contact": "اتصل بنا",
+    "documentation": "التوثيق"
+  },
+  "status": {
+    "connected": "متصل",
+    "disconnected": "غير متصل",
+    "saving": "جاري الحفظ...",
+    "loading": "جاري التحميل...",
+    "success": "نجاح!",
+    "error": "خطأ",
+    "pending": "في الانتظار..."
+  },
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "refresh": "تحديث",
+    "export": "تصدير",
+    "import": "استيراد",
+    "reset": "إعادة تعيين",
+    "test": "اختبار",
+    "unlock": "فتح",
+    "change": "تغيير",
+    "enable": "تفعيل",
+    "disable": "إلغاء التفعيل",
+    "download": "تحميل",
+    "show": "عرض",
+    "hide": "إخفاء",
+    "sync": "مزامنة"
+  },
+  "errors": {
+    "save_failed": "خطأ في الحفظ",
+    "load_failed": "خطأ في التحميل",
+    "connection_failed": "فشل الاتصال",
+    "invalid_data": "بيانات غير صالحة",
+    "password_required": "كلمة المرور مطلوبة",
+    "permission_denied": "تم رفض الإذن"
+  },
+  "notifications": {
+    "saved": "✅ تم الحفظ بنجاح!",
+    "deleted": "✅ تم الحذف بنجاح!",
+    "reset": "🔄 تمت إعادة التعيين بنجاح!",
+    "error": "❌ حدث خطأ",
+    "warning": "⚠️ انتباه",
+    "info": "ℹ️ معلومات",
+    "test_success": "✅ نجح الاختبار",
+    "test_failed": "❌ فشل الاختبار"
+  }
+}

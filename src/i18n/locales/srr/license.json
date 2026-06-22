@@ -1,0 +1,37 @@
+{
+  "title": "Licence & Sécurité",
+  "subtitle": "Gestion de la licence logicielle",
+  "status": {
+    "valid": "Licence valide",
+    "invalid": "Licence invalide",
+    "expired": "Licence expirée",
+    "trial": "Période d'essai",
+    "pending": "En attente de validation"
+  },
+  "fields": {
+    "license_key": "Clé de licence",
+    "customer": "Client",
+    "expiry_date": "Date d'expiration",
+    "max_users": "Nombre max d'utilisateurs",
+    "features": "Fonctionnalités activées"
+  },
+  "actions": {
+    "activate": "Activer la licence",
+    "validate": "Valider",
+    "renew": "Renouveler",
+    "deactivate": "Désactiver"
+  },
+  "messages": {
+    "enter_key": "Veuillez entrer votre clé de licence",
+    "validation_success": "Licence validée avec succès",
+    "validation_failed": "Échec de la validation de la licence",
+    "expiry_warning": "Votre licence expire dans {days} jours",
+    "expired": "Votre licence a expiré. Veuillez la renouveler."
+  },
+  "protection": {
+    "title": "Protection anti-piratage",
+    "fingerprint": "Empreinte matérielle",
+    "last_check": "Dernière vérification",
+    "status": "Statut de la protection"
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "title": "Fay",
+  "subtitle": "Gestionu fay yu nekk ci biir",
+  "header": {
+    "payment": "Fay",
+    "amount_to_pay": "Xaliss bu ñu wara fay",
+    "order_id": "Commande {id}",
+    "online": "Ci internet",
+    "offline": "Ci biir bi"
+  },
+  "methods": {
+    "wave": "Wave",
+    "orange_money": "Orange Money",
+    "cash": "Espèces",
+    "card": "Carte",
+    "card_desc": "CB / Visa",
+    "wave_desc": "Fay ci Wave",
+    "om_desc": "Fay ci OM",
+    "cash_desc": "Fay ci cash",
+    "choose": "Xeetu fay",
+    "change": "Soppi xeetu fay"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "amount": "Xaliss",
+    "status": "Statut",
+    "date": "Fan",
+    "reference": "Référence",
+    "client": "Client",
+    "type": "Xeet",
+    "details": "Détailsu transaction bi",
+    "pending_count": "Li ñu xaar ngir xoolaat",
+    "reconciled": "Jéex na",
+    "reconcile": "Xoolaat lépp",
+    "manual_ref": "Référence {method}",
+    "ref_locale": "Réf locale : {ref}",
+    "to_reconcile": "Li ñu wara xoolaat"
+  },
+  "status": {
+    "pending": "Ci xaar",
+    "completed": "Jéex na",
+    "success": "Baax na",
+    "failed": "Baaxul",
+    "cancelled": "Dindi nañu ko",
+    "refunded": "Doxaat nañu xaliss bi",
+    "idle": "Ci xaar",
+    "succeeded": "Baax na",
+    "expired": "Jeex na",
+    "processing": "Doxal na..."
+  },
+  "qr_code": {
+    "title": "QR Code bu fay",
+    "generate": "Defal QR code",
+    "scan": "Scanner QR code",
+    "amount": "Xaliss bu ñu wara fay",
+    "description": "Li fay bi di nekk",
+    "scan_with": "Scanner ci {method}",
+    "show_sticker": "Woneal sa autocollant {method}",
+    "client_scans": "Client bi di na scanner QR code bu sa autocollant marchand",
+    "merchant_number": "{method}: {number}"
+  },
+  "wave": {
+    "title": "Fay ci Wave",
+    "pay": "Fay ci Wave",
+    "pay_loading": "Doxal na...",
+    "open_app": "Dina ubbi app Wave — API Business bu am sécurité",
+    "reopen_app": "Ubbiwaat app Wave",
+    "pending": "Ci xaar fay bi...",
+    "pending_desc": "Client bi di na fay ci app Wave bi",
+    "success": "Fay ci Wave baax na!",
+    "no_api": "API Wave bi defuñu ko — mode QR bu tuuti",
+    "no_number": "Amul benn numéro Wave bu ñu def",
+    "error": "Mënul def session Wave. Xoolal sa connexion ak sa clé API.",
+    "api_key": "Clé API Wave bi amul. Demal ci Paramètres → Wave & Paiements.",
+    "failed": "Fay bi baaxul walla dindi nañu ko."
+  },
+  "orange_money": {
+    "title": "Fay ci Orange Money",
+    "pay": "Fay ci Orange Money",
+    "pay_loading": "QR bi di na génn...",
+    "open_app": "Dina ubbi app Orange Money",
+    "qr_generated": "Dina def QR code bu am sécurité",
+    "pending": "Ci xaar fay bi...",
+    "pending_desc": "Client bi di na fay ci app Orange Money bi",
+    "success": "Fay ci Orange Money baax na!",
+    "no_api": "API Orange Money bi defuñu ko — mode QR bu tuuti",
+    "no_number": "Amul benn numéro Orange Money bu ñu def",
+    "error": "Mënul def fay Orange Money. Xoolal sa connexion.",
+    "api_key": "Orange Money bi amul. Demal ci Paramètres → Wave & Paiements.",
+    "failed": "Fay Orange Money baaxul walla jeex na."
+  },
+  "cash": {
+    "title": "Fay ci Espèces",
+    "received": "Espèces yu ñu jot (FCFA)",
+    "placeholder": "Ex: 2000, 5000, 10000...",
+    "change": "Monee bu ñu wara rendi",
+    "insufficient": "Xaliss bi matul",
+    "confirm": "Dëggël fay bi",
+    "amount_due": "Xaliss bu ñu wara fay"
+  },
+  "card": {
+    "title": "Fay ci Carte",
+    "confirm": "Dëggël fay bi"
+  },
+  "manual_entry": {
+    "title": "Saisie manuel {method}",
+    "auth_required": "Soxla na authentification",
+    "auth_desc": "Saisie manuel — {method}",
+    "password": "Mot de passe administrateur",
+    "password_placeholder": "Mot de passe administrateur",
+    "verify": "Xoolal",
+    "incorrect": "Mot de passe bi baaxul",
+    "ref_label": "Référence {method} *",
+    "ref_placeholder_wave": "Ex: WV2025-XXXX",
+    "ref_placeholder_om": "Ex: OM-2025-XXXX",
+    "client_name": "Turu client bi (bu nekké)",
+    "client_name_placeholder": "Ngir xoolal",
+    "save": "Denc (ngir xoolaat)",
+    "warning": "Client bi fay na ci autocollant {method}. Bindal référence transaction bi.",
+    "ref_local": "Réf locale : {ref} · Xoolaat"
+  },
+  "password": {
+    "title": "Soxla na authentification",
+    "desc": "Saisie manuel — {method}",
+    "input": "Mot de passe administrateur",
+    "placeholder": "Mot de passe administrateur",
+    "verify": "Xoolal",
+    "error": "Mot de passe bi baaxul"
+  },
+  "offline": {
+    "title": "Mode hors-ligne",
+    "desc": "Woneal sa autocollant {label}. Transaction bi dinañu ko bind bu ñu jokkeewaat.",
+    "show_sticker": "Woneal sa autocollant {label}",
+    "client_scans": "Client bi di na scanner QR code bu sa autocollant marchand",
+    "amount_due": "Xaliss bu ñu wara fay",
+    "ref": "Réf: {ref}",
+    "manual_ref": "Réf. manuelle",
+    "client_paid": "Client bi fay na",
+    "reconcile_note": "Transaction bi dinañu ko xoolaat bu ñu jokkeewaat"
+  },
+  "payment_confirmation": {
+    "success": "Fay bi baax na!",
+    "order": "Commande {id}",
+    "amount": "{amount} FCFA",
+    "offline_note": "Hors-ligne — wara xoolaat ci internet"
+  },
+  "buttons": {
+    "confirm": "Dëggël fay bi",
+    "cancel": "Dindi",
+    "retry": "Jéemwaat",
+    "back": "Ginnaw",
+    "save": "Denc",
+    "verify": "Xoolal",
+    "close": "Tëj",
+    "reconcile": "Xoolaat",
+    "manual_entry": "Saisie manuel",
+    "change_method": "← Soppi xeetu fay",
+    "client_paid": "Client bi fay na",
+    "open_app": "Ubbi app bi"
+  },
+  "errors": {
+    "merchant_not_found": "Bokk na ci ay jaaykat yi",
+    "insufficient_funds": "Xaliss bi matul",
+    "invalid_amount": "Xaliss bu ñu bind baaxul",
+    "timeout": "Transaction bi jeex na",
+    "network_error": "Error ci réseau bi",
+    "wave_api": "Clé API Wave bi amul. Demal ci Paramètres → Wave & Paiements.",
+    "wave_session": "Mënul def session Wave. Xoolal sa connexion ak sa clé API.",
+    "wave_failed": "Fay bi baaxul walla dindi nañu ko.",
+    "om_api": "Orange Money bi amul. Demal ci Paramètres → Wave & Paiements.",
+    "om_session": "Mënul def fay Orange Money. Xoolal sa connexion.",
+    "om_failed": "Fay Orange Money bi baaxul walla jeex na.",
+    "password_incorrect": "Mot de passe bi baaxul",
+    "ref_required": "Référence bu ñu soxla"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "url": "URL bu notification",
+    "secret": "Secret",
+    "events": "Événements",
+    "test": "Tester webhook bi"
+  },
+  "reconciliation": {
+    "title": "Xoolaat",
+    "pending": "Ci xaar xoolaat",
+    "reconciled": "Jéex na",
+    "reconcile_now": "Xoolaat leegi",
+    "manual_ref": "Référence manuel",
+    "auto_reconcile": "Transaction bi dinañu ko xoolaat bu ñu jokkeewaat"
+  }
+}

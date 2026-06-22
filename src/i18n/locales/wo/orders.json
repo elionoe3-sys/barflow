@@ -1,0 +1,156 @@
+{
+  "title": "Commandes",
+  "subtitle": "Gestionu commandes yi",
+  "status": {
+    "pending": "Ci xaar",
+    "in_progress": "Ci biir",
+    "paid": "Fay nañu",
+    "cancelled": "Dindi nañu ko"
+  },
+  "caisse": {
+    "open": "Ubbi caisse bi",
+    "close": "Tëj caisse bi",
+    "opened": "Caisse bi ubbi na",
+    "closed": "Caisse bi tëj na",
+    "fund": "Fond de caisse",
+    "server": "Turu serveur bi",
+    "openedAt": "Ubbi na ci : {time}",
+    "totalExpected": "Total bu ñu gëmoon ci caisse bi",
+    "fundPlusCash": "Fond + Xaliss bu ñu fayé",
+    "confirmClose": "Dëggël tëj caisse bi"
+  },
+  "cart": {
+    "title": "Panier",
+    "total": "Total",
+    "submit": "Dëggël commande bi",
+    "empty": "Panier bi amul dara",
+    "items": "articles",
+    "table": "Panier (Table {table})"
+  },
+  "payment": {
+    "title": "Fay",
+    "methods": {
+      "cash": "Espèces",
+      "wave": "Wave",
+      "orange_money": "Orange Money"
+    },
+    "amount": "Xaliss bu ñu wara fay",
+    "confirm": "Dëggël fay bi"
+  },
+  "ardoise": {
+    "title": "Ardoises",
+    "empty": "Amul benn ardoise bu am",
+    "total": "Total ardoises",
+    "pay": "Encaisser leegi",
+    "warning": "Client yii dund nañu waaye fayuñu leegi. Dinañu fay bu caisse bi tëjé walla bu ñu jóge.",
+    "existingNote": "Note bu ubbi ci Table {table}",
+    "itemsAdded": "Articles yi dinañu leen yokk ci ardoise bu am."
+  },
+  "history": {
+    "title": "Li jàll",
+    "empty": "Amul benn commande ci li jàll",
+    "details": "Détailu commande bi",
+    "total": "Total bi ñu encaisser",
+    "orders": "Commandes",
+    "avgTicket": "Ticket bu nekk",
+    "lastDays": "30 fan yu mujj · {count} commandes yi ñu fay",
+    "paid": "Fay nañu"
+  },
+  "search": {
+    "placeholder": "Seetlu produit..."
+  },
+  "product": {
+    "outOfStock": "Rupture de stock",
+    "stock": "Stock",
+    "price": "Pëy",
+    "category": "Xeet",
+    "inStock": "Ci biir stock",
+    "critical": "Stock critique"
+  },
+  "table": {
+    "title": "Plan de salle",
+    "select": "Tànnal table ngir tambali",
+    "manage": "Gestion",
+    "free": "Libre",
+    "occupied": "Occupé",
+    "waiting": "Ci xaar",
+    "seats": "{seats} pers.",
+    "number": "Numéro",
+    "places": "Li ñu mën a nattu",
+    "status": "Statut",
+    "add": "Defal table",
+    "edit": "Soppi table bi",
+    "delete": "Dindi",
+    "editTitle": "Soppi table {number}",
+    "addTitle": "Defal table",
+    "save": "Denc",
+    "cancel": "Dindi",
+    "deleteConfirm": "Dindi table {number}?"
+  },
+  "order": {
+    "detail": "Détailu commande bi",
+    "table": "Table {table}",
+    "id": "Commande: {id}",
+    "items": "{count} article(s)",
+    "total": "TOTAL",
+    "paid": "Fay nañu",
+    "pending": "Ardoise",
+    "inProgress": "Ci biir",
+    "print": "Imprimer ticket",
+    "close": "Tëj",
+    "pay": "Fay",
+    "ardoise": "ARDOISE",
+    "ticketPrinted": "Ticket bi mënul génn ba bu fayé!",
+    "payFirst": "Fayël commande bi ba noppi tëj!"
+  },
+  "validation": {
+    "title": "Dëggël commande bi",
+    "table": "Table {table} · {total} FCFA",
+    "ardoise": "Def ko ci ardoise",
+    "ardoiseDesc": "Table bi continué na occuppé. Client bi dina fay ci kanam.",
+    "payNow": "Fay leegi",
+    "payNowDesc": "Encaissement immédiat : Espèces, Wave walla Orange Money."
+  },
+  "errors": {
+    "caisseClosed": "Ubbiël caisse bi ba noppi tambali!",
+    "selectTable": "Tànnal table bi ba noppi!",
+    "paymentRequired": "Fayël commande bi ba noppi tëj!",
+    "printNotPaid": "Ticket bi mënul génn ba bu fayé!",
+    "printError": "Mënul ubbi fenêtre impression.",
+    "cartEmpty": "Panier bi amul dara"
+  },
+  "modals": {
+    "caisse": {
+      "open": "Ubbi caisse bi",
+      "openDesc": "Xaliss bi nekk ci caisse bi ci tambali bi",
+      "serverLabel": "Turu serveur bi (bu nekké)",
+      "serverPlaceholder": "Ex: Fatou, Jean-Pierre...",
+      "openButton": "Ubbi caisse bi",
+      "cancel": "Dindi",
+      "date": "{weekday} {day} {month}"
+    },
+    "fermeture": {
+      "title": "Tëj caisse bi",
+      "openedAt": "Ouverture : {time}",
+      "server": "{server}",
+      "fund": "Fond de caisse",
+      "cashReceipts": "Recettes en espèces",
+      "payments": "{count} fay",
+      "totalExpected": "Total bu ñu gëmoon ci caisse bi",
+      "fundPlusCash": "Fond + Xaliss bu ñu fayé",
+      "ardoisesOpen": "{count} ardoise yu ubbi",
+      "ardoisesTotal": "Total : {total} FCFA — Xoolal lépp ba noppi.",
+      "confirmClose": "Dëggël tëj caisse bi"
+    }
+  },
+  "loading": "Yóbb na ay produits...",
+  "noProducts": "Amul benn produit",
+  "noProductsDesc": "Soppi filtre yi walla defal ay produits ci Stock",
+  "currentOrders": "Commandes yi ci biir",
+  "currentOrdersDesc": "Bëral ci commande bi ngir xool détails yi",
+  "orderCount": "{count} commande(s)",
+  "noActiveOrders": "Amul benn commande ci biir",
+  "totalFCFA": "{amount} FCFA",
+  "paidWith": "Fay ci {method}",
+  "thankYou": "Jërëjëf ci ñëw bi!"
+}

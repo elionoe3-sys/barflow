@@ -1,0 +1,250 @@
+{
+  "title": "Settings",
+  "subtitle": "Application Configuration",
+  "tabs": {
+    "general": "Theme & Languages",
+    "network": "Network Configuration",
+    "backup": "Backup & Data",
+    "payments": "Payments",
+    "security": "Security"
+  },
+  "themes": {
+    "title": "Theme",
+    "light": "Light",
+    "daltonien": "Colorblind",
+    "senegal": "Senegal",
+    "dark": "Dark",
+    "senegal_desc": "Senegal flag colors"
+  },
+  "colors": {
+    "title": "Primary color",
+    "violet": "Violet",
+    "emerald": "Emerald",
+    "blue": "Blue",
+    "rose": "Rose",
+    "amber": "Amber"
+  },
+  "languages": {
+    "title": "Languages",
+    "french": "French",
+    "english": "English",
+    "wolof": "Wolof",
+    "select": "Select your language"
+  },
+  "restaurant": {
+    "title": "Establishment Information",
+    "subtitle": "This information will appear on tickets and invoices",
+    "name": "Bar name",
+    "name_placeholder": "Ex: Le Teranga Bar",
+    "phone": "Phone",
+    "phone_placeholder": "+221 77 000 00 00",
+    "email": "Email",
+    "email_placeholder": "contact@yourbar.sn",
+    "address": "Address",
+    "address_placeholder": "Street, district, city",
+    "taxNumber": "Tax ID / NIF",
+    "taxNumber_placeholder": "Ex: 0000000 0A 0000",
+    "save": "Save information",
+    "saved": "Information saved!"
+  },
+  "network": {
+    "title": "Network Configuration",
+    "wifi": "Wi-Fi",
+    "printer": "Printer",
+    "caisse": "Secondary cash register",
+    "offline_mode": "Offline mode",
+    "offline_mode_desc": "Data is saved locally and synchronized automatically",
+    "sync_now": "Sync now",
+    "last_sync": "Last sync",
+    "never": "Never",
+    "sync_status": "Sync status",
+    "pending_changes": "Pending changes",
+    "synced": "Everything is synced"
+  },
+  "backup": {
+    "title": "Data Backup",
+    "subtitle": "Export, import or reset your data",
+    "export": "Export data",
+    "export_desc": "Download all your data in JSON format",
+    "import": "Import data",
+    "import_desc": "Restore data from a JSON file",
+    "reset": "Reset",
+    "resetSettings": "Reset settings",
+    "resetSettings_desc": "Resets all settings to their default values",
+    "resetAll": "Reset everything",
+    "resetAll_desc": "Deletes all application data (orders, products, etc.)",
+    "last_backup": "Last backup",
+    "never": "Never",
+    "export_success": "Data exported successfully!",
+    "import_success": "Data imported successfully!",
+    "reset_confirm": "Are you sure you want to reset everything? This action is irreversible.",
+    "reset_settings_confirm": "Are you sure you want to reset all settings?",
+    "password_required": "Password required for this action"
+  },
+  "payments": {
+    "title": "Mobile Payments",
+    "subtitle": "Configure Wave and Orange Money APIs",
+    "locked": "Protected tab",
+    "lockedMessage": "API keys are sensitive. Enter the administrator password to access them.",
+    "unlock": "Unlock",
+    "unlocked": "Tab unlocked",
+    "wave": {
+      "title": "Wave Business API",
+      "subtitle": "Wave API configuration for mobile payments",
+      "merchantId": "Merchant ID",
+      "merchantId_placeholder": "Your Wave merchant ID",
+      "apiKey": "API Key",
+      "apiKey_placeholder": "Wave API Key",
+      "apiSecret": "API Secret",
+      "apiSecret_placeholder": "Wave API Secret",
+      "webhookSecret": "Webhook Secret",
+      "webhookSecret_placeholder": "Secret for Wave webhooks",
+      "test": "Test connection",
+      "test_success": "✅ Wave connection successful!",
+      "test_failed": "❌ Wave connection failed",
+      "merchant_number": "Wave merchant number",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "orange": {
+      "title": "Orange Money API",
+      "subtitle": "Orange Money API configuration",
+      "merchantId": "Merchant ID",
+      "merchantId_placeholder": "Your Orange merchant ID",
+      "apiLogin": "API Login",
+      "apiLogin_placeholder": "Orange Money API Login",
+      "apiPassword": "API Password",
+      "apiPassword_placeholder": "Orange Money API Password",
+      "apiKey": "API Key",
+      "apiKey_placeholder": "Orange Money API Key",
+      "test": "Test connection",
+      "test_success": "✅ Orange Money connection successful!",
+      "test_failed": "❌ Orange Money connection failed",
+      "merchant_number": "Orange Money merchant number",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "merchant_sticker": {
+      "title": "Merchant sticker",
+      "desc": "Customers can pay by scanning your QR code even offline",
+      "show_qr": "Show QR code",
+      "download_qr": "Download QR code"
+    },
+    "save": "Save",
+    "saved": "Configuration saved!",
+    "testing": "Testing..."
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Manage access and security of your application",
+    "password": {
+      "title": "Administrator password",
+      "current": "Current password",
+      "current_placeholder": "Enter your current password",
+      "new": "New password",
+      "new_placeholder": "Enter a new password",
+      "confirm": "Confirm new password",
+      "confirm_placeholder": "Confirm the new password",
+      "change": "Change password",
+      "forgot": "Forgot password?",
+      "change_success": "✅ Password changed successfully!",
+      "change_failed": "❌ Password change failed",
+      "incorrect": "Current password is incorrect",
+      "mismatch": "Passwords do not match",
+      "min_length": "Password must be at least 6 characters"
+    },
+    "secret": {
+      "title": "Secret question",
+      "desc": "Used to reset your password if forgotten",
+      "question": "Question",
+      "question_placeholder": "Ex: What is the name of your first pet?",
+      "answer": "Answer",
+      "answer_placeholder": "Your answer",
+      "save": "Save secret question"
+    },
+    "info": "Sensitive actions (import, reset) are password protected.",
+    "two_factor": {
+      "title": "Two-factor authentication (2FA)",
+      "enable": "Enable 2FA",
+      "disable": "Disable 2FA",
+      "code": "Verification code",
+      "setup": "Set up 2FA",
+      "enabled": "✅ 2FA enabled",
+      "disabled": "❌ 2FA disabled"
+    },
+    "session": {
+      "title": "Session",
+      "expire_after": "Session timeout",
+      "expire_after_desc": "Auto logout after inactivity",
+      "never": "Never",
+      "minutes": "{minutes} minutes",
+      "hours": "{hours} hours"
+    }
+  },
+  "theme": {
+    "title": "Theme",
+    "appearance": "Appearance",
+    "select_color": "Choose your primary color",
+    "preview": "Preview"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Choose your language"
+  },
+  "info": {
+    "title": "About",
+    "version": "Version {version}",
+    "build": "Build {build}",
+    "license": "License",
+    "copyright": "© {year} BarFlow. All rights reserved.",
+    "support": "Support",
+    "contact": "Contact us",
+    "documentation": "Documentation"
+  },
+  "status": {
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "success": "Success!",
+    "error": "Error",
+    "pending": "Pending..."
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "refresh": "Refresh",
+    "export": "Export",
+    "import": "Import",
+    "reset": "Reset",
+    "test": "Test",
+    "unlock": "Unlock",
+    "change": "Change",
+    "enable": "Enable",
+    "disable": "Disable",
+    "download": "Download",
+    "show": "Show",
+    "hide": "Hide",
+    "sync": "Sync"
+  },
+  "errors": {
+    "save_failed": "Error saving",
+    "load_failed": "Error loading",
+    "connection_failed": "Connection failed",
+    "invalid_data": "Invalid data",
+    "password_required": "Password required",
+    "permission_denied": "Permission denied"
+  },
+  "notifications": {
+    "saved": "✅ Saved successfully!",
+    "deleted": "✅ Deleted successfully!",
+    "reset": "🔄 Reset successfully!",
+    "error": "❌ An error occurred",
+    "warning": "⚠️ Warning",
+    "info": "ℹ️ Information",
+    "test_success": "✅ Test successful",
+    "test_failed": "❌ Test failed"
+  }
+}

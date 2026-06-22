@@ -23,6 +23,7 @@ router.post('/produits', async (req, res) => {
     if (d.seuilAlerte != null)  cleanData.seuilAlerte = !isNaN(Number(d.seuilAlerte)) ? Number(d.seuilAlerte) : undefined;
     if (d.seuilCritique != null) cleanData.seuilCritique = !isNaN(Number(d.seuilCritique)) ? Number(d.seuilCritique) : undefined;
     if (d.image)                cleanData.image = String(d.image);
+    if (d.photo !== undefined)  cleanData.photo = d.photo ? String(d.photo) : null;
     if (d.color)                cleanData.color = String(d.color);
     if (d.popularite != null)   cleanData.popularite = !isNaN(Number(d.popularite)) ? Number(d.popularite) : undefined;
     if (d.activePriceFormats)   cleanData.activePriceFormats = d.activePriceFormats;
@@ -52,6 +53,7 @@ router.put('/produits/:id', async (req, res) => {
     if (d.seuilAlerte !== undefined)       cleanData.seuilAlerte = !isNaN(Number(d.seuilAlerte)) ? Number(d.seuilAlerte) : undefined;
     if (d.seuilCritique !== undefined)     cleanData.seuilCritique = !isNaN(Number(d.seuilCritique)) ? Number(d.seuilCritique) : undefined;
     if (d.image !== undefined)             cleanData.image = String(d.image);
+    if (d.photo !== undefined)             cleanData.photo = d.photo ? String(d.photo) : null;
     if (d.color !== undefined)             cleanData.color = String(d.color);
     if (d.popularite !== undefined)        cleanData.popularite = !isNaN(Number(d.popularite)) ? Number(d.popularite) : undefined;
     if (d.activePriceFormats !== undefined) cleanData.activePriceFormats = d.activePriceFormats;
@@ -498,11 +500,12 @@ router.get('/categories', async (req, res) => {
 router.post('/categories', async (req, res) => {
   try {
     const d = req.body;
-    const cleanData = {
+    const cleanData: any = {
       nom:   String(d.nom || d.name || ''),
       emoji: String(d.emoji || '📦'),
       color: String(d.color || '#8B5CF6'),
     };
+    if (d.icon !== undefined) cleanData.icon = d.icon ? String(d.icon) : null;
     const data = await prisma.categorie.upsert({
       where:  { id: d.id },
       update: cleanData,
@@ -521,6 +524,7 @@ router.put('/categories/:id', async (req, res) => {
     if (d.nom !== undefined)   cleanData.nom = String(d.nom);
     if (d.emoji !== undefined) cleanData.emoji = String(d.emoji);
     if (d.color !== undefined) cleanData.color = String(d.color);
+    if (d.icon !== undefined)  cleanData.icon = d.icon ? String(d.icon) : null;
 
     const data = await prisma.categorie.upsert({
       where:  { id: req.params.id },

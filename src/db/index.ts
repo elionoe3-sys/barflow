@@ -24,10 +24,20 @@ export interface DailyStat {
 export interface Produit {
   id: string; nom: string; prix: number; categorie: string; stock: number;
   stockUnit?: string; seuilAlerte?: number; seuilCritique?: number;
-  image?: string; color?: string; popularite?: number;
+  image?: string; photo?: string; color?: string; popularite?: number;
   activePriceFormats?: string[];
   prices?: { bouteille?: number; demi?: number; quart?: number; verre?: number; canette?: number; };
   options?: { bottleSize?: string; supplements?: string[]; notes?: string; };
+  // Gestion stock en centilitres (vins/spiritueux/bières) — voir src/types.ts VolumeConfig
+  stockCl?: number;
+  volumeConfig?: {
+    contenanceCl: number;
+    clParBouteille?: number;
+    clParDemi?: number;
+    clParQuart?: number;
+    clParVerre?: number;
+    clParCanette?: number;
+  };
   synced: boolean; deleted: boolean; createdAt: Date; updatedAt: Date;
 }
 export interface Commande {
@@ -180,9 +190,11 @@ class BarFlowDatabase extends Dexie {
       categorie: data.categorie || data.category || 'autre', stock: data.stock || 0,
       stockUnit: data.stockUnit || 'unités', seuilAlerte: data.seuilAlerte || 10,
       seuilCritique: data.seuilCritique || 5, image: data.image || '📦',
+      photo: data.photo || undefined,
       color: data.color || '#8B5CF6', popularite: data.popularite || 50,
       activePriceFormats: data.activePriceFormats || ['bouteille'],
       prices: data.prices || {}, options: data.options || {},
+      stockCl: data.stockCl, volumeConfig: data.volumeConfig,
       synced: false, deleted: false, createdAt: new Date(), updatedAt: new Date(),
     };
     await this.produits.add(item);
@@ -326,13 +338,72 @@ class BarFlowDatabase extends Dexie {
   }
 
   async initDefaultData(productsData: any[]) {
+    // ── Garde-fou global : si des produits existent déjà (avec n'importe
+    // quel id), on ne réinjecte rien. Cela évite la duplication en boucle
+    // qui se produisait quand addProduit() générait un nouvel uuid à
+    // chaque démarrage au lieu de respecter prod.id.
+    const alreadyHasProducts = (await this.produits.count()) > 0;
+    if (alreadyHasProducts) return;
+
     for (const prod of productsData) {
       const existing = await this.produits.get(prod.id);
-      if (!existing) {
-        await this.addProduit(prod);
-      }
+      if (existing) continue;
+
+      // Insertion directe avec l'id d'origine (p1, p2, ...) — on n'utilise
+      // pas addProduit() ici car celui-ci génère toujours un nouvel uuid()
+      // et ignorerait prod.id, rendant la vérification d'existence inutile
+      // au prochain démarrage.
+      const item: Produit = {
+        id: prod.id,
+        nom: prod.nom || prod.name,
+        prix: prod.prix ?? prod.price ?? 0,
+        categorie: prod.categorie || prod.category || 'autre',
+        stock: prod.stock || 0,
+        stockUnit: prod.stockUnit || 'unités',
+        seuilAlerte: prod.seuilAlerte ?? 10,
+        seuilCritique: prod.seuilCritique ?? 5,
+        image: prod.image || '📦',
+        color: prod.color || '#8B5CF6',
+        popularite: prod.popularite ?? 50,
+        activePriceFormats: prod.activePriceFormats || ['bouteille'],
+        prices: prod.prices || {},
+        options: prod.options || {},
+        synced: false,
+        deleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await this.produits.add(item);
+      await this.addToSyncQueue('CREATE', 'produit', item.id, item);
     }
   }
+
+  // ── Nettoyage des doublons créés par l'ancien bug (uuid aléatoire
+  // au lieu de l'id du produit statique à chaque démarrage). Garde le
+  // produit le plus ancien (createdAt le plus petit) par nom+catégorie
+  // et supprime (soft-delete) les autres.
+  async dedupeProduits(): Promise<number> {
+    const all = (await this.produits.toArray()).filter(p => !p.deleted);
+    const groups = new Map<string, Produit[]>();
+    for (const p of all) {
+      const key = `${(p.nom || '').trim().toLowerCase()}|${p.categorie}`;
+      const arr = groups.get(key) || [];
+      arr.push(p);
+      groups.set(key, arr);
+    }
+    let removed = 0;
+    for (const [, arr] of groups) {
+      if (arr.length <= 1) continue;
+      arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      const [, ...dupes] = arr;
+      for (const dup of dupes) {
+        await this.deleteProduit(dup.id);
+        removed++;
+      }
+    }
+    return removed;
+  }
+
 }
 
 export const db = new BarFlowDatabase();
@@ -365,4 +436,3 @@ export async function initializeDefaultData() {
 }
 
 export { BarFlowDatabase };
-export type { Charge, Employe, Investissement, Produit, Commande, DailyStat, SyncQueue };

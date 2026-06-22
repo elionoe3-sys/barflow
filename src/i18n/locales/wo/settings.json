@@ -1,0 +1,250 @@
+{
+  "title": "Paramètres",
+  "subtitle": "Configurationu sa application",
+  "tabs": {
+    "general": "Thème ak Làkk",
+    "network": "Configuration réseau",
+    "backup": "Sauvegarde ak Données",
+    "payments": "Fay",
+    "security": "Sécurité"
+  },
+  "themes": {
+    "title": "Thème",
+    "light": "Leer",
+    "daltonien": "Daltonien",
+    "senegal": "Sénégal",
+    "dark": "Tëriin",
+    "senegal_desc": "Derru drapeauu Sénégal"
+  },
+  "colors": {
+    "title": "Derru bu gënë fëss",
+    "violet": "Violet",
+    "emerald": "Émeraude",
+    "blue": "Bleu",
+    "rose": "Rose",
+    "amber": "Ambre"
+  },
+  "languages": {
+    "title": "Làkk",
+    "french": "Français",
+    "english": "Anglais",
+    "wolof": "Wolof",
+    "select": "Tànnal sa làkk"
+  },
+  "restaurant": {
+    "title": "Xibaaru bar bi",
+    "subtitle": "Xibaar yii dinañu génn ci ticket yi ak facture yi",
+    "name": "Turu bar bi",
+    "name_placeholder": "Ex: Le Teranga Bar",
+    "phone": "Téléphone",
+    "phone_placeholder": "+221 77 000 00 00",
+    "email": "Email",
+    "email_placeholder": "contact@votrebar.sn",
+    "address": "Adresse",
+    "address_placeholder": "N° rue, quartier, ville",
+    "taxNumber": "NIF / Contribution",
+    "taxNumber_placeholder": "Ex: 0000000 0A 0000",
+    "save": "Denc xibaar yi",
+    "saved": "Xibaar yi denc nañu ko!"
+  },
+  "network": {
+    "title": "Configuration réseau",
+    "wifi": "Wi-Fi",
+    "printer": "Imprimante",
+    "caisse": "Caisse secondaire",
+    "offline_mode": "Mode hors-ligne",
+    "offline_mode_desc": "Données yi denc nañu ko ci biir bi te dinañu synchroniser wu bopam",
+    "sync_now": "Synchroniser leegi",
+    "last_sync": "Synchronisation bu mujj",
+    "never": "Mukk",
+    "sync_status": "Statut bu synchronisation",
+    "pending_changes": "Modifications yi ñu xaar",
+    "synced": "Lépp synchronisé na"
+  },
+  "backup": {
+    "title": "Sauvegarde bu données",
+    "subtitle": "Exporté, importé walla yeesalaat sa données",
+    "export": "Exporté données yi",
+    "export_desc": "Télécharger lépp sa données ci format JSON",
+    "import": "Importé données yi",
+    "import_desc": "Yeesalaat données yi jóge ci bénn fichier JSON",
+    "reset": "Yeesalaat",
+    "resetSettings": "Yeesalaat paramètres yi",
+    "resetSettings_desc": "Dindi na lépp bindparamètres yi ngir dellu ci li mu nekkoon",
+    "resetAll": "Yeesalaat lépp",
+    "resetAll_desc": "Dindi na lépp sa données ci application bi (commandes, produits, etc.)",
+    "last_backup": "Sauvegarde bu mujj",
+    "never": "Mukk",
+    "export_success": "Données yi exporté nañu ko!",
+    "import_success": "Données yi importé nañu ko!",
+    "reset_confirm": "Dëggël nga ne bëgg nga yeesalaat lépp? Lii mënulo ko dindi.",
+    "reset_settings_confirm": "Dëggël nga ne bëgg nga yeesalaat paramètres yi?",
+    "password_required": "Soxla na mot de passe ngir lii"
+  },
+  "payments": {
+    "title": "Fay yu mobile",
+    "subtitle": "Configuration API Wave ak Orange Money",
+    "locked": "Onglet bi ñu tëj",
+    "lockedMessage": "Clés API yi sensibilité nañu. Bindal mot de passe administrateur bi ngir dugg.",
+    "unlock": "Ubbi",
+    "unlocked": "Onglet bi ubbi na",
+    "wave": {
+      "title": "Wave Business API",
+      "subtitle": "Configuration API Wave ngir fay yu mobile",
+      "merchantId": "Merchant ID",
+      "merchantId_placeholder": "Sa identifiant marchand Wave",
+      "apiKey": "API Key",
+      "apiKey_placeholder": "Clé API Wave",
+      "apiSecret": "API Secret",
+      "apiSecret_placeholder": "Secret API Wave",
+      "webhookSecret": "Webhook Secret",
+      "webhookSecret_placeholder": "Secret ngir webhooks Wave",
+      "test": "Jéem connexion bi",
+      "test_success": "✅ Connexion Wave baax na!",
+      "test_failed": "❌ Connexion Wave baaxul",
+      "merchant_number": "Numéro marchand Wave",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "orange": {
+      "title": "Orange Money API",
+      "subtitle": "Configuration API Orange Money",
+      "merchantId": "Merchant ID",
+      "merchantId_placeholder": "Sa identifiant marchand Orange",
+      "apiLogin": "API Login",
+      "apiLogin_placeholder": "Login API Orange Money",
+      "apiPassword": "API Password",
+      "apiPassword_placeholder": "Mot de passe API Orange Money",
+      "apiKey": "API Key",
+      "apiKey_placeholder": "Clé API Orange Money",
+      "test": "Jéem connexion bi",
+      "test_success": "✅ Connexion Orange Money baax na!",
+      "test_failed": "❌ Connexion Orange Money baaxul",
+      "merchant_number": "Numéro marchand Orange Money",
+      "merchant_number_placeholder": "+221 77 000 00 00"
+    },
+    "merchant_sticker": {
+      "title": "Autocollant marchand",
+      "desc": "Client yi mën nañu fay ci scanner sa QR code sax bu nekké hors-ligne",
+      "show_qr": "Wone QR code",
+      "download_qr": "Télécharger QR code"
+    },
+    "save": "Denc",
+    "saved": "Configuration denc na!",
+    "testing": "Jéem na..."
+  },
+  "security": {
+    "title": "Sécurité",
+    "subtitle": "Gestionu aksé ak sécurité sa application",
+    "password": {
+      "title": "Mot de passe administrateur",
+      "current": "Mot de passe bu nekk",
+      "current_placeholder": "Bindal sa mot de passe bu nekk",
+      "new": "Mot de passe bu yees",
+      "new_placeholder": "Bindal mot de passe bu yees",
+      "confirm": "Dëggël mot de passe bu yees",
+      "confirm_placeholder": "Dëggël mot de passe bu yees",
+      "change": "Soppi mot de passe",
+      "forgot": "Mot de passe bi faté nañu ko?",
+      "change_success": "✅ Mot de passe soppi na!",
+      "change_failed": "❌ Soppi mot de passe baaxul",
+      "incorrect": "Mot de passe bu nekk bi baaxul",
+      "mismatch": "Mot de passe yi ànduñu",
+      "min_length": "Mot de passe bi wara am lu ëpp 6 caractères"
+    },
+    "secret": {
+      "title": "Question bu sutura",
+      "desc": "Li ñu jëfëndikoo ngir yeesalaat sa mot de passe bu faté",
+      "question": "Question",
+      "question_placeholder": "Ex: Lan moy turu sa njëkk saar?",
+      "answer": "Wàll",
+      "answer_placeholder": "Sa wàll",
+      "save": "Denc question bu sutura"
+    },
+    "info": "Action yu sensibilité yi (import, yeesalaat) dañu leen tëj ak mot de passe.",
+    "two_factor": {
+      "title": "Authentification à deux facteurs (2FA)",
+      "enable": "Ubbi 2FA",
+      "disable": "Tëj 2FA",
+      "code": "Code de vérification",
+      "setup": "Configuration 2FA",
+      "enabled": "✅ 2FA ubbi na",
+      "disabled": "❌ 2FA tëj na"
+    },
+    "session": {
+      "title": "Session",
+      "expire_after": "Expiré session",
+      "expire_after_desc": "Déconnexion boppam bu inactivité amee",
+      "never": "Mukk",
+      "minutes": "{minutes} minut",
+      "hours": "{hours} waxtu"
+    }
+  },
+  "theme": {
+    "title": "Thème",
+    "appearance": "Apparence",
+    "select_color": "Tànnal sa derru bu gënë fëss",
+    "preview": "Aperçu"
+  },
+  "language": {
+    "title": "Làkk",
+    "select": "Tànnal sa làkk"
+  },
+  "info": {
+    "title": "Ci sa mbir",
+    "version": "Version {version}",
+    "build": "Build {build}",
+    "license": "Licence",
+    "copyright": "© {year} BarFlow. Lépp ñu ko yor.",
+    "support": "Support",
+    "contact": "Jokkal ak ñun",
+    "documentation": "Documentation"
+  },
+  "status": {
+    "connected": "Jokke na",
+    "disconnected": "Jokkeul",
+    "saving": "Denc na...",
+    "loading": "Yóbb na...",
+    "success": "Baax na!",
+    "error": "Error",
+    "pending": "Ci xaar..."
+  },
+  "buttons": {
+    "save": "Denc",
+    "cancel": "Dindi",
+    "close": "Tëj",
+    "delete": "Dindi",
+    "edit": "Soppi",
+    "add": "Defal",
+    "refresh": "Yeesalaat",
+    "export": "Exporté",
+    "import": "Importé",
+    "reset": "Yeesalaat",
+    "test": "Jéem",
+    "unlock": "Ubbi",
+    "change": "Soppi",
+    "enable": "Ubbi",
+    "disable": "Tëj",
+    "download": "Télécharger",
+    "show": "Wone",
+    "hide": "Dëfal",
+    "sync": "Synchroniser"
+  },
+  "errors": {
+    "save_failed": "Error ci denc bi",
+    "load_failed": "Error ci yóbb bi",
+    "connection_failed": "Connexion baaxul",
+    "invalid_data": "Données yi baaxul",
+    "password_required": "Soxla na mot de passe",
+    "permission_denied": "Permission bi baaxul"
+  },
+  "notifications": {
+    "saved": "✅ Denc na baax na!",
+    "deleted": "✅ Dindi na baax na!",
+    "reset": "🔄 Yeesalaat na baax na!",
+    "error": "❌ Error am na",
+    "warning": "⚠️ Attention",
+    "info": "ℹ️ Xibaar",
+    "test_success": "✅ Jéem bi baax na",
+    "test_failed": "❌ Jéem bi baaxul"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "title": "Synchronization",
+  "status": {
+    "idle": "Idle",
+    "syncing": "Syncing...",
+    "success": "Sync successful",
+    "error": "Sync error"
+  },
+  "actions": {
+    "sync_now": "Sync now",
+    "auto_sync": "Auto sync",
+    "last_sync": "Last sync"
+  },
+  "sources": {
+    "cloud": "Cloud",
+    "local": "Local",
+    "conflicts": "Conflicts"
+  },
+  "messages": {
+    "confirm": "Do you want to sync the data?",
+    "conflict_detected": "Conflict detected",
+    "resolved": "Conflict resolved",
+    "select_version": "Select the version to keep"
+  }
+}

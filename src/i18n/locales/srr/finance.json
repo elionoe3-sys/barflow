@@ -1,0 +1,34 @@
+{
+  "title": "Finance & Analyses",
+  "subtitle": "Analyse financière de votre activité",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "revenue": "Revenus",
+    "expenses": "Dépenses",
+    "profit": "Bénéfices",
+    "trends": "Tendances"
+  },
+  "metrics": {
+    "total_revenue": "Revenu total",
+    "total_expenses": "Dépenses totales",
+    "net_profit": "Bénéfice net",
+    "margin": "Marge",
+    "growth": "Croissance",
+    "average_ticket": "Ticket moyen",
+    "daily_average": "Moyenne journalière"
+  },
+  "charts": {
+    "revenue_vs_expenses": "Revenus vs Dépenses",
+    "profit_evolution": "Évolution des bénéfices",
+    "cost_breakdown": "Répartition des coûts",
+    "revenue_by_category": "Revenus par catégorie"
+  },
+  "periods": {
+    "today": "Aujourd'hui",
+    "week": "Cette semaine",
+    "month": "Ce mois-ci",
+    "quarter": "Ce trimestre",
+    "year": "Cette année",
+    "custom": "Personnalisé"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "title": "Paiements",
+  "subtitle": "Gestion des paiements mobiles",
+  "methods": {
+    "wave": "Wave",
+    "orange_money": "Orange Money",
+    "cash": "Espèces",
+    "card": "Carte bancaire"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "amount": "Montant",
+    "status": "Statut",
+    "date": "Date",
+    "reference": "Référence",
+    "client": "Client",
+    "type": "Type",
+    "details": "Détails de la transaction"
+  },
+  "status": {
+    "pending": "En attente",
+    "completed": "Terminé",
+    "failed": "Échoué",
+    "cancelled": "Annulé",
+    "refunded": "Remboursé"
+  },
+  "qr_code": {
+    "title": "QR Code de paiement",
+    "generate": "Générer un QR code",
+    "scan": "Scanner un QR code",
+    "amount": "Montant à payer",
+    "description": "Description du paiement"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "url": "URL de notification",
+    "secret": "Secret",
+    "events": "Événements",
+    "test": "Tester le webhook"
+  },
+  "errors": {
+    "merchant_not_found": "Commerçant non trouvé",
+    "insufficient_funds": "Fonds insuffisants",
+    "invalid_amount": "Montant invalide",
+    "timeout": "Transaction expirée",
+    "network_error": "Erreur réseau"
+  }
+}

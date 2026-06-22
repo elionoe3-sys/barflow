@@ -5,22 +5,25 @@ import {
   Bell, LogOut, Menu, X, Truck,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
 }
 
-const tabs: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard', label: 'Tableau de Bord',        icon: LayoutDashboard },
-  { id: 'orders',    label: 'Commandes',               icon: ShoppingCart    },
-  { id: 'stocks',    label: 'Gestion des Stocks',      icon: Package         },
-  { id: 'reappro',   label: 'Réapprovisionnement',     icon: Truck           },
-  { id: 'finance',   label: 'Finance & Analyses',      icon: BarChart3       },
-  { id: 'settings',  label: 'Paramètres',              icon: Settings        },
+// ✅ Garder label pour l'affichage, mais utiliser les clés de traduction
+const tabs: { id: TabId; label: string; labelKey: string; icon: typeof LayoutDashboard }[] = [
+  { id: 'dashboard', label: 'Tableau de Bord', labelKey: 'links.dashboard', icon: LayoutDashboard },
+  { id: 'orders',    label: 'Commandes',       labelKey: 'links.orders',    icon: ShoppingCart    },
+  { id: 'stocks',    label: 'Gestion des Stocks', labelKey: 'links.stocks', icon: Package         },
+  { id: 'reappro',   label: 'Réapprovisionnement', labelKey: 'links.reappro', icon: Truck           },
+  { id: 'finance',   label: 'Finance & Analyses', labelKey: 'links.finance', icon: BarChart3       },
+  { id: 'settings',  label: 'Paramètres',      labelKey: 'links.settings',  icon: Settings        },
 ];
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+  const { t } = useTranslation('sidebar');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -34,7 +37,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-20 h-14 bg-slate-900 flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
           <div className="flag-gradient w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm">B</div>
-          <span className="font-bold text-white text-sm">BarFlow</span>
+          <span className="font-bold text-white text-sm">{t('brand.name')}</span>
         </div>
         <button onClick={() => setMobileOpen(true)} className="text-white p-1">
           <Menu size={22} />
@@ -54,8 +57,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               B
             </div>
             <div className="animate-fadeIn">
-              <h1 className="font-bold text-base leading-tight">BarFlow</h1>
-              <p className="text-[10px] text-white/50 font-medium">Sénégal</p>
+              <h1 className="font-bold text-base leading-tight">{t('brand.name')}</h1>
+              <p className="text-[10px] text-white/50 font-medium">{t('brand.tagline')}</p>
             </div>
           </div>
           <button
@@ -71,6 +74,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            // ✅ Utiliser labelKey pour la traduction, label en fallback
+            const label = t(tab.labelKey, tab.label);
             return (
               <button
                 key={tab.id}
@@ -88,7 +93,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                 )}>
                   <Icon size={18} className={isActive ? 'text-violet-300' : ''} />
                 </div>
-                <span className="text-sm font-medium animate-fadeIn">{tab.label}</span>
+                <span className="text-sm font-medium animate-fadeIn">{label}</span>
               </button>
             );
           })}

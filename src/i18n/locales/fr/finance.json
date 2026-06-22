@@ -1,0 +1,85 @@
+{
+  "title": "Finance & Analyses",
+  "subtitle": "Analyse financière de votre activité",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "revenue": "Revenus",
+    "expenses": "Dépenses",
+    "profit": "Bénéfices",
+    "trends": "Tendances"
+  },
+  "metrics": {
+    "total_revenue": "Revenu total",
+    "total_expenses": "Dépenses totales",
+    "net_profit": "Bénéfice net",
+    "margin": "Marge",
+    "growth": "Croissance",
+    "average_ticket": "Ticket moyen",
+    "daily_average": "Moyenne journalière"
+  },
+  "charts": {
+    "revenue_vs_expenses": "Revenus vs Dépenses",
+    "profit_evolution": "Évolution des bénéfices",
+    "cost_breakdown": "Répartition des coûts",
+    "revenue_by_category": "Revenus par catégorie"
+  },
+  "periods": {
+    "today": "Aujourd'hui",
+    "week": "Cette semaine",
+    "month": "Ce mois-ci",
+    "quarter": "Ce trimestre",
+    "year": "Cette année",
+    "custom": "Personnalisé"
+  },
+  "access": {
+    "restricted": "Accès restreint",
+    "enter_password": "Entrez le mot de passe pour accéder aux données financières"
+  },
+  "data": {
+    "real_banner": "✅ Données réelles — {count} jour(s) de ventes",
+    "ca_total": "CA total",
+    "demo_banner": "⚠️ Données de démonstration — commencez à encaisser pour voir vos vraies statistiques"
+  },
+  "kpi": {
+    "total_ca": "CA Total",
+    "clients": "Clients",
+    "avg_ticket": "Ticket moyen",
+    "gross_margin": "Marge brute"
+  },
+  "pdf": {
+    "title": "Rapport Financier",
+    "period": "Période",
+    "generated": "Généré le",
+    "real": "Données Réelles ✓",
+    "demo": "Données Démo",
+    "pages": {
+      "summary": "1. Synthèse Générale",
+      "evolution": "2. Évolution",
+      "products": "3. Performance par Produit",
+      "payments": "4. Moyens de Paiement",
+      "losses": "5. Pertes & Ajustements"
+    },
+    "fields": {
+      "date": "Date",
+      "ca": "CA (FCFA)",
+      "clients": "Clients",
+      "ticket_moyen": "Ticket moyen (FCFA)",
+      "marge": "Marge (FCFA)",
+      "product": "Produit",
+      "category": "Catégorie",
+      "quantity": "Quantité",
+      "ca_product": "CA (FCFA)",
+      "marge_product": "Marge (FCFA)",
+      "pct_ca": "% CA",
+      "payment_method": "Moyen",
+      "amount": "Montant (FCFA)",
+      "transactions": "Transactions",
+      "pct_ca_payment": "% du CA",
+      "reason": "Motif"
+    },
+    "footer": {
+      "confidential": "BarFlow — Rapport {type} confidentiel",
+      "page": "Page {page}"
+    }
+  }
+}

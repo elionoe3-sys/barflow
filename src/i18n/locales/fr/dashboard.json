@@ -1,0 +1,75 @@
+{
+  "title": "Tableau de bord",
+  "subtitle": "Vue d'ensemble de votre activité",
+  "loading": "Chargement des données...",
+  "period_days": "{{count}} jours",
+  "period": {
+    "weekend": "Week-end",
+    "weekday": "Semaine"
+  },
+  "stats": {
+    "ca": "CA Hier",
+    "clients": "Clients Hier",
+    "ticket": "Ticket Moyen",
+    "marge": "Marge Hier"
+},
+  "estimation": {
+    "title": "Estimation du jour",
+    "based_on": "Basée sur les {{days}} derniers jours",
+    "click_details": "🔍 Cliquer pour plus de détails",
+    "clients": "Clients estimés",
+    "ca": "CA estimé",
+    "beers": "Consommation bières",
+    "cocktails": "Consommation cocktails",
+    "weekend": "Week-end → +40%",
+    "weekday": "Jour de semaine",
+    "bottles": "bouteilles estimées",
+    "glasses": "verres estimés"
+  },
+  "modal": {
+    "title": "Détails de l'estimation",
+    "subtitle": "Basée sur la consommation des {{days}} derniers jours",
+    "clients": "Clients",
+    "ca": "CA estimé",
+    "beers": "Bières",
+    "cocktails": "Cocktails",
+    "weekend_boost": "Week-end (+40%)",
+    "method_title": "Méthode de calcul",
+    "method_clients": "Clients : Moyenne des {{days}} derniers jours {{weekend}}",
+    "method_weekend_suffix": "× 1.4 (week-end)",
+    "method_ca": "CA : Clients estimés × Ticket moyen ({{ticket}} F)",
+    "method_beers": "Bières : {{count}} bouteilles basé sur la consommation moyenne",
+    "method_cocktails": "Cocktails : {{count}} verres basé sur la consommation moyenne",
+    "trends_title": "Tendances",
+    "ca_variation": "Variation CA",
+    "clients_variation": "Variation clients",
+    "close": "Fermer"
+  },
+  "charts": {
+    "ca_evolution": "Évolution du CA (7 jours)",
+    "sales_by_hour": "Ventes par heure",
+    "top_products": "Top 10 Produits",
+    "category_consumption": "Consommation par catégorie (30 jours)",
+    "units": "{{count}} unités",
+    "sales_count": "{{count}} ventes"
+  },
+  "alerts": {
+    "stock_alert": "Alertes rupture de stock",
+    "no_stock": "Aucun produit critique",
+    "critical_count": "{{count}} produit(s) critique(s)",
+    "remaining": "{{count}} restant(s)",
+    "daily_consumption": "Consommation : {{value}}/jour",
+    "restock_tip": "💡 Réapprovisionnez ces produits rapidement pour éviter les ruptures"
+  },
+  "products": {
+    "top_to_promote": "Top produits à mettre en avant ce soir",
+    "score": "Score de rentabilité",
+    "score_tip": "Ces produits ont le meilleur score de rentabilité (marge × rotation × perte)",
+    "star": "🔥 Produit star",
+    "solid": "✅ Produit solide",
+    "high_margin": "🔥 Marge exceptionnelle",
+    "happy_hour": "✅ Bon produit - Idéal pour happy hour",
+    "fast_rotation": "✅ Rotation rapide",
+    "bundle": "📊 Marge correcte - À associer en pack"
+  }
+}

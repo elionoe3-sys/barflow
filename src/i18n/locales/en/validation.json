@@ -1,0 +1,46 @@
+{
+  "errors": {
+    "required": "This field is required",
+    "email": "Please enter a valid email",
+    "phone": "Please enter a valid phone number",
+    "number": "Please enter a valid number",
+    "min": "Minimum value is {min}",
+    "max": "Maximum value is {max}",
+    "minLength": "Minimum {length} characters",
+    "maxLength": "Maximum {length} characters",
+    "password": "Password must be at least 4 characters",
+    "password_match": "Passwords do not match",
+    "stock_insufficient": "Insufficient stock",
+    "out_of_stock": "Product out of stock",
+    "table_required": "Please select a table"
+  },
+  "success": {
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully",
+    "created": "Created successfully",
+    "exported": "Exported successfully",
+    "imported": "Imported successfully",
+    "paid": "Payment successful",
+    "synced": "Synced successfully"
+  },
+  "confirm": {
+    "delete": "Do you really want to delete this item?",
+    "delete_all": "Do you really want to delete everything?",
+    "reset": "Do you really want to reset settings?",
+    "close_cash": "Do you really want to close the cash register?",
+    "cancel_order": "Do you really want to cancel this order?"
+  },
+  "warnings": {
+    "low_stock": "Low stock",
+    "critical_stock": "Critical stock",
+    "expiring": "Product expiring soon",
+    "unpaid_orders": "Unpaid orders"
+  },
+  "info": {
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "please_wait": "Please wait...",
+    "no_data": "No data available"
+  }
+}

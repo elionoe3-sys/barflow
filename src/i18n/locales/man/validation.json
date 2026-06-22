@@ -1,0 +1,46 @@
+{
+  "errors": {
+    "required": "Ce champ est requis",
+    "email": "Veuillez entrer un email valide",
+    "phone": "Veuillez entrer un numéro de téléphone valide",
+    "number": "Veuillez entrer un nombre valide",
+    "min": "La valeur minimale est {min}",
+    "max": "La valeur maximale est {max}",
+    "minLength": "Minimum {length} caractères",
+    "maxLength": "Maximum {length} caractères",
+    "password": "Le mot de passe doit contenir au moins 4 caractères",
+    "password_match": "Les mots de passe ne correspondent pas",
+    "stock_insufficient": "Stock insuffisant",
+    "out_of_stock": "Produit en rupture de stock",
+    "table_required": "Veuillez sélectionner une table"
+  },
+  "success": {
+    "saved": "Enregistré avec succès",
+    "deleted": "Supprimé avec succès",
+    "updated": "Mis à jour avec succès",
+    "created": "Créé avec succès",
+    "exported": "Exporté avec succès",
+    "imported": "Importé avec succès",
+    "paid": "Paiement effectué avec succès",
+    "synced": "Synchronisé avec succès"
+  },
+  "confirm": {
+    "delete": "Voulez-vous vraiment supprimer cet élément ?",
+    "delete_all": "Voulez-vous vraiment tout supprimer ?",
+    "reset": "Voulez-vous vraiment réinitialiser les paramètres ?",
+    "close_cash": "Voulez-vous vraiment fermer la caisse ?",
+    "cancel_order": "Voulez-vous vraiment annuler cette commande ?"
+  },
+  "warnings": {
+    "low_stock": "Stock faible",
+    "critical_stock": "Stock critique",
+    "expiring": "Produit bientôt périmé",
+    "unpaid_orders": "Commandes non payées"
+  },
+  "info": {
+    "loading": "Chargement...",
+    "processing": "Traitement en cours...",
+    "please_wait": "Veuillez patienter...",
+    "no_data": "Aucune donnée disponible"
+  }
+}

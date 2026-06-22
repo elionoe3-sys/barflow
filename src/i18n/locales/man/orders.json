@@ -1,0 +1,56 @@
+{
+  "title": "Commandes",
+  "subtitle": "Gestion des commandes",
+  "status": {
+    "pending": "En attente",
+    "in_progress": "En cours",
+    "paid": "Payé",
+    "cancelled": "Annulé"
+  },
+  "caisse": {
+    "open": "Ouvrir la caisse",
+    "close": "Fermer la caisse",
+    "opened": "Caisse ouverte",
+    "closed": "Caisse fermée",
+    "fund": "Fond de caisse",
+    "server": "Nom du serveur"
+  },
+  "cart": {
+    "title": "Panier",
+    "total": "Total",
+    "submit": "Valider la commande",
+    "empty": "Panier vide",
+    "items": "articles"
+  },
+  "payment": {
+    "title": "Paiement",
+    "methods": {
+      "cash": "Espèces",
+      "wave": "Wave",
+      "orange_money": "Orange Money"
+    },
+    "amount": "Montant à payer",
+    "confirm": "Confirmer le paiement"
+  },
+  "ardoise": {
+    "title": "Ardoises",
+    "empty": "Aucune ardoise en cours",
+    "total": "Total ardoises",
+    "pay": "Encaisser maintenant"
+  },
+  "history": {
+    "title": "Historique",
+    "empty": "Aucune commande dans l'historique",
+    "details": "Détails de la commande",
+    "total": "Total encaissé"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."
+  },
+  "product": {
+    "outOfStock": "Rupture de stock",
+    "stock": "Stock",
+    "price": "Prix",
+    "category": "Catégorie"
+  }
+}

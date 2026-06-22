@@ -1,0 +1,29 @@
+{
+  "title": "Navigation",
+  "links": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "stocks": "Inventory",
+    "reappro": "Replenishment",
+    "finance": "Finance",
+    "bilan": "Balance Sheet",
+    "settings": "Settings",
+    "payments": "Payments",
+    "users": "Users",
+    "reports": "Reports"
+  },
+  "brand": {
+    "name": "BarFlow",
+    "tagline": "Bar Management"
+  },
+  "user": {
+    "profile": "Profile",
+    "settings": "My settings",
+    "logout": "Logout"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "syncing": "Syncing..."
+  }
+}

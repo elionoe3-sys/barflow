@@ -1,0 +1,91 @@
+{
+  "title": "Paramètres",
+  "subtitle": "Configuration de votre application",
+  "tabs": {
+    "general": "Thème & Langues",
+    "network": "Configuration réseau",
+    "backup": "Sauvegarde & Données",
+    "payments": "Paiements",
+    "security": "Sécurité"
+  },
+  "themes": {
+    "light": "Clair",
+    "daltonien": "Daltonien",
+    "senegal": "Sénégal"
+  },
+  "colors": {
+    "violet": "Violet",
+    "emerald": "Émeraude",
+    "blue": "Bleu",
+    "rose": "Rose",
+    "amber": "Ambre"
+  },
+  "languages": {
+    "title": "Langues",
+    "french": "Français",
+    "english": "Anglais",
+    "wolof": "Wolof"
+  },
+  "restaurant": {
+    "title": "Informations établissement",
+    "name": "Nom du bar",
+    "phone": "Téléphone",
+    "email": "Email",
+    "address": "Adresse",
+    "taxNumber": "NIF / Contribution"
+  },
+  "network": {
+    "title": "Configuration réseau",
+    "wifi": "Wi-Fi",
+    "printer": "Imprimante",
+    "caisse": "Caisse secondaire"
+  },
+  "backup": {
+    "title": "Sauvegarde des données",
+    "export": "Exporter les données",
+    "import": "Importer les données",
+    "reset": "Réinitialisation",
+    "resetSettings": "Réinitialiser les paramètres",
+    "resetAll": "Tout réinitialiser"
+  },
+  "payments": {
+    "title": "Paiements mobiles",
+    "subtitle": "Configurez les API Wave et Orange Money",
+    "locked": "Onglet protégé",
+    "lockedMessage": "Les clés API sont sensibles. Entrez le mot de passe administrateur pour y accéder.",
+    "unlock": "Déverrouiller",
+    "wave": {
+      "title": "Wave Business API",
+      "merchantId": "Merchant ID",
+      "apiKey": "API Key",
+      "apiSecret": "API Secret",
+      "webhookSecret": "Webhook Secret",
+      "test": "Tester la connexion"
+    },
+    "orange": {
+      "title": "Orange Money API",
+      "merchantId": "Merchant ID",
+      "apiLogin": "API Login",
+      "apiPassword": "API Password",
+      "apiKey": "API Key",
+      "test": "Tester la connexion"
+    }
+  },
+  "security": {
+    "title": "Sécurité",
+    "password": {
+      "title": "Mot de passe administrateur",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "change": "Changer le mot de passe",
+      "forgot": "Mot de passe oublié ?"
+    },
+    "secret": {
+      "title": "Question secrète",
+      "question": "Question",
+      "answer": "Réponse"
+    },
+    "info": "Les actions sensibles (import, réinitialisation) sont protégées par mot de passe."
+  }
+}

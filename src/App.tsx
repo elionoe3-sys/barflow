@@ -13,6 +13,7 @@ import { Settings } from '@/components/Settings';
 import { Reappro } from '@/components/Reappro';
 import { LicenseGate } from '@/components/LicenseGate';
 import { initDbWithDefaults } from '@/utils/db-offline';
+import { db } from '@/db';
 import { products } from '@/data';
 import { useBarInfo } from '@/hooks/useBarInfo';
 import {
@@ -22,7 +23,7 @@ import {
   type LicenseInfo,
   type Plan,
 } from '@/utils/license';
-import { getCurrentLanguage } from '@/i18n';
+import i18n from '@/i18n';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId | 'settings'>('dashboard');
@@ -30,18 +31,19 @@ export default function App() {
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   const { barInfo } = useBarInfo();
 
+
   // Appliquer la direction RTL pour l'arabe
   useEffect(() => {
-    const lang = getCurrentLanguage();
-    const html = document.documentElement;
-    if (lang === 'ar') {
-      html.setAttribute('dir', 'rtl');
-      html.setAttribute('lang', 'ar');
-    } else {
-      html.setAttribute('dir', 'ltr');
-      html.setAttribute('lang', 'fr');
-    }
-  }, []);
+  const lang = i18n.language || 'fr';
+  const html = document.documentElement;
+  if (lang === 'ar') {
+    html.setAttribute('dir', 'rtl');
+    html.setAttribute('lang', 'ar');
+  } else {
+    html.setAttribute('dir', 'ltr');
+    html.setAttribute('lang', 'fr');
+  }
+}, []);
 
   useEffect(() => {
     // 1. Vérifie la licence sauvegardée
@@ -55,7 +57,27 @@ export default function App() {
 
     // 2. Initialise la base de données
     initDbWithDefaults(products as unknown as Record<string, unknown>[])
-      .then(() => setLoading(false))
+      .then(async () => {
+        // Nettoyage ponctuel des doublons de produits créés par l'ancien bug
+        // (addProduit générait un nouvel uuid à chaque démarrage au lieu de
+        // respecter l'id du produit statique, donc les 15 produits par
+        // défaut étaient réinjectés à chaque ouverture de l'app).
+        // On ne le fait qu'une fois grâce à un flag dans localStorage.
+        const dedupeDone = localStorage.getItem('barflow_dedupe_v1_done');
+        if (!dedupeDone) {
+          try {
+            const removed = await db.dedupeProduits();
+            if (removed > 0) {
+              console.log(`🧹 Nettoyage : ${removed} produit(s) en double supprimé(s).`);
+            }
+          } catch (e) {
+            console.warn('Échec du nettoyage des doublons:', e);
+          } finally {
+            localStorage.setItem('barflow_dedupe_v1_done', '1');
+          }
+        }
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 

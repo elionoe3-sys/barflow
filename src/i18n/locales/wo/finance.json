@@ -1,0 +1,85 @@
+{
+  "title": "Xaliss & Analyses",
+  "subtitle": "Li nekk ci biir xalissu sa liggéey",
+  "tabs": {
+    "overview": "Li ñu gënë fëss",
+    "revenue": "Duggu xaliss",
+    "expenses": "Doxalin (Dépenses)",
+    "profit": "Yiw",
+    "trends": "Li dox"
+  },
+  "metrics": {
+    "total_revenue": "Total bu dugg",
+    "total_expenses": "Total bu génn",
+    "net_profit": "Yiw bu mat",
+    "margin": "Marge",
+    "growth": "Li ñu jëkkë",
+    "average_ticket": "Ticket bu nekk",
+    "daily_average": "Li ñuy am ci fan bu nekk"
+  },
+  "charts": {
+    "revenue_vs_expenses": "Duggu vs Génn",
+    "profit_evolution": "Li yiw di soppeeku",
+    "cost_breakdown": "Séedar doxalin",
+    "revenue_by_category": "Duggu ci xeet"
+  },
+  "periods": {
+    "today": "Tey",
+    "week": "Ay weer yu genn",
+    "month": "Weer wi",
+    "quarter": "3 weer",
+    "year": "At mi",
+    "custom": "Leneen"
+  },
+  "access": {
+    "restricted": "Ammul yaakaar",
+    "enter_password": "Bindal code bi ngir xool xaliss bi"
+  },
+  "data": {
+    "real_banner": "✅ Données dëgg — {count} fanu jaay",
+    "ca_total": "Total CA",
+    "demo_banner": "⚠️ Données demo — jaayal ngir gis sa données dëgg"
+  },
+  "kpi": {
+    "total_ca": "Total CA",
+    "clients": "Client yi",
+    "avg_ticket": "Ticket bu nekk",
+    "gross_margin": "Marge brute"
+  },
+  "pdf": {
+    "title": "Rapport Xaliss",
+    "period": "Jamono",
+    "generated": "Bi ñu ko defe",
+    "real": "Données dëgg ✓",
+    "demo": "Données Démo",
+    "pages": {
+      "summary": "1. Synthèse",
+      "evolution": "2. Soppeeku",
+      "products": "3. Performance",
+      "payments": "4. Fay",
+      "losses": "5. Pertes"
+    },
+    "fields": {
+      "date": "Fan",
+      "ca": "CA (FCFA)",
+      "clients": "Client yi",
+      "ticket_moyen": "Ticket (FCFA)",
+      "marge": "Marge (FCFA)",
+      "product": "Produit",
+      "category": "Xeet",
+      "quantity": "Li nekk",
+      "ca_product": "CA (FCFA)",
+      "marge_product": "Marge (FCFA)",
+      "pct_ca": "% CA",
+      "payment_method": "Fay",
+      "amount": "Total (FCFA)",
+      "transactions": "Transaction",
+      "pct_ca_payment": "% CA",
+      "reason": "Motif"
+    },
+    "footer": {
+      "confidential": "BarFlow — Rapport {type} bi",
+      "page": "Page {page}"
+    }
+  }
+}

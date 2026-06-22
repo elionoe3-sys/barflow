@@ -1,0 +1,165 @@
+{
+  "title": "Gestion des Stocks",
+  "subtitle": "Suivi en temps réel des stocks",
+  "header": {
+    "title": "Gestion des Stocks",
+    "subtitle": "Suivi en temps réel — stock en centilitres pour vins & spiritueux"
+  },
+  "actions": {
+    "new": "Nouveau produit",
+    "reappro": "Réapprovisionner",
+    "inventory": "Inventaire",
+    "movements": "Mouvements",
+    "predictions": "Prévisions",
+    "categories": "Catégories"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."
+  },
+  "status": {
+    "critical": "Critique",
+    "low": "Bas",
+    "medium": "Moyen",
+    "good": "Bon",
+    "critical_label": "🔴 Critique",
+    "low_label": "🟡 Bas",
+    "medium_label": "🔵 Moyen",
+    "good_label": "🟢 Bon"
+  },
+  "volume": {
+    "title": "Gestion en centilitres",
+    "bottle": "Contenance de la bouteille",
+    "service": "Volume servi par format",
+    "enable": "Gestion en centilitres (vins, spiritueux, bières)",
+    "bottle_capacity": "Contenance de la bouteille (cl) *",
+    "examples": "Exemples : 75cl vin, 70cl whisky/gin, 65cl bière Flag/Gazelle, 33cl canette",
+    "format_volume": "Volume servi par format (cl) :",
+    "bottle": "Bouteille",
+    "half": "Demi",
+    "quarter": "Quart",
+    "glass": "Verre",
+    "can": "Canette",
+    "bottle_hint": "Bouteille entière",
+    "half_hint": "Demi-bouteille",
+    "quarter_hint": "Quart de bouteille",
+    "glass_hint": "Service au verre",
+    "can_hint": "Canette entière",
+    "services_per_bottle": "{cl}cl → {services} service(s)/btl",
+    "recap": "Récapitulatif :"
+  },
+  "reappro": {
+    "title": "Réapprovisionnement",
+    "format": "Format de livraison",
+    "quantity": "Quantité reçue",
+    "supplier": "Fournisseur",
+    "price": "Prix achat",
+    "confirm": "Confirmer la réception",
+    "product": "Produit *",
+    "select_product": "— Sélectionner —",
+    "unit": "📦 Unité",
+    "unit_desc": "1 bouteille à la fois",
+    "carton12": "📦 Carton ×12",
+    "carton12_desc": "12 bouteilles/carton",
+    "carton24": "📦 Carton ×24",
+    "carton24_desc": "24 bouteilles/carton",
+    "carton_custom": "📦 Carton autre",
+    "carton_custom_desc": "Quantité custom",
+    "bottles_per_carton": "Bouteilles par carton",
+    "quantity_received": "Quantité reçue ({format}) *",
+    "placeholder": "Ex: 2",
+    "supplier_placeholder": "Ex: Castel",
+    "price_placeholder": "FCFA",
+    "recap_title": "Récapitulatif réception :",
+    "recap_bottles": "+ {bottles} bouteilles de {product}",
+    "recap_cl": "= {cl}cl ajoutés au stock",
+    "recap_cartons": "({qty} carton{s} × {perCarton} btl)",
+    "recap_total_cost": "Coût total : {total} FCFA",
+    "success": "Stock mis à jour !",
+    "success_cl": "+{bottles} bouteilles · +{cl}cl",
+    "success_units": "+{units} unités"
+  },
+  "inventory": {
+    "title": "Pertes & Ajustements",
+    "reason": "Motif",
+    "quantity": "Quantité",
+    "note": "Note (optionnel)",
+    "product": "Produit concerné",
+    "select_product": "-- Sélectionner --",
+    "reasons": {
+      "breakage": "💥 Casse",
+      "offered": "🎁 Offert",
+      "gap": "⚖️ Écart",
+      "expiry": "🗑️ Péremption",
+      "inventory": "📋 Inventaire",
+      "other": "📝 Autre"
+    },
+    "stock_reel": "Stock réel (actuel : {stock} btl)",
+    "quantity_lost": "Quantité perdue (bouteilles)",
+    "cl_approx": "≈ {cl} cl",
+    "save": "Enregistrer",
+    "success": "Ajustement enregistré"
+  },
+  "movements": {
+    "title": "Flux Récents",
+    "entry": "Entrée",
+    "exit": "Sortie",
+    "type": "Type",
+    "date": "Date",
+    "product": "Produit",
+    "empty": "Aucun mouvement"
+  },
+  "predictions": {
+    "title": "Prévisions rupture",
+    "stock": "Stock : {stock}",
+    "stock_cl": "({cl}cl)"
+  },
+  "categories": {
+    "title": "Catégories",
+    "new": "Nouvelle catégorie...",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "all": "Tous"
+  },
+  "product_form": {
+    "create": "Créer un produit",
+    "edit": "Modifier le produit",
+    "name": "Nom *",
+    "category": "Catégorie *",
+    "initial_stock": "Stock initial *",
+    "unit": "Unité",
+    "alert_threshold": "Seuil alerte",
+    "critical_threshold": "Seuil critique",
+    "supplements": "Suppléments",
+    "supplements_placeholder": "Citron, Glaçons",
+    "internal_notes": "Notes internes",
+    "create_button": "Créer le produit",
+    "edit_button": "Enregistrer les modifications",
+    "price_required": "Veuillez définir au moins un prix.",
+    "formats": "Formats & Prix (FCFA)",
+    "price_placeholder": "Prix FCFA"
+  },
+  "stock_display": {
+    "bottles": "btl",
+    "cl": "cl",
+    "stock": "Stock",
+    "vol_bottle": "Vol. btl : {cl}cl",
+    "glass_services": "Verre : {cl}cl ({services} services/btl)"
+  },
+  "product_actions": {
+    "add_stock": "+ Stock",
+    "inventory": "Inventaire",
+    "edit": "Modifier",
+    "delete": "Supprimer"
+  },
+  "status_badge": {
+    "critical": "🔴 Critique",
+    "low": "🟡 Bas",
+    "medium": "🔵 Moyen",
+    "good": "🟢 Bon"
+  },
+  "errors": {
+    "delete_confirm": "Supprimer {name} définitivement ?",
+    "delete_error": "Impossible de supprimer"
+  }
+}

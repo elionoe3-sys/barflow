@@ -1,0 +1,37 @@
+{
+  "title": "الترخيص والأمان",
+  "subtitle": "إدارة ترخيص البرنامج",
+  "status": {
+    "valid": "ترخيص صالح",
+    "invalid": "ترخيص غير صالح",
+    "expired": "انتهى الترخيص",
+    "trial": "فترة تجريبية",
+    "pending": "في انتظار التحقق"
+  },
+  "fields": {
+    "license_key": "مفتاح الترخيص",
+    "customer": "العميل",
+    "expiry_date": "تاريخ الانتهاء",
+    "max_users": "الحد الأقصى للمستخدمين",
+    "features": "الميزات المفعلة"
+  },
+  "actions": {
+    "activate": "تفعيل الترخيص",
+    "validate": "تحقق",
+    "renew": "تجديد",
+    "deactivate": "إلغاء التفعيل"
+  },
+  "messages": {
+    "enter_key": "الرجاء إدخال مفتاح الترخيص الخاص بك",
+    "validation_success": "تم التحقق من الترخيص بنجاح",
+    "validation_failed": "فشل التحقق من الترخيص",
+    "expiry_warning": "ينتهي ترخيصك خلال {days} أيام",
+    "expired": "انتهى ترخيصك. الرجاء تجديده."
+  },
+  "protection": {
+    "title": "الحماية من القرصنة",
+    "fingerprint": "بصمة الأجهزة",
+    "last_check": "آخر فحص",
+    "status": "حالة الحماية"
+  }
+}

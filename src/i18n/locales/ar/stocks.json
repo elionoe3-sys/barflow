@@ -1,0 +1,165 @@
+{
+  "title": "إدارة المخزون",
+  "subtitle": "تتبع المخزون في الوقت الفعلي",
+  "header": {
+    "title": "إدارة المخزون",
+    "subtitle": "تتبع في الوقت الفعلي — المخزون بالسنتيلتر للنبيذ والمشروبات الروحية"
+  },
+  "actions": {
+    "new": "منتج جديد",
+    "reappro": "إعادة التموين",
+    "inventory": "جرد",
+    "movements": "الحركات",
+    "predictions": "التوقعات",
+    "categories": "الفئات"
+  },
+  "search": {
+    "placeholder": "البحث عن منتج..."
+  },
+  "status": {
+    "critical": "حرج",
+    "low": "منخفض",
+    "medium": "متوسط",
+    "good": "جيد",
+    "critical_label": "🔴 حرج",
+    "low_label": "🟡 منخفض",
+    "medium_label": "🔵 متوسط",
+    "good_label": "🟢 جيد"
+  },
+  "volume": {
+    "title": "إدارة السنتيلتر",
+    "bottle": "سعة الزجاجة",
+    "service": "الحجم المقدم لكل صيغة",
+    "enable": "إدارة السنتيلتر (النبيذ، المشروبات الروحية، البيرة)",
+    "bottle_capacity": "سعة الزجاجة (cl) *",
+    "examples": "أمثلة: 75cl نبيذ، 70cl ويسكي/جين، 65cl بيرة Flag/Gazelle، 33cl علبة",
+    "format_volume": "الحجم المقدم لكل صيغة (cl):",
+    "bottle": "زجاجة",
+    "half": "نصف",
+    "quarter": "ربع",
+    "glass": "كأس",
+    "can": "علبة",
+    "bottle_hint": "زجاجة كاملة",
+    "half_hint": "نصف زجاجة",
+    "quarter_hint": "ربع زجاجة",
+    "glass_hint": "خدمة بالكأس",
+    "can_hint": "علبة كاملة",
+    "services_per_bottle": "{cl}cl → {services} خدمة(خدمات)/زجاجة",
+    "recap": "ملخص:"
+  },
+  "reappro": {
+    "title": "إعادة التموين",
+    "format": "صيغة التسليم",
+    "quantity": "الكمية المستلمة",
+    "supplier": "المورد",
+    "price": "سعر الشراء",
+    "confirm": "تأكيد الاستلام",
+    "product": "المنتج *",
+    "select_product": "— اختر —",
+    "unit": "📦 وحدة",
+    "unit_desc": "زجاجة واحدة في كل مرة",
+    "carton12": "📦 كرتون ×12",
+    "carton12_desc": "12 زجاجة/كرتون",
+    "carton24": "📦 كرتون ×24",
+    "carton24_desc": "24 زجاجة/كرتون",
+    "carton_custom": "📦 كرتون مخصص",
+    "carton_custom_desc": "كمية مخصصة",
+    "bottles_per_carton": "الزجاجات لكل كرتون",
+    "quantity_received": "الكمية المستلمة ({format}) *",
+    "placeholder": "مثال: 2",
+    "supplier_placeholder": "مثال: كاستل",
+    "price_placeholder": "FCFA",
+    "recap_title": "ملخص الاستلام:",
+    "recap_bottles": "+ {bottles} زجاجة من {product}",
+    "recap_cl": "= {cl}cl مضافة إلى المخزون",
+    "recap_cartons": "({qty} كرتون × {perCarton} زجاجة)",
+    "recap_total_cost": "التكلفة الإجمالية: {total} FCFA",
+    "success": "تم تحديث المخزون!",
+    "success_cl": "+{bottles} زجاجة · +{cl}cl",
+    "success_units": "+{units} وحدة"
+  },
+  "inventory": {
+    "title": "الخسائر والتسويات",
+    "reason": "السبب",
+    "quantity": "الكمية",
+    "note": "ملاحظة (اختياري)",
+    "product": "المنتج المعني",
+    "select_product": "-- اختر --",
+    "reasons": {
+      "breakage": "💥 كسر",
+      "offered": "🎁 هدية",
+      "gap": "⚖️ فارق",
+      "expiry": "🗑️ انتهاء الصلاحية",
+      "inventory": "📋 جرد",
+      "other": "📝 أخرى"
+    },
+    "stock_reel": "المخزون الفعلي (الحالي: {stock} زجاجة)",
+    "quantity_lost": "الكمية المفقودة (زجاجات)",
+    "cl_approx": "≈ {cl} cl",
+    "save": "حفظ",
+    "success": "تم حفظ التسوية"
+  },
+  "movements": {
+    "title": "الحركات الأخيرة",
+    "entry": "داخل",
+    "exit": "خارج",
+    "type": "النوع",
+    "date": "التاريخ",
+    "product": "المنتج",
+    "empty": "لا توجد حركات"
+  },
+  "predictions": {
+    "title": "توقعات نفاد المخزون",
+    "stock": "المخزون: {stock}",
+    "stock_cl": "({cl}cl)"
+  },
+  "categories": {
+    "title": "الفئات",
+    "new": "فئة جديدة...",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "all": "الكل"
+  },
+  "product_form": {
+    "create": "إنشاء منتج",
+    "edit": "تعديل المنتج",
+    "name": "الاسم *",
+    "category": "الفئة *",
+    "initial_stock": "المخزون الأولي *",
+    "unit": "الوحدة",
+    "alert_threshold": "حد التنبيه",
+    "critical_threshold": "الحد الحرج",
+    "supplements": "الإضافات",
+    "supplements_placeholder": "ليمون، مكعبات ثلج",
+    "internal_notes": "ملاحظات داخلية",
+    "create_button": "إنشاء المنتج",
+    "edit_button": "حفظ التغييرات",
+    "price_required": "يرجى تحديد سعر واحد على الأقل.",
+    "formats": "الصيغ والأسعار (FCFA)",
+    "price_placeholder": "السعر FCFA"
+  },
+  "stock_display": {
+    "bottles": "زجاجة",
+    "cl": "cl",
+    "stock": "المخزون",
+    "vol_bottle": "حجم الزجاجة: {cl}cl",
+    "glass_services": "الكأس: {cl}cl ({services} خدمة/زجاجة)"
+  },
+  "product_actions": {
+    "add_stock": "+ مخزون",
+    "inventory": "جرد",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "status_badge": {
+    "critical": "🔴 حرج",
+    "low": "🟡 منخفض",
+    "medium": "🔵 متوسط",
+    "good": "🟢 جيد"
+  },
+  "errors": {
+    "delete_confirm": "حذف {name} نهائياً؟",
+    "delete_error": "تعذر الحذف"
+  }
+}

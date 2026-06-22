@@ -2,6 +2,8 @@
 // src/utils/lossStore.ts
 // Store partagé des pertes & ajustements
 // ============================================
+import { enqueueSync } from '@/utils/syncBridge';
+
 export type LossReason = 'casse' | 'offert' | 'ecart' | 'peremption' | 'inventaire' | 'autre';
 
 export interface LossEntry {
@@ -38,6 +40,13 @@ initLosses();
 export function addLossEntry(entry: LossEntry): void {
   globalLosses = [entry, ...globalLosses];
   notifyLossListeners();
+  enqueueSync({
+    store: 'losses',
+    operation: 'CREATE',
+    entityId: entry.id,
+    apiCall: 'createPerte',
+    payload: entry,
+  });
 }
 
 export function getLossEntries(): LossEntry[] {
